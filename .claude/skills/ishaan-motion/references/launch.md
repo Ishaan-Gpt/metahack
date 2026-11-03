@@ -1,0 +1,228 @@
+# Launch films: the branch (taste from Ishaan's verdicts, 2026-10-18)
+
+This is what Ishaan judged better on resend.com, version by version. The log and boards are in
+`docs/agents/mastery/launch.md`, the films in `data/freeform/resend*`. The old Launch library (12 looks, 10 arcs,
+~400 graph parts) scored about 2/10 and is not a taste source.
+
+## What won, in order
+1. **A bespoke film beats re-skinned parts.** One film written for this one product, from a strong prompt, beat the
+   whole cast-from-the-graph pipeline (f1 > p0). The same prompt plus this skill did a little better again (f2 > f1).
+2. **The product's own UI is the film** (ref 1, dump.cam; f3 > f2). There are no headline cards. The words on screen
+   are the UI's own: a page title, the filter pills, the search box, the call to action.
+   - The logo becomes the header bar, and the bar stays as the anchor across the film.
+   - A dense, colourful pile of the product's real content (for an email API: designed emails) grows fast, every item
+     popping in on a jittered stagger with its own sound.
+   - **Chaos, then order:** the pile flies into the product's own grid, and a filter click re-flows it.
+   - **Dive into one tile, full-bleed.** A bridge element (a frosted search bar) appears on it, types, and survives the
+     tile shrinking away. Results fly in around the bar, and the bar becomes the end pill.
+3. **Real photos, plus one beat only this product can have** (f4 > f3).
+   - Emails carry real photos (from the footage finder, licence recorded), never drawn blocks.
+   - The product's own mechanic, performed: the email splits into its React source, a cursor renames a prop, and the
+     phone preview re-renders live. A Dark toggle recolours it.
+   - Depth of field hands over from a busy split to the next bridge element, so there is one text layer.
+4. **The brand's own look, from its live site** (f5, awaiting a verdict). Read the site capture first: palette, display
+   face, logo, the hero's light. Resend is black, with one light beam, a serif display face and a sharp R. A
+   reference's world (dump's light grey) is grammar to learn from, never a palette to copy.
+5. **The content wears the brand too** (Ishaan on f5: "white and purple don't match Resend's theme"). The product's
+   own content (emails, cards, buttons, status dots, code colours) is built from the site's ramp, never invented. For
+   Resend: warm stone from black to bone, the Light/Dark toggle swapping the ramp's ends, and colour only from real
+   photos. Run the palette gate in `palette.md` before the first frame.
+
+## Checks that caught real bugs
+- **A filter must show what it says.** After "Delivered", only delivered items remain; otherwise the viewer reads it as
+  wrong.
+- **An active pill's label must flip colour with the thumb that slides under it.** White text on the white thumb
+  disappears.
+- **Thumbnails never sit on a title.** Put a photo thumb beside the button, not beside the heading.
+- **Items that fly out must clear the frame completely.** A white sliver at the edge reads as an error.
+
+## Look L-UI-1 "Product UI" (Ishaan, 2026-10-18: "the first good generated reference/look for this style; absorb it")
+Resend v6 became a reusable look: `packages/library/src/kits/launch-ui/` (player + README) and
+`packages/engine/scripts/launch-ui.ts <site>`. The script reads a live site once and makes a playable film in under
+a minute (linear.app: preview at 17 s, board at 24 s). The brand-specific beat stays open for the Director to write.
+For a new launch, start from this look; a new look only when a reference teaches a new grammar.
+
+## A new grammar never costs the craft (Ishaan on f7, 2026-10-18: "it nerfed all premiumness from 10/10 to 6/10:
+## animations, transitions, sfx, effects")
+Taking a new reference's grammar (ref 2: one material runs the film) must keep every premium layer of the best film so
+far. f7 lost them: its scenes appeared and faded (a slideshow), the camera barely moved, there was no cursor, and the
+sound was thin. The checklist that brought them back (f8):
+- **Every scene is born from the last:** the lockup shrinks into the header, the row's cards morph into the tiles, the
+  camera cranes from the tiles into the field, the pins' labels fly into the cloud, the cloud implodes to the dot that
+  becomes the logo. Never a fade or a cut-to-empty between scenes.
+- **The camera never stops:** a slow push all film, a punch on the drop, whips and cranes with motion blur from speed.
+- **The cursor drives:** hover lifts (photo zoom, growing shadow), clicks with a ripple, a flare on hover.
+- **Every arrival:** a spring, a blur-in, a shadow that grows; a hero flies out of the material toward the lens in log scale.
+- **Sound:** a tick on every word (render and score read one line list), a whoosh on every move, a riser that ends
+  exactly on the drop, a granular shimmer for particles, a short room on the sfx, a breakdown before the end.
+- Check every transition at sub-steps (±0.15 s): no empty frame, nothing drawn on top of a line still on screen.
+
+## Smooth, filled, and ramped (Ishaan on f8, 2026-10-18: "why does it hang so much; make it smooth; why are some cards
+## empty; add Vignesh's pic/clip fetching and Claude's image generation as tools; A→2x→0.5x→2x→B is an advanced camera
+## effect, add it to the camera graph tagged premium")
+- **Never `ctx.filter` blur or `shadowBlur` per draw, per frame.** f8 measured a 165 s stall on one frame. Bake every
+  card, word, email and shadow ONCE into a sprite, with pre-blurred variants (0, 2, 4, 7, 11, 16 px). Each frame only
+  `drawImage`s them, picking the blur level from speed. Whole-layer motion blur is a downsample-and-upscale, not a
+  filter. Dot colours come from a lookup table. Warm every sprite at load (render the film once in 0.25 s steps), so
+  nothing is built mid-playback. Measure it: render every frame at 30 fps and count frames over 33 ms. f9: 896 of 900
+  were under 33 ms, worst 30 ms after a re-run (the 4 slow frames in the first pass were one-off pauses in the
+  headless browser).
+- **No empty card, ever.** Each item asks `src/launch/media.ts`. `realMedia` uses Vignesh's footage finder (clips and
+  photos with licences); `drawnArt` has the brain draw an SVG in the palette's tokens only, rasterised by Chrome.
+  CLI: `scripts/launch-media.ts <dir> name="query|what to draw" …`. Resend: 14 of 14 in 37 s (12 clips, 1 photo,
+  1 drawn). Look at every result: the finder returned a stone coin for "team welcome" (a relevance miss), so re-map
+  or re-query.
+- **The premium speed ramp** (`camera:speed-ramp`, tagged `premium` in the craft graph; ease `speed-ramp` in
+  `@moovi/library/camera`): A → 2× → 0.5× → 2× → B. Velocity is 2× for the first and last sixth and 0.5× for the middle
+  two thirds. Use it on travels and reveals: the row (slow while the cursor clicks), the crane, the swarm gathering,
+  the lockup moving to the header. Put the slow middle where the eye must read, and the fast ends with blur and a
+  whoosh.
+
+## Look L-UI-2 "One material" (from f7–f10, ref 2 grammar with v6 craft; `data/freeform/resend-v10`)
+The recipe: one material is the product's own content (for an email API, emails). It runs the whole film:
+1. Real items scatter at three depths, with depth of field.
+2. One sentence carries across beats, word by word, each verb with a hero item flying out of the swarm toward the lens.
+3. The swarm gathers into a rotating sphere on a speed ramp, then collapses to one dot, and the dot becomes the logo.
+4. The lockup shrinks into the header (the anchor).
+5. A row of the product's kinds travels on a speed ramp, slow while the cursor clicks, and morphs into feature tiles.
+6. A dot-matrix word assembles from flying dots over halftone tiles, and a hover flares one tile.
+7. The camera cranes into a halftone field, where signal pins rise; their labels fly into a cloud of chores around the
+   payoff line.
+8. The cloud implodes to a point that becomes the logo again (a bookend), then a rule and the end line.
+Rendered with sprites (never per-draw filters), real media on every item (`media.ts`), one tick per word, a whoosh per
+move, a riser ending on the drop. To make it data-driven like L-UI-1: the material, the kinds, the features, the
+events and the chores come from the site; the sentence comes from the Director.
+
+## Lessons from f7–f10 (owner)
+- "It nerfed all premiumness" (f7): a new grammar must keep every craft layer (see above).
+- "Why does it hang" (f8): sprites, not filters. Measure with rAF playback (v8 11 fps → v10 138 fps).
+- "Some cards are empty" (f8): every item gets real media, else drawn art (`media.ts`). Look at every result before
+  using it.
+- "Camera looks off; I meant easing; smooth as butter" (f9): speed curves without corners, start and end at rest,
+  continuous blur, soft in-out on travel and cursor paths. `references/camera.md` holds the recommendations by moment.
+- **Faces on plates** (owner rule, 2026-10-18): when a real photo or clip behind the UI shows a person (the hiker
+  plate, the dinner plates), no word, giant verb or card sits on the face. Place it beside or below the face with a
+  margin, using the face detector the edit lane uses. A difference or negative highlight takes its colour from the
+  plate behind it, pushed bright, never a fixed hue.
+
+## When Ishaan sends a reference to match, rebuild it shot for shot (owner on f11, 2026-10-18: "2/10, not at all
+## the premium launch video I sent")
+f11 borrowed three ideas from ref 3 and invented its own 22 s film with simplified, hand-drawn UI. That is not a
+rebuild. The procedure:
+1. **Measure the reference first:** frame sheets at 3 fps (10 s per sheet) and scene-cut detection. Ref 3 has
+   **no hard cuts**: one continuous camera take in each section, with cuts only between sections, on the beat.
+   Write the shot table (time, shot, camera, type, transition) before any code.
+2. **Match its structure, length, pacing and camera**, beat for beat. Change only the brand: its words, its product,
+   its palette.
+3. **Real product screens, never drawn UI:** the premium comes from dense, real screens that the camera pushes and pans
+   into. Take them from the brand's own site: product-page screenshots (`/_next/image?url=…product-pages…&w=3840`),
+   blog cover art and the brand's 3D renders (Resend: `screenshot-metrics`, `screenshot-zoom-analytics/audience`,
+   `broadcast-email-header`, and `cube`, `3d-react/broadcast/control` .mp4). Draw UI only where no real screen exists.
+4. **Real moving plates** (clips, not stills) behind the UI: landscapes, sky, night, fields (`media.ts`).
+5. Then compare our stills with the reference at the same times, side by side, before showing anything.
+6. **Confirmed (owner on f12, 2026-10-18: "v12 is better; keep this direction and push it further").** Pushing it
+   means taking more of the reference's own moves, not adding ideas: dive until one real UI element fills the frame
+   (3.4x into the sidebar, log-space scale), then pull back on the same curve; drag-and-drop with the cursor (the
+   tile lifts with a shadow, the drop zone darkens, the tile lands); placeholders show the image as a soft blur
+   before it loads sharp; type slides at the reference's size (72 px at 1080); a 3D object on a light world is
+   composited (difference/invert), never shown in its black render tile. Keep every clip decoding from Play; a clip
+   that starts or seeks mid-film stalls a frame.
+7. **"Push hard" (owner on f13, 2026-10-18) means the finish layers, not new scenes (f14):** a real music bed from
+   the library (product-safe, e.g. Mixkit) with its drop on the film's big reveal; the owner's Style 1 sound pack
+   placed by `assets/sfx-style1/map.json` events (card-in, word, cascade, scene, max 2 punches, 60 ms min gap,
+   risers end on the cut, no ducking), never synth beeps; every cut snapped to the bed's beat by a piecewise time
+   warp (speed changes only on a cut, within ±15 %); glass cards are the frame behind them downsampled twice (no
+   filter), with a tint, a rim and a top sheen; the day sky carried into the light world as a soft band under the
+   type (ref 3). Peaks under -1 dBFS; render the score while the page loads so Play starts at once.
+   The bed choice is Ishaan's: f14 used "Golden Storm"; offer the alternatives (Rising Sun, Close Up) with it.
+
+## Reference intake for a Launch rebuild (the procedure behind f12–f15)
+1. `yt-dlp -f "bv*+ba/b" --merge-output-format mp4 -o ref.mp4 <url>` into its own folder; `ffprobe` for length, size
+   and fps; `ffmpeg -af volumedetect` for loudness.
+2. Sheets at 3 fps: `ffmpeg -i ref.mp4 -vf "fps=3,scale=320:-1,tile=6x6" -frames:v 2 sheet_%d.jpg` (12 s a sheet).
+   Read them and write the shot table (time, shot, camera, type, transition, sound) before any code.
+3. Map it shot for shot onto the brand (its words, its real screens, its palette). Keep the reference's length and
+   pacing. Where a shot needs a real photo or clip, ask the footage finder (`scripts/launch-media.ts`); when nothing
+   real passes, build the shot as a real 3D scene (three.js) in the brand's palette before falling back to drawn art.
+4. Build on the last good film's engine (sprites, the sound engine, the beat warp, glass, fields); swap only scenes.
+5. Stills at the reference's times, side by side with its sheet; fix the gaps; rAF playback per section; then the
+   labelled storyboard and the playable link.
+
+## Look L-REF-3 "Product tour" (ref 3 Commas, f12–f14, the owner's "better, push it further")
+The code: `packages/library/src/kits/launch-ui/looks/l-ref3-tour.html` (Resend v14). A 30 s tour in two worlds:
+- stipple ribbons condense into "Introducing" → the name with a dot pop → on black the mark drops and the name types
+  → a speed-ramp pull-back (6.4× → 1×, log space) shows the black was a phone's screen over a real valley clip;
+- a card lifts out ("Send"), a speed-ramp pan down onto the real analytics screen ("Track"), one giant word ("Reach");
+- the real dashboard over the brand's own art: a speed-ramp dive until the sidebar fills the frame (3.4×), a cursor
+  clicks, a log-space pull-back into a grid whose tiles load blur → sharp;
+- "Know your audience." → the real Audiences card in frosted glass over a night clip that turns to day;
+- the light world with the day sky as a band under the type: "Broadcast to everyone." → a light editor where the
+  cursor drags a cover into a dashed drop zone → "Ship it from your code." → a monitor in a field → the name;
+- the brand's 3D render composited on the light world between the two halves of the line → black, the mark, the name.
+Sound: a real bed with its drop on the pull-back, the owner's pack by `map.json`, every cut on the beat.
+
+## Look L-REF-4 "Calm one-hue" (ref 4 Notely, f15)
+The code: `packages/library/src/kits/launch-ui/looks/l-ref4-calm.html` (Resend v15). 21 s, slow and quiet:
+- **One material, one hue's tints** (for a monochrome brand, its neutral ramp): soft fields, not backgrounds.
+- **3D for the problem:** a three.js stack of the brand's real emails/pages falls and lands fanned with soft
+  shadows, a slow dolly and orbit, two small lines on the left ("Too many emails." / "Too many tools." in a lighter
+  tint); then a three.js desk (laptop, lamp, cup, a low sun) whose screen types the question over giant ghost words.
+- **Tiny type** (34–40 px at 1080) that drifts in word by word from the right out of a blur.
+- **Focus pulls as transitions:** a soft-edged dark blob sweeps the light field ("meet" → the name); a light burst,
+  the real dashboard in glass pulls into focus, holds, defocuses into a moving field.
+- **A word cycler** ("Send your receipts / updates / launches"), a closing line, "All with", and the name resolving
+  out of scrambled letters as the mark springs in.
+Sound: a calm bed (Mixkit "Close Up") with its lift on the dashboard reveal, words at -24 (the owner's word rule,
+quieter for a calm film), cuts on the beat.
+
+## Look L-KEY-1 "Keynote cut" (CaptionsEasy, 2026-10-21; Ishaan locked its palette, voice and bed)
+Film: `docs/launch/captionseasy-apple/` in the Moovi repo (README there holds the locked tokens). Blind judge: 7.2 vs
+the brand's earlier slide-style film 4.8 in the same round. The recipe, for a small free web tool with no reference:
+1. **One calm voice line per shot**, Apple-cadence (short, declarative, one hero word in serif italic), on a half-bar
+   grid; the film opens one second before the first word on the bed alone.
+2. **Seven scenes, each born from the last, never a cut to empty:** a phone wall that starts zoomed on one phone and
+   pulls out in log space (rack focus on the outer phones as "the world" is said) → an iris of the night grows out of
+   one phone's mute icon → the line itself wears the product's caption looks word by word → the logo reveal on one
+   bloom → the logo shrinks into the header of the product's REAL page (rebuilt from its live UI, its own cream/ink) →
+   a cursor drags a real clip in and drops it on the word "video" → dive into the clip full-bleed, where the captions
+   are timed to the voice's own word stamps and a timing ruler lights each word → recede into a phone, a look picker
+   clicked on each spoken look name → export, a fake watermark pixel-dissolves on "No watermark" → whip to a dark
+   on-device scene (an upload arrow meets a glass ceiling, a dome closes) → flash to "Free." slammed in log space, the
+   URL typing itself → a night wall rises into the end card.
+3. **The product performs its own claim:** for a captions tool the film's captions ARE the product (synced to the
+   narrator's stamps); for a privacy claim the data visibly never leaves.
+4. **The world is derived, the brand stays the mark:** a celadon porcelain ramp built from the brand's green (light
+   world) and green lacquer with one bloom (dark world); the brand's own cream and ink only on the logo and its real UI.
+5. **A synthesized bed when the library has no fitting mood** (WebAudio pad + glass arpeggio + soft pulse, sections
+   following the story: sparse hook, pulse from the logo, breakdown on the serious claim, long final chord).
+6. Judge debts still open: the Studio page's small UI text is illegible at full-window scale (zoom to the drop zone or
+   take the page 1.3x); the end card wants a product glimpse.
+
+## A launch film is 2D on the brand's own colours unless asked otherwise (Ishaan on Fetaccino, 2026-10-23: "make it a 2d launch video not 3d, bright themed, on its brand colours, but very advanced and good")
+- A launch film for a brand with a designed light site is built in 2D (canvas) on the site's own tokens, type and mark: its field colours ARE the world (the brand really owns them, so they beat the no-default-palette list). A derived 3D material world (glaze, stone, lacquer) was the channel films' grammar, not the launch default; I had started three 3D material worlds for Fetaccino and they were dropped.
+- "Advanced" in 2D comes from craft, not from 3D: layered soft shadows tinted with the brand ink (never black), depth of field between UI planes (the row lifted toward the lens, the window soft behind), the real UI redrawn from the site CSS at any scale, a cursor that drives, grain, camera moves in 2.5D, and designed sound.
+- The palette drill still runs, inside the brand: the choice is which brand field carries which part of the story (Fetaccino: the site's map greens for "found it", the cream page for "filed it", the soft rose for the mark). Show 2-3 rendered treatments and let him pick.
+- When the brief does not say 2D or 3D, offer both at intake with one rendered frame each; never pick the medium silently.
+
+## Look L-2D-1 "Brand UI, 2D" (Fetaccino, 2026-10-23; code `docs/agents/story/launch-fetaccino/`)
+A 35 s launch for a small tool whose site has a designed demo, built 2D in canvas on the site's own tokens:
+- **The film follows one real item from the site's demo** (a result row) through the product's whole job (tick, review, send,
+  dedupe), and performs the promise before naming the brand ("Watch it become row four" -> "That was Fetaccino").
+- **The site's UI redrawn from its CSS at any scale** (kit/ui.js, kit/draw2d.js), never a screenshot: the camera can sit at 3-5x on
+  a row and the type stays sharp. The data of a row arrives on the words that speak it.
+- **Worlds follow the story using the site's own line** ("from found it to filed it"): the demo's map enlarged for finding, the page
+  cream for filing, the soft rose only for the mark; the map's roads straighten into the sheet's grid lines (a morph, not a cut).
+- Depth in 2D: ink-tinted three-layer shadows, a row lifting toward the lens with its window going soft, an affine "turn" that eases
+  to frontal, log-space scale, motion ghosts, a cursor with a ripple. The judge still asked for more depth and fewer crops (6.9 vs 7.1).
+- **Caption cards are hand-set phrases** when the script is fixed (a word-count list): automatic splits by length orphaned "row |
+  four" and "don't | fit", and the judge read the cards as fragments.
+- **9:16 from the same film:** render each 16:9 frame off-screen without its ground (worlds skip when `__NO_WORLD`), reframe it by a
+  per-shot focus (centre, zoom, deliberate pans) into a tall window over the full-height world, the brand on top, captions native.
+- **Judge on full-size frames**: a downscaled contact sheet made the judge call readable UI "illegible"; give it the MP4 and frame
+  numbers and require 3 full frames per film before scoring.
+
+## Launch films are soft, slow and premium (Ishaan on Fetaccino v3, 2026-10-23: "not so fast paced.. soft slow and premium feel")
+The fast-pacing rule (3.2-3.8 words a second, a change every 1.2-2 s) is for channel and social films. A brand launch film is
+paced like a keynote: a calm read (Andrew at about -6%, about 2.7-3 words a second), natural breaths between sentences kept (up to
+about 0.6 s, never cut to 0.2 s), every move slower with long soft settles, springs damped (no visible bounce), no elastic caption
+gestures, a softer bed. Every event still lands on its word; only the speed drops. Length 40-45 s is fine for the master.
