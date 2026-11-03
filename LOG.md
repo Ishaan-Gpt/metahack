@@ -13,3 +13,7 @@
   Base grade baked into graded.mp4 by prep (no per-frame colour filter); grain is one full-frame layer.
 - Not done yet: SAM 3.1, Muse Spark run, Voice diarization, blind ratchet vs the references, real-time watch-through,
   export, a better (sharper, 1080p) demo clip.
+- Matte bake on t1: 806 frames at 15 fps baked in the browser (slow while the pane was hidden: about 1 frame/s, ~13 min;
+  a visible window should be much faster), encoded to matte.webm (VP9 alpha, 3.6 MB) in 22.8 s.
+- With the baked matte, a frame costs 1-2 ms (vision 0.1-0.3 ms + draw 0.9-1.6 ms), down from 35-96 ms. Look unchanged (`data/grabs/t1-v5-baked.jpg`).
+  Real-time fps not measured yet: the browser pane was hidden, which throttles the page.
