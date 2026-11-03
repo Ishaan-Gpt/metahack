@@ -3,7 +3,7 @@
  "why": "ba2 chapter cards for the 3 points; ba4 desk world acts out the process; ba1 meaning colour + stacked kinetic type on the negative, B&W calm then colour back; ba3 the speaker shrinks into a card and the claim becomes its picture (UI widget, 3D cube). Moovi: Premium Caption 1, the Style 1 / CC0 sounds, punches and leaks.",
  "clip": "/data/clips/t3/",
  "start": {
-  "w": "so"
+  "w": "first"
  },
  "palette": {
   "page": "#1b1714",
@@ -34,7 +34,7 @@
  },
  "caption": {
   "variant": "1.1",
-  "accent": "video"
+  "accent": "#E2563A"
  },
  "music": {
   "file": "music/bed.mp3",
@@ -321,36 +321,27 @@
  "beats": [
   {
    "from": {
-    "w": "so"
+    "w": "first"
    },
    "layers": [
     {
      "t": "cam",
-     "z": 1.12,
-     "Y": 0.34,
+     "z": 1.14,
+     "Y": 0.4,
      "looks": [
       {
        "at": {
-        "w": "so"
+        "w": "first"
        },
-       "f": "contrast(1.12) saturate(1.08) sepia(.08)"
+       "f": "contrast(1.16) saturate(1.04) sepia(.16) brightness(.96)"
       }
      ]
-    }
-   ]
-  },
-  {
-   "from": {
-    "w": "first"
-   },
-   "noCaption": true,
-   "layers": [
+    },
     {
      "t": "art",
      "text": true,
-     "dur": 1.1,
-     "html": "<div class=\"cc\"><div class=\"num\">1</div><div class=\"dia\"><span>1</span></div><div class=\"lab\">no two-way talk</div></div>",
-     "css": ".cc{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 42%,#2c1e17,#100b09 70%)}\n.num{position:absolute;left:0;right:0;top:300px;text-align:center;font:400 1100px/1 'Russo One';color:rgba(247,236,222,calc(.04 + .1*var(--e)));transform:translateY(calc((1 - var(--e))*80px)) scale(calc(1.06 - .06*var(--e)))}\n.dia{position:absolute;left:450px;top:790px;width:180px;height:180px;border:8px solid #F7ECDE;background:#C8321E;box-shadow:0 0 70px rgba(230,80,50,.75),0 30px 60px rgba(0,0,0,.6);transform:rotate(45deg) scale(min(1,calc(.2 + var(--e)*1.4)))}\n.dia span{position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font:400 110px 'Russo One';color:#F7ECDE}\n.lab{position:absolute;left:0;right:0;top:1090px;text-align:center;font:italic 500 96px 'FrauncesV';color:#F7ECDE;letter-spacing:-.01em;opacity:clamp(0,calc(var(--p)*5 - 1.4),1);transform:translateY(calc((1 - clamp(0,calc(var(--p)*4 - 1),1))*30px))}"
+     "html": "<div class=\"cb\"><div class=\"num\">1</div><div class=\"dia\"><span>1</span></div><div class=\"lab\">no two-way talk</div></div>",
+     "css": ".cb{position:absolute;left:0;right:0;top:0;height:760px;background:linear-gradient(180deg,rgba(16,10,8,.82),rgba(16,10,8,.55) 55%,rgba(16,10,8,0))}\n.num{position:absolute;left:40px;top:40px;font:400 560px/1 'Russo One';color:rgba(247,236,222,calc(.06 + .08*min(1,var(--t)*3)));transform:translateY(calc((1 - min(1,var(--t)*3))*-40px))}\n.dia{position:absolute;left:150px;top:300px;width:140px;height:140px;border:7px solid #F7ECDE;background:#C8321E;box-shadow:0 0 60px rgba(230,80,50,.75),0 24px 50px rgba(0,0,0,.6);transform:rotate(45deg) scale(min(1,calc(.2 + var(--t)*4)))}\n.dia span{position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font:400 86px 'Russo One';color:#F7ECDE}\n.lab{position:absolute;left:350px;top:318px;right:40px;font:italic 500 92px/1 'FrauncesV';color:#F7ECDE;opacity:clamp(0,calc((var(--t) - .1)*6),1);transform:translateX(calc((1 - clamp(0,calc((var(--t) - .1)*5),1))*-40px))}"
     }
    ]
   },
@@ -361,8 +352,8 @@
    "layers": [
     {
      "t": "cam",
-     "z": 1.3,
-     "Y": 0.33,
+     "z": 1.22,
+     "Y": 0.38,
      "punch": {
       "w": "two"
      },
@@ -372,7 +363,7 @@
        "at": {
         "w": "have"
        },
-       "f": "contrast(1.12) saturate(1.08) sepia(.08)"
+       "f": "contrast(1.16) saturate(1.04) sepia(.16) brightness(.96)"
       }
      ]
     }
@@ -382,6 +373,7 @@
    "from": {
     "w": "two"
    },
+   "noCaption": true,
    "layers": [
     {
      "t": "desk",
@@ -402,15 +394,15 @@
    "layers": [
     {
      "t": "cam",
-     "z": 1.06,
-     "Y": 0.34,
+     "z": 1.18,
+     "Y": 0.38,
      "looks": [
       {
        "at": {
         "w": "that",
         "after": 9.9
        },
-       "f": "contrast(1.12) saturate(1.08) sepia(.08)"
+       "f": "contrast(1.16) saturate(1.04) sepia(.16) brightness(.96)"
       }
      ]
     },
@@ -437,14 +429,25 @@
    "from": {
     "w": "then"
    },
-   "noCaption": true,
    "layers": [
+    {
+     "t": "cam",
+     "z": 1.14,
+     "Y": 0.4,
+     "looks": [
+      {
+       "at": {
+        "w": "then"
+       },
+       "f": "contrast(1.16) saturate(1.04) sepia(.16) brightness(.96)"
+      }
+     ]
+    },
     {
      "t": "art",
      "text": true,
-     "dur": 1.1,
-     "html": "<div class=\"cc\"><div class=\"num\">2</div><div class=\"dia\"><span>2</span></div><div class=\"lab\">can't ask</div></div>",
-     "css": ".cc{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 42%,#2c1e17,#100b09 70%)}\n.num{position:absolute;left:0;right:0;top:300px;text-align:center;font:400 1100px/1 'Russo One';color:rgba(247,236,222,calc(.04 + .1*var(--e)));transform:translateY(calc((1 - var(--e))*80px)) scale(calc(1.06 - .06*var(--e)))}\n.dia{position:absolute;left:450px;top:790px;width:180px;height:180px;border:8px solid #F7ECDE;background:#C8321E;box-shadow:0 0 70px rgba(230,80,50,.75),0 30px 60px rgba(0,0,0,.6);transform:rotate(45deg) scale(min(1,calc(.2 + var(--e)*1.4)))}\n.dia span{position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font:400 110px 'Russo One';color:#F7ECDE}\n.lab{position:absolute;left:0;right:0;top:1090px;text-align:center;font:italic 500 96px 'FrauncesV';color:#F7ECDE;letter-spacing:-.01em;opacity:clamp(0,calc(var(--p)*5 - 1.4),1);transform:translateY(calc((1 - clamp(0,calc(var(--p)*4 - 1),1))*30px))}"
+     "html": "<div class=\"cb\"><div class=\"num\">2</div><div class=\"dia\"><span>2</span></div><div class=\"lab\">can't ask</div></div>",
+     "css": ".cb{position:absolute;left:0;right:0;top:0;height:760px;background:linear-gradient(180deg,rgba(16,10,8,.82),rgba(16,10,8,.55) 55%,rgba(16,10,8,0))}\n.num{position:absolute;left:40px;top:40px;font:400 560px/1 'Russo One';color:rgba(247,236,222,calc(.06 + .08*min(1,var(--t)*3)));transform:translateY(calc((1 - min(1,var(--t)*3))*-40px))}\n.dia{position:absolute;left:150px;top:300px;width:140px;height:140px;border:7px solid #F7ECDE;background:#C8321E;box-shadow:0 0 60px rgba(230,80,50,.75),0 24px 50px rgba(0,0,0,.6);transform:rotate(45deg) scale(min(1,calc(.2 + var(--t)*4)))}\n.dia span{position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font:400 86px 'Russo One';color:#F7ECDE}\n.lab{position:absolute;left:350px;top:318px;right:40px;font:italic 500 92px/1 'FrauncesV';color:#F7ECDE;opacity:clamp(0,calc((var(--t) - .1)*6),1);transform:translateX(calc((1 - clamp(0,calc((var(--t) - .1)*5),1))*-40px))}"
     }
    ]
   },
@@ -482,7 +485,7 @@
      "text": true,
      "dur": 2.9,
      "html": "<div class=\"k\"><i class=\"a\">unable to</i><b class=\"b\">ASK</b><span class=\"c\">questions</span><span class=\"d\">in the class</span></div>",
-     "css": ".k{position:absolute;left:96px;top:210px;width:900px}\n.k > *{display:block;opacity:0}\n.a{font:italic 400 118px/1 'FrauncesV';color:#F7ECDE;opacity:clamp(0,calc((var(--t) - .5)*8),1)!important}\n.b{font:400 360px/.92 'Russo One';color:#FFEDE6;text-shadow:0 0 34px rgba(235,80,50,.95),0 0 110px rgba(200,40,20,.75);opacity:clamp(0,calc((var(--t) - .8)*9),1)!important;transform:scale(calc(1.28 - .28*clamp(0,calc((var(--t) - .8)*5),1)));transform-origin:0 60%}\n.c{font:800 128px/1.02 Manrope;letter-spacing:-.03em;color:#F7ECDE;opacity:clamp(0,calc((var(--t) - .98)*8),1)!important}\n.d{margin-top:22px;font:600 54px JBMono;letter-spacing:.3em;text-transform:uppercase;color:rgba(247,236,222,.72);opacity:clamp(0,calc((var(--t) - 1.5)*6),1)!important}"
+     "css": ".k{position:absolute;left:96px;top:210px;width:900px}\n.k > *{display:block;opacity:0}\n.a{font:italic 400 118px/1 'FrauncesV';color:#F7ECDE;opacity:clamp(0,calc((var(--t) - .5)*8),1)!important}\n.b{font:400 360px/.92 'Russo One';color:#FFEDE6;text-shadow:0 0 34px rgba(235,80,50,.95),0 0 110px rgba(200,40,20,.75);opacity:clamp(0,calc((var(--t) - .8)*9),1)!important;transform:scale(calc(1.28 - .28*clamp(0,calc((var(--t) - .8)*5),1)));transform-origin:0 60%}\n.c{font:400 132px/1.02 'Russo One';color:#F7ECDE;opacity:clamp(0,calc((var(--t) - .98)*8),1)!important}\n.d{margin-top:16px;font:italic 400 84px 'FrauncesV';color:rgba(247,236,222,.82);opacity:clamp(0,calc((var(--t) - 1.5)*6),1)!important}"
     }
    ]
   },
@@ -495,7 +498,7 @@
     {
      "t": "cam",
      "z": 1.16,
-     "Y": 0.34,
+     "Y": 0.38,
      "punch": {
       "w": "introvert"
      },
@@ -517,14 +520,26 @@
     "w": "and",
     "after": 18
    },
-   "noCaption": true,
    "layers": [
+    {
+     "t": "cam",
+     "z": 1.14,
+     "Y": 0.4,
+     "looks": [
+      {
+       "at": {
+        "w": "and",
+        "after": 18
+       },
+       "f": "contrast(1.16) saturate(1.04) sepia(.16) brightness(.96)"
+      }
+     ]
+    },
     {
      "t": "art",
      "text": true,
-     "dur": 1.1,
-     "html": "<div class=\"cc\"><div class=\"num\">3</div><div class=\"dia\"><span>3</span></div><div class=\"lab\">no immersive learning</div></div>",
-     "css": ".cc{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 42%,#2c1e17,#100b09 70%)}\n.num{position:absolute;left:0;right:0;top:300px;text-align:center;font:400 1100px/1 'Russo One';color:rgba(247,236,222,calc(.04 + .1*var(--e)));transform:translateY(calc((1 - var(--e))*80px)) scale(calc(1.06 - .06*var(--e)))}\n.dia{position:absolute;left:450px;top:790px;width:180px;height:180px;border:8px solid #F7ECDE;background:#C8321E;box-shadow:0 0 70px rgba(230,80,50,.75),0 30px 60px rgba(0,0,0,.6);transform:rotate(45deg) scale(min(1,calc(.2 + var(--e)*1.4)))}\n.dia span{position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font:400 110px 'Russo One';color:#F7ECDE}\n.lab{position:absolute;left:0;right:0;top:1090px;text-align:center;font:italic 500 96px 'FrauncesV';color:#F7ECDE;letter-spacing:-.01em;opacity:clamp(0,calc(var(--p)*5 - 1.4),1);transform:translateY(calc((1 - clamp(0,calc(var(--p)*4 - 1),1))*30px))}"
+     "html": "<div class=\"cb\"><div class=\"num\">3</div><div class=\"dia\"><span>3</span></div><div class=\"lab\">no immersive learning</div></div>",
+     "css": ".cb{position:absolute;left:0;right:0;top:0;height:760px;background:linear-gradient(180deg,rgba(16,10,8,.82),rgba(16,10,8,.55) 55%,rgba(16,10,8,0))}\n.num{position:absolute;left:40px;top:40px;font:400 560px/1 'Russo One';color:rgba(247,236,222,calc(.06 + .08*min(1,var(--t)*3)));transform:translateY(calc((1 - min(1,var(--t)*3))*-40px))}\n.dia{position:absolute;left:150px;top:300px;width:140px;height:140px;border:7px solid #F7ECDE;background:#C8321E;box-shadow:0 0 60px rgba(230,80,50,.75),0 24px 50px rgba(0,0,0,.6);transform:rotate(45deg) scale(min(1,calc(.2 + var(--t)*4)))}\n.dia span{position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font:400 86px 'Russo One';color:#F7ECDE}\n.lab{position:absolute;left:350px;top:318px;right:40px;font:italic 500 92px/1 'FrauncesV';color:#F7ECDE;opacity:clamp(0,calc((var(--t) - .1)*6),1);transform:translateX(calc((1 - clamp(0,calc((var(--t) - .1)*5),1))*-40px))}"
     }
    ]
   },
@@ -532,44 +547,15 @@
    "from": {
     "w": "immersive"
    },
-   "layers": [
-    {
-     "t": "cam",
-     "z": 1.24,
-     "Y": 0.33,
-     "punch": {
-      "w": "learning"
-     },
-     "by": 1.06,
-     "looks": [
-      {
-       "at": {
-        "w": "immersive"
-       },
-       "f": "contrast(1.12) saturate(1.08) sepia(.08)"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "from": {
-    "w": "like",
-    "after": 20
-   },
    "noCaption": true,
    "layers": [
     {
-     "t": "cam",
-     "form": "corner-br",
-     "z": 1.05
-    },
-    {
-     "t": "art",
-     "text": true,
-     "dur": 1.05,
-     "html": "<div class=\"sc\"><div class=\"cube\"><i class=\"f1\"></i><i class=\"f2\"></i><i class=\"f3\"></i><i class=\"f4\"></i><i class=\"f5\"></i><i class=\"f6\"></i></div><div class=\"t\">3D</div></div>",
-     "css": ".sc{position:absolute;inset:0;perspective:1500px}\n.cube{position:absolute;left:390px;top:300px;width:300px;height:300px;transform-style:preserve-3d;transform:rotateX(calc(-22deg - var(--t)*35deg)) rotateY(calc(35deg + var(--t)*110deg)) scale(calc(.45 + .55*var(--e)))}\n.cube i{position:absolute;inset:0;border:7px solid #F7ECDE;box-shadow:0 0 34px rgba(255,190,120,.65),inset 0 0 34px rgba(255,190,120,.25);background:rgba(255,215,170,.05)}\n.f1{transform:translateZ(150px)}.f2{transform:rotateY(180deg) translateZ(150px)}.f3{transform:rotateY(90deg) translateZ(150px)}.f4{transform:rotateY(-90deg) translateZ(150px)}.f5{transform:rotateX(90deg) translateZ(150px)}.f6{transform:rotateX(-90deg) translateZ(150px)}\n.t{position:absolute;left:0;right:0;top:720px;text-align:center;font:400 250px 'Russo One';color:#FFF3E6;text-shadow:0 0 50px rgba(255,170,90,.85);opacity:clamp(0,calc(var(--p)*6 - 1),1)}"
+     "t": "desk",
+     "focus": [
+      560,
+      2640,
+      1.3
+     ]
     }
    ]
   },
@@ -581,15 +567,15 @@
    "layers": [
     {
      "t": "cam",
-     "z": 1.08,
-     "Y": 0.34,
+     "z": 1.18,
+     "Y": 0.38,
      "looks": [
       {
        "at": {
         "w": "you",
         "after": 21
        },
-       "f": "contrast(1.12) saturate(1.12) sepia(.08)"
+       "f": "contrast(1.16) saturate(1.04) sepia(.16) brightness(.96)"
       }
      ]
     },
@@ -604,14 +590,6 @@
   }
  ],
  "sfx": [
-  {
-   "at": {
-    "w": "first",
-    "dt": -0.5
-   },
-   "k": "riser",
-   "g": 0.32
-  },
   {
    "at": {
     "w": "first",
@@ -720,14 +698,6 @@
    },
    "k": "whoosh",
    "g": 0.4
-  },
-  {
-   "at": {
-    "w": "like",
-    "after": 20
-   },
-   "k": "whoosh",
-   "g": 0.38
   },
   {
    "at": {

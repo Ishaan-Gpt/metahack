@@ -306,3 +306,10 @@ video and it doesn't feel repetitive." And: "animation is shitty 3/10, so many e
   timing), never a whole-clip pass of captions; (2) before building, count from the reference frames what share of time shows a designed
   graphic, a look change, the speaker moved/shrunk, or plain footage, and build to those shares; (3) port the approved player and devices,
   never re-invent their taste; (4) the before footage must be good enough to show the after (sharp, lit), or the demo fails whatever the edit.
+- **2026-11-04 · metahack four-references edit ("i dont feel.. did any good").** Mixing four references' whys into one edit on his
+  clip pleased no one (blind judge 5.2 → 5.8 vs the references' 6-8.5). Ishaan's method, binding for reference work: ONE reference at a
+  time, recreated 1:1 (timing, layout, fonts, colours, motion) on a similar public footage (a Wikimedia Commons talking head that looks
+  like the reference's raw), in 5-second windows: REF.md (frame by frame, measured: positions, sizes, fonts by x-height and letter shapes,
+  colours sampled from frames, camera zoom/pan per frame, motion-blur shutter), build, OURS.md, DIFF.md (every difference), PLAN.md,
+  fix, compare again, then the next 5 s; use the sharpest copy of the reference; finish with a side-by-side and a per-region motion
+  check (no jitter); show a preview, then move to the next reference. Do not ask him questions mid-way; show the result.
