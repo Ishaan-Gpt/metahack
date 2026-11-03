@@ -1,0 +1,13 @@
+{
+  "name": "metahack",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prep": "node engine/prep.mjs",
+    "edit": "node engine/edit.mjs",
+    "serve": "node serve.mjs 4700"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "0.10.14"
+  }
+}

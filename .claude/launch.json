@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "player", "runtimeExecutable": "node", "runtimeArgs": ["serve.mjs", "4700"], "port": 4700 }
+  ]
+}

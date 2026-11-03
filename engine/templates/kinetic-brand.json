@@ -1,0 +1,229 @@
+{
+  "dialect": "kinetic-brand",
+  "why": "edit-ba1 + edit-ba2 grammar (refs/): every phrase a look state; hero words lit, helpers small; meaning colour; text beside or behind the person; loud beats then rest beats; few, different transitions.",
+  "defaults_need_ishaan": "palette, fonts, sfx and bed below are proposals (CONTEXT.md section 14), not approved taste",
+  "palette": {
+    "hot": "oklch(0.63 0.22 29)",
+    "hotGlow": "oklch(0.70 0.24 29 / 0.85)",
+    "warm": "oklch(0.83 0.12 82)",
+    "cool": "oklch(0.80 0.06 210)",
+    "ink": "oklch(0.17 0.012 40)",
+    "paper": "oklch(0.97 0.008 80)",
+    "void": "oklch(0.13 0.01 40)",
+    "field": [
+      "oklch(0.30 0.12 27)",
+      "oklch(0.16 0.06 25)"
+    ]
+  },
+  "type": {
+    "display": {
+      "family": "Archivo",
+      "file": "archivo-latin-wdth-normal.woff2",
+      "weight": 800,
+      "stretch": "112%"
+    },
+    "companion": {
+      "family": "Instrument Serif",
+      "file": "instrument-serif-latin-400-italic.woff2",
+      "style": "italic",
+      "weight": 400
+    },
+    "text": {
+      "family": "Inter Tight",
+      "file": "inter-tight-latin-wght-normal.woff2",
+      "weight": 600
+    }
+  },
+  "grade": {
+    "contrast": 1.14,
+    "saturate": 1.1,
+    "brightness": 0.97,
+    "warm": 0.04,
+    "fall": 0.55,
+    "vignette": 0.35,
+    "grain": 0.05
+  },
+  "pace": {
+    "restShare": 0.28,
+    "transitionEvery": 4
+  },
+  "templates": [
+    {
+      "id": "kb.rest",
+      "roles": [
+        "claim",
+        "payoff",
+        "negative",
+        "question",
+        "number",
+        "hook",
+        "cta"
+      ],
+      "loud": false,
+      "use": "plain beat between loud ones: as-shot framing, one small phrase subtitle under the chin",
+      "shot": {
+        "size": 1.0
+      },
+      "subject": "as-is",
+      "text": {
+        "system": "subtitle"
+      }
+    },
+    {
+      "id": "kb.hero-chest",
+      "roles": [
+        "claim",
+        "payoff",
+        "negative",
+        "hook"
+      ],
+      "loud": false,
+      "use": "a strong claim: the hero word big and lit over the chest, under the chin; helpers small above it",
+      "shot": {
+        "size": 1.06
+      },
+      "subject": "as-is",
+      "text": {
+        "system": "hero-glow",
+        "place": "chest",
+        "behind": false,
+        "color": "warm"
+      }
+    },
+    {
+      "id": "kb.stack-side",
+      "roles": [
+        "hook",
+        "question",
+        "claim"
+      ],
+      "loud": true,
+      "use": "the hook or a key claim: punch to a close-up, face to one side, the phrase builds word by word as a stacked block beside it",
+      "shot": {
+        "size": 1.35,
+        "place": "side"
+      },
+      "subject": "dim-bg",
+      "text": {
+        "system": "stack",
+        "place": "side"
+      }
+    },
+    {
+      "id": "kb.void-stat",
+      "roles": [
+        "number"
+      ],
+      "loud": true,
+      "use": "a number: the person isolated on a dark void, the number huge and hot behind the head",
+      "shot": {
+        "size": 1.0,
+        "place": "low"
+      },
+      "subject": "void",
+      "text": {
+        "system": "stat",
+        "place": "top",
+        "behind": true,
+        "color": "hot"
+      },
+      "transition": "line-wipe",
+      "sfx": [
+        "hit"
+      ]
+    },
+    {
+      "id": "kb.field-hot",
+      "roles": [
+        "negative"
+      ],
+      "loud": true,
+      "use": "a warning or a negative: the room swapped for the hot colour field, the hero word big and hot beside the face",
+      "shot": {
+        "size": 1.22,
+        "place": "side"
+      },
+      "subject": "field",
+      "text": {
+        "system": "stack",
+        "place": "side",
+        "color": "hot"
+      }
+    },
+    {
+      "id": "kb.mono",
+      "roles": [
+        "claim",
+        "negative",
+        "payoff"
+      ],
+      "loud": false,
+      "use": "the calm conclusion: black-and-white, one tiny word at a time at the chest; the next beat brings colour back",
+      "shot": {
+        "size": 1.12
+      },
+      "subject": "mono",
+      "text": {
+        "system": "one-word"
+      }
+    },
+    {
+      "id": "kb.chapter",
+      "roles": [
+        "chapter"
+      ],
+      "loud": true,
+      "use": "a structural step (first, second, number three): a full-frame card, a ghost numeral and the step's label, then the person returns",
+      "shot": {
+        "size": 1.0
+      },
+      "subject": "card",
+      "text": {
+        "system": "chapter"
+      },
+      "cardFor": 1.4,
+      "sfx": [
+        "riser",
+        "pop"
+      ]
+    },
+    {
+      "id": "kb.list",
+      "roles": [
+        "claim"
+      ],
+      "needs": "list",
+      "loud": true,
+      "use": "a list of three or more: items stack as pills on their words over the dimmed shot",
+      "shot": {
+        "size": 1.0
+      },
+      "subject": "dim",
+      "text": {
+        "system": "list"
+      }
+    }
+  ],
+  "transitions": [
+    "flash",
+    "line-wipe",
+    "blur-through",
+    "whip"
+  ],
+  "sfx": {
+    "word": "kenney.click.wav",
+    "pop": "ui.pop.wav",
+    "whoosh": "woosh-tight.wav",
+    "whip": "woosh-short.wav",
+    "hit": "fs.impact.soft-hit.wav",
+    "riser": "riser-short.wav",
+    "chime": "tonal.chime.wav"
+  },
+  "bed": {
+    "file": "music/bed.mp3",
+    "gain": 0.07
+  },
+  "endCard": {
+    "hold": 2.2
+  }
+}
