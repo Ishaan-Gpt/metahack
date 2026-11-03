@@ -297,3 +297,12 @@ video and it doesn't feel repetitive." And: "animation is shitty 3/10, so many e
   written some random things"; study the newest top videos in the niche (1-2 days old), learn how a YouTube long-form explainer works, and
   rebuild to the graph (initial reveal, problem, structured steps, a reason to stay till the end), aiming for 80-90% retention. Rules in
   why-not-what.md ("A YouTube long form is for a stranger, and its demo must win").
+- **2026-11-04 · metahack "before → after" edit engine v0 · 1/10.** I built captions on top of the before, not an edit. The references
+  (refs/edit-ba1..4 in metahack) SHOW every sentence (a number becomes a huge object, a process becomes props on a desk, a tool becomes its
+  UI, the speaker shrinks into a card, the room is replaced) and most of their time carries a designed graphic or a heavy look change; mine
+  typed the words in a new font over the same dull 480p room, with plain rest beats a third of the time. I also re-invented the edit player
+  (my own fonts, glow, devices) instead of porting Edit mastery's player (the edit taste source), and sent it at my own 6/10, breaking
+  "nothing under 8/10". Rules: (1) an edit engine's first proof is ONE reference beat matched side by side (same kind of picture, measured
+  timing), never a whole-clip pass of captions; (2) before building, count from the reference frames what share of time shows a designed
+  graphic, a look change, the speaker moved/shrunk, or plain footage, and build to those shares; (3) port the approved player and devices,
+  never re-invent their taste; (4) the before footage must be good enough to show the after (sharp, lit), or the demo fails whatever the edit.

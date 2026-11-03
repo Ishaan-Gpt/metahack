@@ -17,3 +17,8 @@
   a visible window should be much faster), encoded to matte.webm (VP9 alpha, 3.6 MB) in 22.8 s.
 - With the baked matte, a frame costs 1-2 ms (vision 0.1-0.3 ms + draw 0.9-1.6 ms), down from 35-96 ms. Look unchanged (`data/grabs/t1-v5-baked.jpg`).
   Real-time fps not measured yet: the browser pane was hidden, which throttles the page.
+
+## 2026-11-04
+- Ishaan: **1/10** on v0. My diagnosis: captions over the before, not an edit (no sentence is shown as a picture, no designed graphics,
+  the dull 480p room unchanged, rest beats 42%), a re-invented player instead of Edit mastery's, sent at my own 6/10.
+  Lesson written to ishaan-motion 1.17.87 (lessons.md). Next: match ONE reference beat side by side before anything else.
