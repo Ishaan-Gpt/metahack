@@ -13,7 +13,10 @@ const $ = id => document.getElementById(id), status = s => ($('status').textCont
 window.__ready = false;
 
 // ---------- fit the stage ----------
-function fit() { const k = Math.min(innerWidth / W, (innerHeight - (Q.has('embed') ? 0 : 24)) / H); const s = $('stage'); s.style.transform = `scale(${k})`; s.style.width = W + 'px'; s.parentElement.style.width = W * k + 'px'; s.parentElement.style.height = H * k + 'px'; $('wrap').style.display = 'grid'; }
+function fit() {   // scale the 1080x1920 stage into the window and place it explicitly (a transform does not change layout size)
+  const pad = Q.has('embed') ? 0 : 24, k = Math.min(innerWidth / W, (innerHeight - pad) / H), st = $('stage');
+  Object.assign(st.style, { position: 'absolute', transform: `scale(${k})`, transformOrigin: '0 0', left: (innerWidth - W * k) / 2 + 'px', top: (innerHeight - pad - H * k) / 2 + 'px' });
+}
 addEventListener('resize', fit); fit();
 
 // ---------- load everything behind the gate ----------
@@ -39,7 +42,7 @@ await Promise.all([loadBuf('voice', CLIP + 'voice.m4a'), ...Object.entries(EDIT.
 BUF.boom = synthBoom(); BUF.sand = synthSand();
 
 // ---------- WebGL compositor ----------
-const out = $('out'), gl = out.getContext('webgl2', { preserveDrawingBuffer: Q.has('grab'), desynchronized: true, premultipliedAlpha: false, antialias: false });
+const out = $('out'), gl = out.getContext('webgl2', { preserveDrawingBuffer: Q.has('grab'), premultipliedAlpha: false, antialias: false });
 const mk2d = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; };
 const [CB, bx] = mk2d(W, H), [CF, fx] = mk2d(W, H), [CT, tx] = mk2d(W / 2, H / 2);   // behind, front, tint (half res)
 const VS = `#version 300 es

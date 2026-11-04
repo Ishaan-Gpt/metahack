@@ -16,7 +16,7 @@ one of the reference's cuts or transitions.
   px/frame; void push subject region mean 1.55 px/frame vs the reference's 1.04 with the same 21 direction changes;
   the push at 13.8 s background region jerk p95 36.7 vs 33.2.
 - Real-time playback (recreate/ba1/fps.mjs, headless Chrome on Ishaan's PC, AMD Radeon iGPU via D3D11, CPU at 70-90%
-  from parallel builds): 20-25 fps, p50 33-50 ms, edit clock in real time (10.26 s after 10 s), footage within 0.11 s
+  from parallel builds): 20-25 fps, p50 33-50 ms, edit clock in real time (22.85 s after 22.8 s), footage within 0.11 s
   of the clock (p95). The same headless browser reaches only 48-50 fps on a blank page under this load, so this
   understates a normal browser; it is not 60 fps here.
 
