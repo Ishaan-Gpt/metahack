@@ -1,0 +1,55 @@
+{
+ "source": "data/clips/ba3c/gt7.webm",
+ "crop": {
+  "x": 690,
+  "y": 0,
+  "w": 608,
+  "h": 1080,
+  "note": "1920x1080 source; host face centre x 1040 (59% of the crop), mic head at the left edge, eyes y 280 (26% height, ref 26%)"
+ },
+ "grade": "curves=all='0/0 0.25/0.07 0.5/0.25 0.75/0.55 1/0.85',eq=saturation=0.75,colorbalance=rs=0.10:bs=-0.10:rm=0.07:bm=-0.07,vignette=a=PI/3.5",
+ "pieces": [
+  {
+   "a": 24.4,
+   "b": 26.235,
+   "beat": "B1 hook (ref 0-1.835)",
+   "text": "one of the fastest drivers"
+  },
+  {
+   "a": 76.9,
+   "b": 79.57,
+   "beat": "B2-B3 chart (ref 1.835-4.505)",
+   "text": "learn more about how to become faster in the game"
+  },
+  {
+   "a": 52.1,
+   "b": 53.83,
+   "beat": "B4-B5 words (ref 4.505-6.235)",
+   "text": "Today we're going to discover Digit's"
+  },
+  {
+   "a": 47.5,
+   "b": 49.765,
+   "beat": "B6 checklist (ref 6.235-8.5)",
+   "text": "also a great database for players in"
+  },
+  {
+   "a": 26.75,
+   "b": 31.08,
+   "beat": "B7-B10 circle, store, A-roll (ref 8.5-12.83)",
+   "text": "the Gran Turismo 7 community. We're talking about Digit from Digit Racing. As you may"
+  },
+  {
+   "a": 73.98,
+   "b": 75.8,
+   "beat": "B11 pills (ref 12.83-14.65)",
+   "text": "their racecraft and skill set"
+  },
+  {
+   "a": 83.75,
+   "b": 86.98,
+   "beat": "B12-B13 notification (ref 14.65-17.88)",
+   "text": "potentially starting a sim racing content journey"
+  }
+ ]
+}

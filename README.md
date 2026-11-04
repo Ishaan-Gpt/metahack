@@ -2,7 +2,7 @@
 
 An editing engine: a raw "before" talking-head clip in, an "after" that looks like a pro short-form editor made it out.
 Built for the Meta Global AI Developer Hackathon on Meta's models (Muse Spark, SAM 3.1, Muse Voice Transcribe).
-Start with [CONTEXT.md](CONTEXT.md) (the references' why, the edit grammar, the engine, the plan). Build log: [LOG.md](LOG.md).
+Start with [HANDOFF.md](HANDOFF.md), then [CONTEXT.md](CONTEXT.md) (the references' why, the edit grammar, the engine, the plan). Build log: [LOG.md](LOG.md).
 
 ## Run it (Node 24, ffmpeg 8 on PATH)
 ```bash

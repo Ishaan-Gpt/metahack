@@ -1,0 +1,38 @@
+{
+ "source": "data/clips/ba2c/seg140.webm",
+ "sourceOffset": 140,
+ "note": "seg140.webm = episode 140.0-342.6 s; a/b are seconds in seg140 (episode time = a + 140)",
+ "crop": {
+  "x": 491,
+  "y": 0,
+  "w": 960,
+  "h": 1080,
+  "note": "1080p source; host face centre x 971, y 365 (Haar 216) \u00e2\u2020\u2019 x 480 in the window"
+ },
+ "pieces": [
+  {
+   "a": 139.86,
+   "b": 146.98,
+   "beat": "R0.00-5.6 hook: medium (3 glow groups) \u00e2\u2020\u2019 cut \u00e2\u2020\u2019 ECU neon",
+   "text": "Now, there are some obvious challenges to studying black holes. They're far away. No light can escape them."
+  },
+  {
+   "a": 150.4,
+   "b": 160.58,
+   "beat": "R4.17-11.3 wide + badges \u00e2\u2020\u2019 chapter card 1 \u00e2\u2020\u2019 medium text \u00e2\u2020\u2019 frame + eyeballs",
+   "text": "But we managed to learn about them in two main ways. We gather observational data, like looking through a telescope. We can observe how the stuff around black holes behaves."
+  },
+  {
+   "a": 175.12,
+   "b": 181.2,
+   "beat": "R11.3-17.5 plain medium, no text",
+   "text": "So black hole researchers actually have a lot to work with. And we find black holes all over the universe."
+  },
+  {
+   "a": 146.96,
+   "b": 150.5,
+   "beat": "R17.5-20.0 red ground ECU, face right",
+   "text": "And in many ways, they're just weird."
+  }
+ ]
+}
