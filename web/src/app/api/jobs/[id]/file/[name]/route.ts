@@ -4,7 +4,7 @@ import { Readable } from 'node:stream';
 import { jobDir, validId } from '@/lib/server/jobs';
 
 export const dynamic = 'force-dynamic';
-const ALLOWED = /^(edit\.mp4|before-after\.mp4|card-studio-zoom\.mp4|creator-mix-zoom\.mp4|input\.(mp4|mov|m4v|webm|mkv|avi))$/;
+const ALLOWED = /^(edit\.mp4|before-after\.mp4|card-studio-zoom\.mp4|creator-mix-zoom\.mp4|polyester\.mp4|input\.(mp4|mov|m4v|webm|mkv|avi))$/;
 const TYPE: Record<string, string> = { mp4: 'video/mp4', m4v: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm', mkv: 'video/x-matroska', avi: 'video/x-msvideo' };
 
 /** stream a job's video with byte ranges, so it seeks; ?dl=1 downloads it */
