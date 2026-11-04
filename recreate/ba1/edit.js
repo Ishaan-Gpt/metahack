@@ -73,7 +73,7 @@ function look(T) {
 }
 
 // ---------- transitions (post uniforms) ----------
-const BURN = 5.18, PART = 10.635, BAR = 10.935, GL = 14.68;
+const BURN = 5.18, PART = 10.635, BAR = 10.935, GL = 14.83;
 function post(T) {
   const p = { uBurn: [0, 0, 0, 0], uBand: [960, 0, 0, 0], uPart: [0, 0, 0, 0], uBar: [0, 0, 0, 0], uGlitch: [0, 0, 0, 0], uLeak: [0, 0, 0, 0], uBlack: 0 };
   const b = T - BURN;                                  // ref 7.23 → 7.633 (blobs, white, glitch frame, noise, band to a line, void)
@@ -90,10 +90,9 @@ function post(T) {
   const r = T - BAR;                                   // ref 11.80 → 11.97
   if (r >= 0 && r < 0.17) { const f = Math.floor(r * 30); p.uBar = [[810, 700, 620, 600, 760, 820][Math.min(5, f)], [270, 120, 60, 70, 160, 270][Math.min(5, f)], 1, f]; }
   const g = T - GL;                                    // ref 15.83 → 16.20
-  if (g >= 0 && g < 0.37) { p.uGlitch = [g < 0.12 ? 1 : 0, g >= 0.14 && g < 0.27 ? 1 : 0, g >= 0.27 ? (g < 0.34 ? 1 : 1 - seg(g, 0.34, 0.37)) : 0, 0]; }
-  const l = T - 15.08;                                 // green leak, ref 16.23 → 16.40
-  if (l >= 0 && l < 0.17) p.uLeak = [Math.sin(Math.PI * seg(l, 0, 0.17)), lerp(1000, 640, eo(seg(l, 0, 0.17))), 1700, 170];
-  if (T >= 19.82) p.uBlack = 1;
+  if (g >= 0 && g < 0.40) { p.uGlitch = [g < 0.12 ? 1 : 0, g >= 0.14 && g < 0.27 ? 1 : 0, g >= 0.27 ? 1 : 0, g >= 0.30 ? seg(g, 0.30, 0.40) : 0]; }
+  const l = T - 15.25;                                 // green leak, ref 16.23 → 16.40 (0.03 s after the new shot clears the white)
+  if (l >= 0 && l < 0.17) p.uLeak = [Math.sin(Math.PI * seg(l, 0, 0.17)), lerp(1060, 820, eo(seg(l, 0, 0.17))), 1575, 230];
   return p;
 }
 
@@ -113,7 +112,7 @@ const enter = (T, t0, d = 0.18) => eo(seg(T, t0, t0 + d));
 function txt(c, s, o) {
   const a = (o.alpha ?? 1); if (a <= 0.003) return;
   c.save();
-  c.globalAlpha = a; c.font = o.font; c.textAlign = o.align ?? 'left'; c.textBaseline = 'alphabetic';
+  c.globalAlpha *= a; c.font = o.font; c.textAlign = o.align ?? 'left'; c.textBaseline = 'alphabetic';
   c.letterSpacing = (o.ls ?? 0) + 'px';
   if (o.blur > 0.3) c.filter = `blur(${o.blur.toFixed(1)}px)`;
   const x = o.x + (o.dx ?? 0), y = o.y + (o.dy ?? 0);
@@ -288,16 +287,16 @@ function draw(T, s, ctx) {
     txt(fx, 'so they absorb', { font: F.sb(100), x: 151, y: 1145, fill: '#ffffff', alpha: k1 * out, blur: (1 - k1) * 6, dy: 10 * (1 - k1), shadow: sh });
     txt(fx, 'HEAT', { font: F.sb(sizeForCap(F.sb, 123)), x: 248, y: 1274, stroke: '#d79d63', sw: 3.2, alpha: k2 * out, blur: (1 - k2) * 6, dy: 10 * (1 - k2) });
     txt(fx, 'and', { font: F.xl(100), x: 400 - 260, y: 1352, fill: '#ffffff', alpha: k3 * out, blur: (1 - k3) * 6 });
-    txt(fx, 'carbon dioxide', { font: F.sb(sizeForWidth(F.sb, 'carbon dioxide', 1040 - 312)), x: 312, y: 1352, fill: '#2e9aa3', alpha: k4 * out, blur: (1 - k4) * 6, shadow: ['rgba(0,0,0,0.35)', 8] });
+    txt(fx, 'carbon dioxide', { font: F.sb(95), x: 312, y: 1352, fill: '#2e9aa3', alpha: k4 * out, blur: (1 - k4) * 6, shadow: ['rgba(0,0,0,0.35)', 8] });
   }
   // ===== B4b (13.765 → 15.015): top-left stack, caps + outlined scripts =====
   if (T >= CUT.p5 && T < CUT.p6) {
     const sh = ['rgba(0,0,0,0.45)', 10, 0, 3];
     const it = (t, t0, o) => { const k = enter(T, t0, 0.16); txt(fx, t, { ...o, alpha: k, blur: (1 - k) * 7, dy: 8 * (1 - k) }); };
     it('IT’S', WD.its + 0.12, { font: F.xb(sizeForCap(F.xb, 104)), x: 86, y: 363, fill: '#ffffff', shadow: sh });
-    it('not', WD.not + 0.12, { font: F.lob(112), x: 92, y: 440, stroke: '#9fd0ff', sw: 3, stroke2: '#2e6fb3', sw2: 1.2, shadow: ['rgba(80,160,255,0.6)', 10] });
+    it('not', WD.not + 0.12, { font: F.lob(132), x: 92, y: 440, stroke: '#9fd0ff', sw: 3, stroke2: '#2e6fb3', sw2: 1.2, shadow: ['rgba(80,160,255,0.6)', 10] });
     it('IN', WD.in + 0.1, { font: F.xb(sizeForCap(F.xb, 97)), x: 97, y: 557, grad: [[0, '#ffffff'], [1, '#a7a7a7']], shadow: sh });
-    it('the', WD.the2 + 0.06, { font: F.lob(112), x: 97, y: 640, stroke: '#e2b98d', sw: 3, stroke2: '#7a5536', sw2: 1.2 });
+    it('the', WD.the2 + 0.06, { font: F.lob(132), x: 97, y: 640, stroke: '#e2b98d', sw: 3, stroke2: '#7a5536', sw2: 1.2 });
     it('ATMOSPHERE', WD.atmosphere + 0.08, { font: L.b4b.atm, x: 89, y: 734, grad: [[0, '#ffffff'], [1, '#b3b3b3']], shadow: sh });
   }
   // ===== B5 (15.015 → 19.805): one-word subtitles at the chest, B&W then colour =====
@@ -315,6 +314,7 @@ function draw(T, s, ctx) {
     paintUnder(fx, () => { fx.fillStyle = g; fx.fillRect(0, 1270, W, H - 1270); });
     logo(fx, ctx.brand, 540, 1563, 1, 1);
   } else {
+    fx.fillStyle = 'rgb(3,1,4)'; fx.fillRect(0, 0, W, H);   // the cut to black (ref 20.0), then the logo card
     const a = eio(seg(T, 20.07, 20.82)) * (1 - eio(seg(T, 22.17, 22.57)));
     logo(fx, ctx.brand, 540, 1044, 2.61, a);
   }

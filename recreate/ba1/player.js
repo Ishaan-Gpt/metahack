@@ -125,7 +125,7 @@ void main(){
   // glitch strips: horizontal slices shifted sideways
   if(uGlitch.x > 0.){
     float row = floor(p.y/22.); float k = h(vec2(row, floor(uTime*30.)));
-    if(k > 0.72 && p.y < 900.) tuv.x += (h(vec2(row,3.1))-.5)*0.18*uGlitch.x;
+    if(k > 0.72 && p.y < 800. && p.x < 560.) tuv.x += (h(vec2(row,3.1))-.5)*0.10*uGlitch.x;
   }
   vec3 c = texture(tM, tuv).rgb;
   // light burn: warm blobs blooming over the frame (ref 7.23-7.40)
@@ -161,10 +161,15 @@ void main(){
   if(uBar.z > 0.){ float d = abs(p.x - uBar.x); float m = 1. - smoothstep(uBar.y, uBar.y+3., d);
     float g = h(floor(p/2.) + uBar.w); c = mix(c, vec3(0.97 - 0.35*step(0.86, g)), m*uBar.z); }
   // glitch bars: vertical black/white barcode with noise, then white
-  if(uGlitch.y > 0.){ float col = h(vec2(floor(p.x/(6.+18.*h(vec2(floor(p.x/40.),2.)))), floor(uTime*24.)));
-    vec3 bc = mix(vec3(0.97), vec3(0.03), step(0.84, col)); bc = mix(bc, vec3(0.75), step(0.93, h(p+uTime)));
-    c = mix(c, bc, uGlitch.y); }
-  if(uGlitch.z > 0.) c = mix(c, vec3(1.), uGlitch.z);
+  // a thin vertical streak right of the text while the strips run (ref 15.83-15.93)
+  if(uGlitch.x > 0.){ float d = abs(p.x - 545.); c = mix(c, vec3(step(0.5, h(vec2(floor(p.y/14.), floor(uTime*30.))))), (1.-smoothstep(2.,5.,d))*0.8); }
+  // white grain with a few black bars on the left (ref 15.97-16.07)
+  if(uGlitch.y > 0.){ float g = h(floor(p/2.) + floor(uTime*30.)); vec3 bc = vec3(0.98 - 0.30*step(0.9, g) - 0.18*step(0.62, n2(p/22.))*step(0.6, g));
+    float bar = step(0.9, h(vec2(floor(p.x/7.), floor(uTime*24.)))) * (1. - smoothstep(380., 520., p.x));
+    bc = mix(bc, vec3(0.04), bar); c = mix(c, bc, uGlitch.y); }
+  // white, then the new shot rises out of it from the bottom (ref 16.10-16.20)
+  if(uGlitch.z > 0.){ float rise = uGlitch.w; float vis = smoothstep(1920. - rise*700., 1920. - rise*700. + 260., p.y);
+    c = mix(vec3(1.), mix(vec3(1.), c, 0.85), vis*rise); }
   // green light leak sliding along the bottom (ref 16.27-16.37)
   if(uLeak.x > 0.){ vec2 d = (p - uLeak.yz)/vec2(uLeak.w*1.6, uLeak.w*0.55); float L = exp(-dot(d,d)*1.6);
     c += vec3(0.05, 1.0, 0.25)*L*uLeak.x*1.4; c = mix(c, vec3(0.5,1.,0.6), clamp(L*uLeak.x-0.6,0.,1.)); }
