@@ -1,0 +1,11 @@
+# Runs beside Moovi on the same box and network; Moovi's Caddy serves it at its own HTTPS address.
+services:
+  metahack:
+    build: { context: /opt/metahack, dockerfile: deploy/Dockerfile }
+    image: metahack:latest
+    restart: unless-stopped
+    env_file: /opt/metahack/.env.local
+    volumes: [ "/opt/metahack-data/jobs:/app/data/jobs", "/opt/metahack-data/stock:/app/data/stock", "/opt/metahack-data/cache:/root/.cache" ]
+    networks: [ moovi_default ]
+networks:
+  moovi_default: { external: true }

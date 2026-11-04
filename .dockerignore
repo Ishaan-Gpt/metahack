@@ -1,0 +1,15 @@
+**/node_modules
+web/.next*
+data/clips
+data/jobs
+data/demo
+data/stock
+data/grabs
+data/refs
+data/serve
+recreate
+import
+refs
+out
+.env.local
+.git
