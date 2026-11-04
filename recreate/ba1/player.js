@@ -59,6 +59,8 @@ vec3 grade(vec3 c){ // the reference's measured before→after transfer, softene
   g *= vec3(1.0+0.03*uGrade, 1.0, 1.0-0.06*uGrade);
   return clamp(g,0.0,1.0); }
 vec2 inMaster(vec2 p){ return (p - uO)/uM; }
+// the pre-blurred matte (gaussian 3.5 px at half res, baked by pack.mjs into the bottom-right quarter): a smooth rim line
+float matteSoft(vec2 q){ if(q.x<0.||q.y<0.||q.x>=1800.||q.y>=2160.) return 0.; return texture(tVid, vec2((1800.+q.x*0.5)/2700., (1080.+q.y*0.5)/2160.)).r; }
 float matteAt(vec2 q){ if(q.x<0.||q.y<0.||q.x>=1800.||q.y>=2160.) return 0.; return texture(tVid, vec2((1800.+q.x*0.5)/2700., q.y*0.5/2160.)).r; }
 void main(){
   vec2 p = vec2(uv.x*1080., (1.-uv.y)*1920.);
@@ -71,6 +73,7 @@ void main(){
   float l = lum(g);
   vec3 bg = mix(vec3(l), g, uBgSat);
   bg = (bg - 0.5)*uBgCon + 0.5; bg = max(bg,0.)*uBgBri;
+  if(uBgSat < 0.01) bg = 0.62*(1. - exp(-bg*1.9));   // B&W ground: highlights rolled off (the ref's foliage never clips)
   float tint = texture(tT, vec2(uv.x, 1.-uv.y)).r;
   vec3 red = vec3(clamp(0.58 + (lum(g)-0.12)*uTintGain*0.5, 0.40, 0.95), 0.0, 0.004);   // ref red 152-207 with the wall's texture
   bg = mix(bg, red, tint);
@@ -85,11 +88,11 @@ void main(){
   if(uRim > 0.0){
     float r = uRimW/uM, mx = 0., mg = 0.;
     for(int i=0;i<16;i++){ float an = 6.2831853*float(i)/16.; vec2 d = vec2(cos(an),sin(an));
-      mx = max(mx, matteAt(q + d*r)); mg = max(mg, matteAt(q + d*r*2.6)); }
-    float outside = 1. - smoothstep(0.15, 0.55, matteAt(q));
+      mx = max(mx, matteSoft(q + d*r)); mg = max(mg, matteSoft(q + d*r*2.6)); }
+    float outside = 1. - smoothstep(0.15, 0.55, matteSoft(q));
     float line = smoothstep(0.35, 0.75, mx) * outside;
-    float glow = smoothstep(0.3, 0.8, mg) * outside * 0.22;
-    col = mix(col, vec3(0.93,0.91,0.87), clamp(line*uRim,0.,1.));
+    float glow = smoothstep(0.3, 0.8, mg) * outside * 0.28;
+    col = mix(col, vec3(0.96,0.94,0.90), clamp(line*uRim*1.1,0.,1.));
     col += vec3(0.9,0.88,0.84)*glow*uRim;
   }
   col = mix(col, vec3(lum(col)), uBW);
@@ -134,15 +137,17 @@ void main(){
     float L = clamp((l1+l2*.8+l3*.6)*(0.4+1.4*t), 0., 1.6);
     c = c + vec3(1.0,0.86,0.66)*L; c = mix(c, vec3(1.), smoothstep(0.75, 1., t)*0.7);
   }
-  if(uBand.w > 0.){ float l = lum(c); c = vec3(l)*1.3 + vec3(step(0.82, h(vec2(floor(p.x/9.), 7.)))*0.6); }
+  if(uBand.w > 0.){ float l = lum(c); c = vec3(l)*1.25 + 0.12;
+    c += vec3(0.35)*step(0.7, h(vec2(floor(p.y/5.), 7.)))*0.6; c += vec3(0.8)*exp(-pow((p.x-300.)/70.,2.))*0.7; }
   if(uBurn.y > 0.) c = mix(c, vec3(1.), uBurn.y);
   if(uBurn.z > 0.){ float g = h(p + uTime*91.); c = mix(c, vec3(0.94 - g*0.18), uBurn.z); }
   if(uBurn.w > 0.){ // white band collapsing to a line, black elsewhere, until the void shot shows
     float d = abs(p.y - uBand.x);
     float band = 1. - smoothstep(uBand.y, uBand.y+2., d);
-    c = mix(mix(c, vec3(0.008,0.004,0.01), uBurn.w), vec3(1.), band*uBurn.w);
+    c = mix(c, vec3(1.), band*uBurn.w);
   }
-  if(uBand.z > 0.){ float d = abs(p.y - uBand.x); c = mix(c, vec3(1.), (1.-smoothstep(1.5, 4.5, d))*uBand.z); c += vec3(1.)*exp(-d*d/600.)*0.25*uBand.z; }
+  if(uBand.z > 0.){ float d = abs(p.y - uBand.x); float lft = 1. - smoothstep(0., 1080., p.x)*0.55;   // brighter on the left, as in the ref
+    c = mix(c, mix(vec3(0.78), vec3(1.), 1.-smoothstep(0.,4.,d)), (1.-smoothstep(5., 8., d))*uBand.z*lft); c += vec3(1.)*exp(-d*d/700.)*0.3*uBand.z*lft; }
   // particle dissolve: white grain sweeping in from the left, then specks over the new shot (ref 11.37-11.73)
   if(uPart.y > 0. || uPart.z > 0.){
     float sweep = smoothstep(uPart.x*1.25 - 0.25, uPart.x*1.25, 1. - p.x/1080.);

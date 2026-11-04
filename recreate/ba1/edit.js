@@ -47,7 +47,7 @@ function camera(T) {
     return place(CU.m * k, x, y, a, true);
   }
   if (T < CUT.p4) {
-    const tr = Math.min(8.5, T + 2.18);              // ref void push 7.6 → 8.5
+    const tr = Math.min(8.5, T + 2.05);              // ref void push 7.6 → 8.5 (ref burn 7.23 = our 5.18)
     const [s, rx, ry] = tab(REF_VOID, tr);
     const m = 0.618 * s / 1.2546, fv = [s * 589 + rx, s * 1062 + ry];
     const vc = place(m, fv[0], fv[1], a, false);
@@ -66,22 +66,25 @@ function camera(T) {
 // ---------- background / grade per time ----------
 function look(T) {
   const g = { uBgSat: 1, uBgBri: 1, uBgCon: 1, uVoid: 0, uBW: 0, uSubSat: 1, uRim: 0, uRimW: 6, uTintGain: 3.4, uGrade: 1, uSatAdj: -0.1 };
-  if (T >= CUT.p2 && T < CUT.p3) Object.assign(g, { uBgSat: 0, uBgBri: 0.62, uBgCon: 1.15, uSubSat: 0.82, uRim: 1 });
+  if (T >= CUT.p2 && T < CUT.p3) Object.assign(g, { uBgSat: 0, uBgBri: 1.25, uBgCon: 1.2, uSubSat: 0.82, uRim: 1, uRimW: 9 });
   if (T >= CUT.p3 && T < CUT.p4) g.uVoid = 1 - eio(seg(T, 8.07, 8.42));
   if (T >= CUT.p6 && T < CUT.p7) g.uBW = 1;
   return g;
 }
 
 // ---------- transitions (post uniforms) ----------
-const BURN = 5.03, PART = 10.635, BAR = 10.935, GL = 14.68;
+const BURN = 5.18, PART = 10.635, BAR = 10.935, GL = 14.68;
 function post(T) {
   const p = { uBurn: [0, 0, 0, 0], uBand: [960, 0, 0, 0], uPart: [0, 0, 0, 0], uBar: [0, 0, 0, 0], uGlitch: [0, 0, 0, 0], uLeak: [0, 0, 0, 0], uBlack: 0 };
   const b = T - BURN;                                  // ref 7.23 → 7.633 (blobs, white, glitch frame, noise, band to a line, void)
   if (b >= 0 && b < 0.237) { p.uBurn[0] = clamp(b / 0.17); p.uBurn[1] = eio(seg(b, 0.14, 0.2)); }
   if (b >= 0.237 && b < 0.27) p.uBand[3] = 1;
   if (b >= 0.27 && b < 0.33) p.uBurn[2] = 1;
-  if (b >= 0.33 && b < 0.37) { p.uBurn[3] = 1; p.uBand[1] = lerp(560, 1.5, eo(seg(b, 0.33, 0.37))); }
-  if (b >= 0.37 && b < 0.47) p.uBand[2] = 1 - seg(b, 0.37, 0.47);
+  if (b >= 0.33 && b < 0.355) {                         // white from the top collapses into a line at y 944 over the void
+    const k = seg(b, 0.33, 0.355), top = 0, bot = lerp(1050, 958, eo(k)), y0 = lerp(top, 958, eo(k));
+    p.uBurn[3] = 1; p.uBand[0] = (y0 + bot) / 2; p.uBand[1] = Math.max(1.5, (bot - y0) / 2); }
+  if (b >= 0.355) p.uBand[0] = 958;
+  if (b >= 0.355 && b < 0.47) p.uBand[2] = 1 - seg(b, 0.355, 0.47);
   const q = T - PART;                                  // ref 11.37 → 11.73
   if (q >= 0 && q < 0.36) { p.uPart = [seg(q, 0, 0.16), Math.sin(Math.PI * seg(q, 0.12, 0.36)), q < 0.23 ? eo(seg(q, 0, 0.12)) : 1 - seg(q, 0.23, 0.3), Math.floor(T * 30)]; }
   const r = T - BAR;                                   // ref 11.80 → 11.97
@@ -258,17 +261,17 @@ function draw(T, s, ctx) {
     sub('is', WD.is2 + 0.04, WD.ocean); sub('ocean', WD.ocean + 0.04, 8.07);
     if (vOut > 0) {
       // the number glows up out of the void (ref %94: dim at 7.6, full at 8.4)
-      const kn = eio(seg(T, 5.42, 6.40)), N = L.num;
-      const col = `rgb(${Math.round(lerp(90, 255, kn))},${Math.round(lerp(8, 22, kn))},${Math.round(lerp(6, 14, kn))})`;
-      fx.save(); fx.globalAlpha = vOut;
-      txt(fx, '%70', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,20,10,${0.85 * kn})`, 44 * kn + 4] });
+      const kn = Math.pow(seg(T, 5.55, 6.40), 1.25), N = L.num;   // ref: dim dark red at the void's reveal (7.6), full by 8.4
+      const col = `rgb(${Math.round(lerp(55, 255, kn))},${Math.round(lerp(2, 22, kn))},${Math.round(lerp(2, 14, kn))})`;
+      fx.save(); fx.globalAlpha = vOut * (T < 5.53 ? 0 : 1);
+      txt(fx, '%70', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,20,10,${0.25 + 0.65 * kn})`, 30 + 18 * kn] });
       txt(fx, '%70', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,40,20,${0.5 * kn})`, 14] });
       fx.restore();
       const ko = enter(T, WD.of + 0.06, 0.2);
-      txt(fx, 'OF', { font: F.anton(118), x: 534, y: 668, align: 'center', fill: `rgba(235,20,14,${0.95 * ko * vOut})`, shadow: ['rgba(255,20,10,0.8)', 24] });
+      txt(fx, 'OF', { font: F.anton(118), x: 534, y: 652, align: 'center', fill: `rgba(235,20,14,${0.95 * ko * vOut})`, shadow: ['rgba(255,20,10,0.8)', 24] });
       const ks = enter(T, WD.earths + 0.05, 0.22);
-      txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(240,22,14,${ks * vOut})`, sw: 4, blur: (1 - ks) * 8 });
-      bx.save(); bx.filter = 'blur(10px)'; txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(255,20,10,${0.6 * ks * vOut})`, sw: 7 }); bx.restore();
+      txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(250,28,18,${ks * vOut})`, sw: 5, blur: (1 - ks) * 8 });
+      bx.save(); bx.filter = 'blur(14px)'; txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(255,20,10,${0.95 * ks * vOut})`, sw: 12 }); bx.restore();
     }
     // room back: RECORD (ref MULTIPLE: double-line outline) and "warming" (ref touchpoints: gold script)
     const kr = enter(T, WD.record + 0.08, 0.16), kw = enter(T, WD.warming + 0.08, 0.2);
@@ -328,7 +331,7 @@ const sfx = [
   { t: 0.28, k: 'wshort', gain: 0.22 }, { t: 1.24, k: 'wtight', gain: 0.18 },
   { t: WD.hot + 0.02, k: 'soft', gain: 0.55 }, { t: WD.years + 0.02, k: 'punch', gain: 0.32 },
   { t: CUT.p2 - 0.02, k: 'wtight', gain: 0.25 },
-  { t: BURN + 0.02, k: 'air', gain: 0.5 }, { t: CUT.p3 + 0.02, k: 'punch', gain: 0.35, rate: 0.7 },
+  { t: BURN + 0.02, k: 'air', gain: 0.5 }, { t: BURN + 0.40, k: 'punch', gain: 0.35, rate: 0.7 },
   { t: 8.05, k: 'wshort', gain: 0.3 }, { t: PART + 0.02, k: 'sand', gain: 0.7 }, { t: BAR, k: 'wtight', gain: 0.3 },
   { t: GL, k: 'scratch', gain: 0.4 }, { t: GL + 0.14, k: 'scratch', gain: 0.35, rate: 1.3 }, { t: GL + 0.27, k: 'wshort', gain: 0.4 },
   { t: 19.86, k: 'boom', gain: 0.75 },
