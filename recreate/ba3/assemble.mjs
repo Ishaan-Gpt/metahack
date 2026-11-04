@@ -13,7 +13,7 @@ for (const [i, p] of P.pieces.entries()) {
   for (const [tag, vf] of [['g', `crop=${C.w}:${C.h}:${C.x}:${C.y},scale=1080:1920:flags=lanczos,${P.grade},format=yuv420p`], ['r', `crop=${C.w}:${C.h}:${C.x}:${C.y},scale=1080:1920:flags=lanczos,format=yuv420p`]])
     ff(['-ss', String(p.a), '-i', join(ROOT, P.source), '-t', d.toFixed(3), '-vf', `fps=30000/1001,${vf}`,
       '-af', `asetpts=PTS-STARTPTS,afade=t=in:d=0.012,afade=t=out:st=${(d - 0.012).toFixed(3)}:d=0.012`,
-      '-c:v', 'libx264', '-preset', 'fast', '-crf', '15', '-c:a', 'pcm_s16le', '-ar', '48000', '-ac', '1', join(out, `p${tag}${i}.mkv`)]);
+      '-threads', '2', '-c:v', 'libx264', '-preset', 'fast', '-crf', '15', '-c:a', 'pcm_s16le', '-ar', '48000', '-ac', '1', join(out, `p${tag}${i}.mkv`)]);
   parts.push({ ...p, i, at: +t.toFixed(3), dur: +d.toFixed(3) }); t += d;
 }
 for (const [tag, name] of [['g', 'aroll.mp4'], ['r', 'before.mp4']]) {
