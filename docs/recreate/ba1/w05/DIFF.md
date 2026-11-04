@@ -16,3 +16,8 @@ Round 2, remaining:
 9. Our close-up is shorter (1.76 s vs 3.95 s), so blocks change every 0.3-0.6 s instead of ~1.3 s (our words).
 10. Room return: our face moves up ~450 px during the 0.38 s fade (the reference's moves ~220 px), because our wide
     shots must cover the frame from a source with no headroom (window 00 DIFF 1).
+
+Blind judge round 1 (ref 8.5 / ours 5.5, 85%): "numbers" clipped at the right edge, OF colliding with the number,
+burn a flat cream wash, an extra caption before the number. FIXED after: block A sized to end at x 1000, OF a mid-size
+red outline in the gap, the burn blooms the frame's own highlights, no captions before the number. Remaining: our
+close-up ground is the dark studio (the reference keeps a lit room), matte edge at the crown.

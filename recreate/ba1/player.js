@@ -13,7 +13,7 @@ const $ = id => document.getElementById(id), status = s => ($('status').textCont
 window.__ready = false;
 
 // ---------- fit the stage ----------
-function fit() { const k = Math.min(innerWidth / W, (innerHeight - 24) / H); const s = $('stage'); s.style.transform = `scale(${k})`; s.style.width = W + 'px'; s.parentElement.style.width = W * k + 'px'; s.parentElement.style.height = H * k + 'px'; $('wrap').style.display = 'grid'; }
+function fit() { const k = Math.min(innerWidth / W, (innerHeight - (Q.has('embed') ? 0 : 24)) / H); const s = $('stage'); s.style.transform = `scale(${k})`; s.style.width = W + 'px'; s.parentElement.style.width = W * k + 'px'; s.parentElement.style.height = H * k + 'px'; $('wrap').style.display = 'grid'; }
 addEventListener('resize', fit); fit();
 
 // ---------- load everything behind the gate ----------
@@ -39,7 +39,7 @@ await Promise.all([loadBuf('voice', CLIP + 'voice.m4a'), ...Object.entries(EDIT.
 BUF.boom = synthBoom(); BUF.sand = synthSand();
 
 // ---------- WebGL compositor ----------
-const out = $('out'), gl = out.getContext('webgl2', { preserveDrawingBuffer: true, premultipliedAlpha: false, antialias: false });
+const out = $('out'), gl = out.getContext('webgl2', { preserveDrawingBuffer: Q.has('grab'), desynchronized: true, premultipliedAlpha: false, antialias: false });
 const mk2d = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; };
 const [CB, bx] = mk2d(W, H), [CF, fx] = mk2d(W, H), [CT, tx] = mk2d(W / 2, H / 2);   // behind, front, tint (half res)
 const VS = `#version 300 es
@@ -135,7 +135,8 @@ void main(){
     float r1 = mix(60., 900., t), r2 = mix(40., 700., t*t), r3 = mix(10., 600., max(t-.3,0.)/.7);
     float l1 = exp(-pow(length(p-c1)/r1, 2.)), l2 = exp(-pow(length(p-c2)/r2, 2.)), l3 = exp(-pow(length(p-c3)/r3,2.));
     float L = clamp((l1+l2*.8+l3*.6)*(0.4+1.4*t), 0., 1.6);
-    c = c + vec3(1.0,0.86,0.66)*L; c = mix(c, vec3(1.), smoothstep(0.75, 1., t)*0.7);
+    float hl = smoothstep(0.25, 0.7, lum(c));
+    c = c + vec3(1.0,0.86,0.66)*L*(0.45 + 1.8*hl) + vec3(1.,0.9,0.75)*hl*t*0.9; c = mix(c, vec3(1.), smoothstep(0.75, 1., t)*0.7);
   }
   if(uBand.w > 0.){ float l = lum(c); c = vec3(l)*1.25 + 0.12;
     c += vec3(0.35)*step(0.7, h(vec2(floor(p.y/5.), 7.)))*0.6; c += vec3(0.8)*exp(-pow((p.x-300.)/70.,2.))*0.7; }
@@ -166,12 +167,13 @@ void main(){
   // white grain with a few black bars on the left (ref 15.97-16.07)
   if(uGlitch.y > 0.){ float g = h(floor(p/2.) + floor(uTime*30.)); vec3 bc = vec3(0.98 - 0.30*step(0.9, g) - 0.18*step(0.62, n2(p/22.))*step(0.6, g));
     float bar = step(0.9, h(vec2(floor(p.x/7.), floor(uTime*24.)))) * (1. - smoothstep(380., 520., p.x));
-    bc = mix(bc, vec3(0.04), bar); c = mix(c, bc, uGlitch.y); }
+    bc = mix(bc, vec3(0.04), bar); bc = mix(bc, c*0.5 + 0.55, 0.32*step(0.5, n2(p/vec2(60., 9.) + uTime*7.)));
+    c = mix(c, bc, uGlitch.y * (1. - 0.45*smoothstep(900., 1080., p.x))); }
   // white, then the new shot rises out of it from the bottom (ref 16.10-16.20)
   if(uGlitch.z > 0.){ float rise = uGlitch.w; float vis = smoothstep(1920. - rise*700., 1920. - rise*700. + 260., p.y);
     c = mix(vec3(1.), mix(vec3(1.), c, 0.85), vis*rise); }
   // green light leak sliding along the bottom (ref 16.27-16.37)
-  if(uLeak.x > 0.){ vec2 d = (p - uLeak.yz)/vec2(uLeak.w*1.6, uLeak.w*0.55); float L = exp(-dot(d,d)*1.6);
+  if(uLeak.x > 0.){ vec2 d = (p - uLeak.yz)/vec2(uLeak.w*1.5, uLeak.w*0.42); float L = exp(-dot(d,d)*1.6) * (0.75 + 0.5*n2(vec2(p.x/90., p.y/6.)));
     c += vec3(0.05, 1.0, 0.25)*L*uLeak.x*1.4; c = mix(c, vec3(0.5,1.,0.6), clamp(L*uLeak.x-0.6,0.,1.)); }
   c = mix(c, vec3(0.008,0.004,0.01), uBlack);
   o = vec4(clamp(c,0.,1.),1.);
@@ -191,15 +193,23 @@ const um = U(PM), up = U(PP);
 function upload(t, src) { gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src); }
 
 // ---------- draw one frame at time T ----------
-const ctx = { W, H, bx, fx, tx, brand: (Q.get('brand') || BRAND).toUpperCase() };
+// layers report whether anything was drawn this frame: an empty layer that was empty last frame is not re-uploaded
+const DIRTY = { b: false, f: false, t: false }, WAS = { b: true, f: true, t: true };
+const track = (c, k) => new Proxy(c, { get(o, p) { const v = o[p]; return typeof v === 'function' ? (...a) => { if (p !== 'clearRect' && p !== 'save' && p !== 'restore' && p !== 'measureText') DIRTY[k] = true; return v.apply(o, a); } : v; }, set(o, p, v) { o[p] = v; return true; } });
+const ctx = { W, H, bx: track(bx, 'b'), fx: track(fx, 'f'), tx: track(tx, 't'), brand: (Q.get('brand') || BRAND).toUpperCase() };
 EDIT.prepare(ctx);
+const PROF = { n: 0, draw: 0, up: 0, gl: 0 }; window.__prof = () => ({ n: PROF.n, draw: +(PROF.draw / PROF.n).toFixed(2), up: +(PROF.up / PROF.n).toFixed(2), gl: +(PROF.gl / PROF.n).toFixed(2) });
+let vNew = true; const onVF = () => { vNew = true; video.requestVideoFrameCallback?.(onVF); }; video.requestVideoFrameCallback?.(onVF);
 function frame(T) {
+  const t0 = performance.now();
   const s = EDIT.state(T);                      // camera + background + post uniforms for this time
-  for (const c of [bx, fx]) c.clearRect(0, 0, W, H);
-  tx.clearRect(0, 0, W / 2, H / 2);
+  if (WAS.b) bx.clearRect(0, 0, W, H); if (WAS.f) fx.clearRect(0, 0, W, H); if (WAS.t) tx.clearRect(0, 0, W / 2, H / 2);
+  DIRTY.b = DIRTY.f = DIRTY.t = false;
   EDIT.draw(T, s, ctx);                         // text, lines, blocks, fall-off, logo
-  if (T < VDUR && video.readyState >= 2) upload(TV, video);
-  upload(TB, CB); upload(TF, CF); upload(TT, CT);
+  const t1 = performance.now();
+  if (!Q.has('novideo') && T < VDUR && video.readyState >= 2 && (vNew || !playing)) { upload(TV, video); vNew = false; }   // only a new decoded frame
+  for (const [k, t, c] of [['b', TB, CB], ['f', TF, CF], ['t', TT, CT]]) { if (DIRTY[k] || WAS[k]) upload(t, c); WAS[k] = DIRTY[k]; }
+  const t2 = performance.now();
   gl.viewport(0, 0, W, H);
   gl.bindFramebuffer(gl.FRAMEBUFFER, FB); gl.useProgram(PM);
   [[TV, 'tVid'], [TB, 'tB'], [TF, 'tF'], [TT, 'tT']].forEach(([t, n], i) => { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, t); gl.uniform1i(um[n], i); });
@@ -214,6 +224,8 @@ function frame(T) {
   for (const k of ['uBurn', 'uBand', 'uPart', 'uBar', 'uGlitch', 'uLeak']) gl.uniform4fv(up[k], s.p[k]);
   gl.uniform1f(up.uBlack, s.p.uBlack);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  if (Q.has('prof')) gl.finish();
+  PROF.n++; PROF.draw += t1 - t0; PROF.up += t2 - t1; PROF.gl += performance.now() - t2;
   $('bar').firstElementChild.style.width = (100 * T / EDIT.duration) + '%';
 }
 
@@ -260,7 +272,7 @@ window.__seek = async t => {
   }
   frame(t); return true;
 };
-window.__play = play; window.__T = () => T; window.__edit = EDIT;
+window.__play = play; window.__T = () => T; window.__edit = EDIT; window.__mute = m => { master.gain.value = m ? 0 : 1; }; window.__vt = () => video.currentTime;
 $('bar').onclick = e => { const r = $('bar').getBoundingClientRect(); const was = playing; pause(); T = (e.clientX - r.left) / r.width * EDIT.duration; window.__seek(T).then(() => was && play()); };
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); } });
 $('stage').onclick = () => (playing ? pause() : play());
@@ -268,6 +280,7 @@ $('stage').onclick = () => (playing ? pause() : play());
 await window.__seek(T);
 status('Ready: press play');
 $('gate').classList.add('ready');
+if (Q.has('embed')) { $('gate').style.display = 'none'; $('bar').style.display = 'none'; }
 $('gate').onclick = () => { $('gate').style.display = 'none'; play(); };
 window.__ready = true;
 

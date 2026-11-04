@@ -92,14 +92,14 @@ function post(T) {
   const g = T - GL;                                    // ref 15.83 → 16.20
   if (g >= 0 && g < 0.40) { p.uGlitch = [g < 0.12 ? 1 : 0, g >= 0.14 && g < 0.27 ? 1 : 0, g >= 0.27 ? 1 : 0, g >= 0.30 ? seg(g, 0.30, 0.40) : 0]; }
   const l = T - 15.25;                                 // green leak, ref 16.23 → 16.40 (0.03 s after the new shot clears the white)
-  if (l >= 0 && l < 0.17) p.uLeak = [Math.sin(Math.PI * seg(l, 0, 0.17)), lerp(1060, 820, eo(seg(l, 0, 0.17))), 1575, 230];
+  if (l >= 0 && l < 0.17) p.uLeak = [Math.sin(Math.PI * seg(l, 0, 0.17)), lerp(1080, 900, eo(seg(l, 0, 0.17))), 1585, 210];
   return p;
 }
 
 // ---------- drawing helpers ----------
 const F = {
   script: s => `400 ${s}px Courgette`, xb: s => `800 ${s}px Poppins`, b: s => `700 ${s}px Poppins`, sb: s => `600 ${s}px Poppins`,
-  l: s => `300 ${s}px Poppins`, xl: s => `200 ${s}px Poppins`, hand: s => `400 ${s}px Kalam`, anton: s => `400 ${s}px Anton`, it: s => `700 ${s}px InterTight`, it6: s => `600 ${s}px InterTight`,
+  l: s => `300 ${s}px Poppins`, r: s => `400 ${s}px Poppins`, xl: s => `200 ${s}px Poppins`, hand: s => `400 ${s}px Kalam`, anton: s => `400 ${s}px Anton`, it: s => `700 ${s}px InterTight`, it6: s => `600 ${s}px InterTight`,
   lob: s => `400 ${s}px Lobster`,
 };
 let MC;                                                // a measuring context
@@ -156,16 +156,16 @@ function prepare(ctx) {
 }
 
 // the logo: the brand word with a red dot standing in for its second letter (the reference's device)
-function logo(c, brand, cx, base, scale, alpha) {
+function logo(c, brand, cx, base, scale, alpha, ink = '#fbf8f4') {
   if (alpha <= 0) return;
   const size = sizeForCap(F.b, 40 * scale), font = F.b(size), cap = 40 * scale;
   const first = brand[0], rest = brand.slice(2), gap = cap * 0.08;
   const w1 = widthOf(first, font), dot = cap * 1.04, w2 = widthOf(rest, font), w = w1 + gap + dot + gap + w2;
   let x = cx - w / 2;
-  c.save(); c.globalAlpha = alpha; c.font = font; c.fillStyle = '#fbf8f4'; c.textBaseline = 'alphabetic';
+  c.save(); c.globalAlpha *= alpha; c.font = font; c.fillStyle = ink; c.textBaseline = 'alphabetic';
   c.fillText(first, x, base); x += w1 + gap;
   c.fillStyle = '#e81e19'; c.beginPath(); c.arc(x + dot / 2, base - cap / 2, dot / 2, 0, Math.PI * 2); c.fill(); x += dot + gap;
-  c.fillStyle = '#fbf8f4'; c.fillText(rest, x, base); c.restore();
+  c.fillStyle = ink; c.fillText(rest, x, base); c.restore();
 }
 
 // ---------- the frame ----------
@@ -222,7 +222,7 @@ function draw(T, s, ctx) {
         if (word === 'YEARS' && !showYears) continue;
         const a = fade(t0);
         tx.save(); tx.scale(0.5, 0.5);
-        txt(tx, word, { font: P.font, x: x0, y: Y, sy: P.sy, fill: '#0000ff', dx: -9, dy: 10, alpha: a });   // the dark offset shadow (blue channel)
+        for (let k = 2; k <= 12; k += 2) txt(tx, word, { font: P.font, x: x0, y: Y, sy: P.sy, fill: '#0000ff', dx: -k * 0.9, dy: k, alpha: a });   // stepped extrusion (blue channel = darken)
         txt(tx, word, { font: P.font, x: x0, y: Y, sy: P.sy, fill: '#00ff00', alpha: a }); tx.restore();
       }
     }
@@ -233,12 +233,13 @@ function draw(T, s, ctx) {
     bx.save(); for (const [x, y, r, ph] of dust) { const yy = y - 30 * (T - CUT.p2) - 8 * Math.sin(T * 2 + ph * 6); const g = bx.createRadialGradient(x, yy, 0, x, yy, r * 2); g.addColorStop(0, 'rgba(255,255,255,0.9)'); g.addColorStop(1, 'rgba(255,255,255,0)'); bx.fillStyle = g; bx.beginPath(); bx.arc(x, yy, r * 2, 0, 7); bx.fill(); } bx.restore();
     const FA = 3.75, FB = 4.38, FC = 4.68;
     const aOut = 1 - seg(T, FB - 0.08, FB), bOut = 1 - seg(T, FC - 0.06, FC);
+    const aSize = Math.min(145, sizeForWidth(F.it, 'numbers', 1000 - 492));
     const w = (c, t, x, y, t0, fill, font = F.it(145)) => { const k = enter(T, t0, 0.12); txt(c, t, { font, x, y, fill, alpha: k, blur: (1 - k) * 6, dx: -30 * (1 - k) }); };
     if (aOut > 0) {
       fx.save(); fx.globalAlpha = aOut;
-      w(fx, 'these', 492, 594, FA, '#ffffff'); w(fx, 'numbers', 492, 659, WD.numbers + 0.1, '#ffffff');
+      w(fx, 'these', 492, 594, FA, '#ffffff', F.it(aSize)); w(fx, 'numbers', 492, 659, WD.numbers + 0.1, '#ffffff', F.it(aSize));
       fx.restore();
-      bx.save(); bx.globalAlpha = aOut; w(bx, 'look', 470, 724, WD.look + 0.1, '#8d8d8d'); bx.restore();
+      bx.save(); bx.globalAlpha = aOut; w(bx, 'look', 470, 724, WD.look + 0.1, '#8d8d8d', F.it(aSize)); bx.restore();
       const lk = eo(seg(T, FA, FA + 0.3)); line(fx, 470, 771, 1080, 771, lk, 0.55 * aOut); line(fx, 756, 120, 756, 1080, lk, 0.4 * aOut);
     }
     if (T >= FB && bOut > 0) {
@@ -256,7 +257,6 @@ function draw(T, s, ctx) {
   if (T >= CUT.p3 && T < CUT.p4) {
     const vOut = 1 - seg(T, 8.07, 8.42);
     const sub = (t, t0, t1) => { if (T < t0 || T >= t1) return; const k = enter(T, t0, 0.08); txt(fx, t, { font: F.sb(62), x: 540, y: 1345, align: 'center', fill: '#ffffff', alpha: k, blur: (1 - k) * 4, shadow: ['rgba(0,0,0,0.5)', 8, 0, 2] }); };
-    sub('more', WD.More, WD.than); sub('than', WD.than, WD.p70 + 0.05);
     sub('is', WD.is2 + 0.04, WD.ocean); sub('ocean', WD.ocean + 0.04, 8.07);
     if (vOut > 0) {
       // the number glows up out of the void (ref %94: dim at 7.6, full at 8.4)
@@ -267,7 +267,7 @@ function draw(T, s, ctx) {
       txt(fx, '%70', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,40,20,${0.5 * kn})`, 14] });
       fx.restore();
       const ko = enter(T, WD.of + 0.06, 0.2);
-      txt(fx, 'OF', { font: F.anton(118), x: 534, y: 652, align: 'center', fill: `rgba(235,20,14,${0.95 * ko * vOut})`, shadow: ['rgba(255,20,10,0.8)', 24] });
+      txt(fx, 'OF', { font: F.anton(96), sy: 1.3, x: 534, y: 708, align: 'center', fill: `rgba(120,6,4,${0.75 * ko * vOut})`, stroke: `rgba(250,30,18,${ko * vOut})`, sw: 3.5, shadow: ['rgba(255,20,10,0.8)', 22] });
       const ks = enter(T, WD.earths + 0.05, 0.22);
       txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(250,28,18,${ks * vOut})`, sw: 5, blur: (1 - ks) * 8 });
       bx.save(); bx.filter = 'blur(14px)'; txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(255,20,10,${0.95 * ks * vOut})`, sw: 12 }); bx.restore();
@@ -285,9 +285,9 @@ function draw(T, s, ctx) {
     const out = 1 - seg(T, 13.62, 13.76), sh = ['rgba(0,0,0,0.45)', 10, 0, 3];
     const k1 = enter(T, 10.95), k2 = enter(T, WD.heat + 0.12), k3 = enter(T, WD.and3 + 0.08), k4 = enter(T, WD.carbon + 0.1);
     txt(fx, 'so they absorb', { font: F.sb(100), x: 151, y: 1145, fill: '#ffffff', alpha: k1 * out, blur: (1 - k1) * 6, dy: 10 * (1 - k1), shadow: sh });
-    txt(fx, 'HEAT', { font: F.sb(sizeForCap(F.sb, 123)), x: 248, y: 1274, stroke: '#d79d63', sw: 3.2, alpha: k2 * out, blur: (1 - k2) * 6, dy: 10 * (1 - k2) });
+    txt(fx, 'HEAT', { font: F.sb(sizeForCap(F.sb, 123)), x: 248, y: 1284, fill: 'rgba(38,24,14,0.55)', shadow: ['rgba(0,0,0,0.45)', 10, 0, 3], stroke: '#d79d63', sw: 3.2, alpha: k2 * out, blur: (1 - k2) * 6, dy: 10 * (1 - k2) });
     txt(fx, 'and', { font: F.xl(100), x: 400 - 260, y: 1352, fill: '#ffffff', alpha: k3 * out, blur: (1 - k3) * 6 });
-    txt(fx, 'carbon dioxide', { font: F.sb(95), x: 312, y: 1352, fill: '#2e9aa3', alpha: k4 * out, blur: (1 - k4) * 6, shadow: ['rgba(0,0,0,0.35)', 8] });
+    txt(fx, 'carbon dioxide', { font: F.sb(86), x: 312, y: 1352, fill: '#2e9aa3', alpha: k4 * out, blur: (1 - k4) * 6, shadow: ['rgba(0,0,0,0.35)', 8] });
   }
   // ===== B4b (13.765 → 15.015): top-left stack, caps + outlined scripts =====
   if (T >= CUT.p5 && T < CUT.p6) {
@@ -303,7 +303,7 @@ function draw(T, s, ctx) {
   if (T >= CUT.p6 && T < CUT.end) {
     for (const list of [SUBS_A, SUBS_B]) for (let i = 0; i < list.length - 1; i++) {
       const [w, t0] = list[i], t1 = list[i + 1][1];
-      if (T >= t0 && T < t1) { const k = enter(T, t0, 0.06); txt(fx, w, { font: F.l(58), x: 540, y: 1300, align: 'center', fill: 'rgba(255,255,255,0.9)', alpha: k, shadow: ['rgba(0,0,0,0.45)', 6, 0, 1] }); }
+      if (T >= t0 && T < t1) { const k = enter(T, t0, 0.06); txt(fx, w, { font: F.r(60), x: 540, y: 1300, align: 'center', fill: 'rgba(255,255,255,0.96)', alpha: k, shadow: ['rgba(0,0,0,0.45)', 6, 0, 1] }); }
     }
   }
   // ===== frame: bottom fall-off to black and the logo bug (ref y 1280 → 1600), then the end card =====
@@ -316,7 +316,7 @@ function draw(T, s, ctx) {
   } else {
     fx.fillStyle = 'rgb(3,1,4)'; fx.fillRect(0, 0, W, H);   // the cut to black (ref 20.0), then the logo card
     const a = eio(seg(T, 20.07, 20.82)) * (1 - eio(seg(T, 22.17, 22.57)));
-    logo(fx, ctx.brand, 540, 1044, 2.61, a);
+    fx.save(); fx.filter = `blur(${(10 * (1 - eio(seg(T, 20.07, 20.82)))).toFixed(1)}px)`; logo(fx, ctx.brand, 540, 1044, 2.61, a, '#ecebe8'); fx.restore();
   }
 }
 // paint something under what the front canvas already holds

@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const kv = Object.fromEntries(process.argv.slice(2).map(a => a.split(/=(.*)/s).slice(0, 2)));
-const url = kv.url ?? 'http://127.0.0.1:4700/recreate/ba1/index.html?mute=1', outDir = resolve(kv.out ?? 'data/grabs/ba1');
+const url = kv.url ?? 'http://127.0.0.1:4700/recreate/ba1/index.html?mute=1&grab=1', outDir = resolve(kv.out ?? 'data/grabs/ba1');
 const times = (kv.times ?? '1').split(',').map(Number);
 mkdirSync(outDir, { recursive: true });
 const req = createRequire(resolve('C:/Ishaan GPT/hackthons/moovi/package.json'));

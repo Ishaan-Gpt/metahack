@@ -17,3 +17,6 @@ Round 1 (sheets: data/grabs/ba1, pairs ref:ours 0.05:0.05, 0.6:0.6, 1.3:1.05, 1.
    reference's shape, but the colours under it are the footage's.
 
 Round 2 (after fixes): 3, 4, 5 match; 1, 2, 6, 7, 8 remain (footage).
+
+Blind judge round 1 (ref 8 / ours 6, original picked at 80%): flat red tiles over our black TV (footage), punch with no
+extrusion and not behind the head. After: the punch has a stepped dark extrusion; position stays (footage).

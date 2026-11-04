@@ -13,3 +13,6 @@ Remaining:
    but its letterforms differ (closest OFL match found; the reference's script is not identified).
 7. Our words: "so they absorb" is 3 words where "Organic" is one, so the first line is longer (x 151-870).
 8. The cut at 13.765 is a jump cut (the reference's take is continuous through its push).
+
+Blind judge round 1 (ref 8 / ours 7, 70%): HEAT touching the line above with no fill, "carbon dioxide" near the edge,
+"not" low contrast. FIXED after: HEAT has the reference's dark fill and shadow and 10 px more room; carbon dioxide 86 px.

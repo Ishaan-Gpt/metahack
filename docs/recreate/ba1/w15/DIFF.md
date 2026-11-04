@@ -7,3 +7,7 @@ Round 1 (pairs 15.88:14.9, 16.03:15.03, 16.15:15.15, 16.3:15.3, 17.0:16.2, 18.5:
 Remaining:
 5. Our words come 2x faster here (10 words in 2.3 s vs 5 in 2.1 s), so subtitles change every ~0.23 s.
 6. Framing: face larger and higher (footage). In B&W the reference's background is lighter grey.
+
+Blind judge round 1 (ref 8.5 / ours 5.5, 90%): glitch read as flat procedural noise, leak a flat ellipse, captions thin
+and grey. FIXED after: the footage bleeds through the grain, leak streaky and longer, bottom-right only; captions
+Poppins Regular 60 at 96% white.
