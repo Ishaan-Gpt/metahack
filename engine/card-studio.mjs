@@ -1,4 +1,6 @@
-// Card Studio director: transcript + face track -> spec.card.json, by plain rules (no model, no credits).
+// Card Studio director: transcript + face track -> spec.card.json. The rule director tiles the timeline; then ONE Muse
+// Spark call (engine/meta.mjs, required MODEL_API_KEY, cached) picks per segment the layout, hero word, icons, stock
+// searches and transition. Rules still enforce every budget on the model's picks; render, timing and zoom stay code.
 // usage: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge "Meta AI"] [--handle "@me"] [--cta1 ..] [--cta2 ..] [--kw WORD] [--no-stock] [--no-music]
 // Decides, per sentence: face card (with a jump zoom at sentence boundaries), keyword graphic card (face hidden),
 // split (stock image on top, face below), bullet list over the face, or a big-text post card for numbers.
@@ -7,6 +9,13 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { ROOT, loadEnv } from './env.mjs';
 import { fetchStock } from './stock.mjs';
+import { metaPlan, requireMetaKey, resetUsage, usageSummary } from './meta.mjs';
+
+// what the model may choose from (the theme's own names; the player draws exactly these)
+export const LAYOUTS = ['face', 'graphic', 'split', 'list', 'post', 'wide', 'orbit', 'topsquare'];
+export const ICONS = ['ig', 'yt', 'tt', 'fb', 'x', 'heart', 'play', 'chat', 'bell', 'cash', 'chart', 'camera'];
+export const TRANSITIONS = ['cut', 'wash', 'wipe', 'pop'];
+const BROLL = new Set(['graphic', 'split', 'wide', 'post', 'orbit']);
 
 const STOP = new Set(`a an the and or but so to of in on at for with from by is are was were be been being am i you he she it we they me
 my your our their his her its this that these those there here then than just only not no do does did done doing have has had having will
@@ -93,6 +102,29 @@ export function chunks(words, R) {
   });
 }
 
+/** List items in a sentence ("a magazine, a billboard" / "X, Y and Z"), plain rules. */
+export function listItems(ws) {
+  const commas = ws.filter((w, j) => /,/.test(w.p ?? '') && j < ws.length - 1).length;
+  // lists: "a magazine, a billboard" / "X, Y and Z": a comma followed by the same determiner, or 2+ commas of short parts
+  const DET = /^(a|an|the|your|my|our|their|his|her)$/i;
+  let items = [];
+  for (let j = 0; j < ws.length - 1; j++) {
+    if (!/,/.test(ws[j].p ?? '') || !DET.test(ws[j + 1].word)) continue;
+    const d0 = [j - 1, j - 2, j - 3].find(m => m >= 0 && ws[m].word.toLowerCase() === ws[j + 1].word.toLowerCase());
+    if (d0 == null) continue;
+    const first = ws.slice(d0 + 1, j + 1).filter(w => !STOP.has(clean(w.word)));
+    const nxt = []; for (let m = j + 2; m < Math.min(ws.length, j + 5); m++) { if (STOP.has(clean(ws[m].word)) && nxt.length) break; if (!STOP.has(clean(ws[m].word))) nxt.push(ws[m]); if (/[,.]/.test(ws[m].p ?? '')) break; }
+    if (first.length && nxt.length) { if (!items.length) items.push({ text: first.map(w => w.word).join(' '), t: ws[d0].t }); items.push({ text: nxt.map(w => w.word).join(' '), t: ws[j + 1].t }); }
+  }
+  if (!items.length && commas >= 2) {
+    const parts = []; let cur = [];
+    for (const w of ws) { cur.push(w); if (/,/.test(w.p ?? '')) { parts.push(cur); cur = []; } }
+    if (cur.length) parts.push(cur);
+    if (parts.every(p => p.length <= 4)) items = parts.map(p => { const c = p.filter(w => !STOP.has(clean(w.word))); return { text: c.map(w => w.word).join(' '), t: p[0].t }; }).filter(x => x.text.length > 1).slice(0, 4);
+  }
+  return items;
+}
+
 function phraseAround(ws, j) {
   // "social media": take the content word before the keyword when it is adjacent and not a stop word
   const a = ws[j - 1], c = ws[j];
@@ -105,11 +137,15 @@ function phraseAround(ws, j) {
 
 export async function direct(dir, opts = {}) {
   loadEnv();
+  if (!opts.noModel) requireMetaKey();
   const T = JSON.parse(readFileSync(join(ROOT, 'engine/templates/card-studio.json'), 'utf8'));
-  const R = T.rules, M = T.motion;
+  const R = { ...T.rules }, M = T.motion;
   const words = JSON.parse(readFileSync(join(dir, 'words.json'), 'utf8'));
   const cut = JSON.parse(readFileSync(join(dir, 'cut.json'), 'utf8'));
   const D = cut.duration;
+  // short clips (< 20 s): shorter holds so all 8 edit types still fit with a change every 2-3 s
+  const SHORT = D < 20, MINHOLD = SHORT ? 1.2 : 1.35, TARGET = SHORT ? 2.1 : 2.6;
+  if (SHORT) Object.assign(R, { graphicMin: 1.1, splitMin: 1.3, bigtextMin: 1.2, graphicMax: 2.0, splitMax: 3.0, bigtextMax: 2.4 });
   // face track: OpenCV pass on the edit's picture (or the browser bake's faces.json when it exists)
   const facesPath = join(dir, 'faces.cv.json');
   if (!existsSync(facesPath)) {
@@ -171,23 +207,7 @@ export async function direct(dir, opts = {}) {
       const a = ti === 0 ? s.t0 : Math.max(s.t0, ws[ti].t - 0.1);
       cands.push({ type: 'topsquare', s, score: 4.8, t0: a, t1: Math.min(s.t1, a + 3.5) });
     }
-    // lists: "a magazine, a billboard" / "X, Y and Z": a comma followed by the same determiner, or 2+ commas of short parts
-    const DET = /^(a|an|the|your|my|our|their|his|her)$/i;
-    let items = [];
-    for (let j = 0; j < ws.length - 1; j++) {
-      if (!/,/.test(ws[j].p ?? '') || !DET.test(ws[j + 1].word)) continue;
-      const d0 = [j - 1, j - 2, j - 3].find(m => m >= 0 && ws[m].word.toLowerCase() === ws[j + 1].word.toLowerCase());
-      if (d0 == null) continue;
-      const first = ws.slice(d0 + 1, j + 1).filter(w => !STOP.has(clean(w.word)));
-      const nxt = []; for (let m = j + 2; m < Math.min(ws.length, j + 5); m++) { if (STOP.has(clean(ws[m].word)) && nxt.length) break; if (!STOP.has(clean(ws[m].word))) nxt.push(ws[m]); if (/[,.]/.test(ws[m].p ?? '')) break; }
-      if (first.length && nxt.length) { if (!items.length) items.push({ text: first.map(w => w.word).join(' '), t: ws[d0].t }); items.push({ text: nxt.map(w => w.word).join(' '), t: ws[j + 1].t }); }
-    }
-    if (!items.length && commas >= 2) {
-      const parts = []; let cur = [];
-      for (const w of ws) { cur.push(w); if (/,/.test(w.p ?? '')) { parts.push(cur); cur = []; } }
-      if (cur.length) parts.push(cur);
-      if (parts.every(p => p.length <= 4)) items = parts.map(p => { const c = p.filter(w => !STOP.has(clean(w.word))); return { text: c.map(w => w.word).join(' '), t: p[0].t }; }).filter(x => x.text.length > 1).slice(0, 4);
-    }
+    const items = listItems(ws);
     if (items.length >= 2) {
       const a = Math.max(s.t0, items[0].t - 0.6);
       cands.push({ type: 'list', s, score: 7, t0: s.t0, t1: s.t1, items: items.slice(0, 4) });
@@ -274,6 +294,221 @@ export async function direct(dir, opts = {}) {
       segs.splice(i, 1); i--;
     }
   }
+  // ---- cadence: a change every 2 to 3 s like the reference. Face segments longer than ~1.4 x TARGET are cut at word
+  // boundaries into pieces of about TARGET s (each piece gets the next zoom level = a jump zoom). Plain code. ----
+  {
+    const out = [];
+    for (const g of segs) {
+      const len = g.t1 - g.t0;
+      if (g.type !== 'face' || len <= TARGET * 1.2) { out.push(g); continue; }
+      const n = Math.max(2, Math.round(len / TARGET));
+      const starts = words.map(w => w.t).filter(t => t > g.t0 + MINHOLD * 0.8 && t < g.t1 - MINHOLD * 0.8);
+      const cuts = [g.t0];
+      for (let k = 1; k < n; k++) {
+        const ideal = g.t0 + (len * k) / n;
+        const c = starts.filter(t => t - cuts.at(-1) >= MINHOLD && g.t1 - t >= MINHOLD).sort((x, y) => Math.abs(x - ideal) - Math.abs(y - ideal))[0];
+        if (c != null) cuts.push(c);
+      }
+      cuts.push(g.t1);
+      for (let k = 0; k + 1 < cuts.length; k++) out.push({ ...g, t0: +cuts[k].toFixed(3), t1: +cuts[k + 1].toFixed(3), face: faceAt(cuts[k], cuts[k + 1]) });
+    }
+    segs.length = 0; segs.push(...out);
+  }
+  // ---- Meta call 2 of 2: ONE Muse Spark plan over the rule director's segments (cached; one attempt, no retries) ----
+  const wordsIn = (a, b) => words.filter(w => w.t >= a - 1e-3 && w.t < b - 1e-3);
+  const asFace = (g, a = g.t0, b = g.t1) => ({ type: 'face', t0: +a.toFixed(3), t1: +b.toFixed(3), zoom: g.type === 'face' && g.zoom ? g.zoom : [M.zoomLevels[0], M.zoomLevels[0] + M.pushPerSegment], face: faceAt(a, b) });
+  const build = (layout, g, it) => {
+    const ws = wordsIn(g.t0, g.t1), dur = g.t1 - g.t0, a = g.t0;
+    const norm = w => clean(w);
+    const hj = Math.max(0, ws.findIndex(w => norm(w.word) === norm(it.hero)));
+    const cut = (max) => { const b = Math.min(g.t1, a + max); return [{ b }, g.t1 - b > 0.05 ? asFace(g, b, g.t1) : null]; };
+    if (layout === 'face') return { main: asFace(g) };
+    if (layout === 'graphic') {
+      if (dur < R.graphicMin) return { why: 'too short for a graphic' };
+      const [{ b }, rest] = cut(R.graphicMax);
+      return { main: { type: 'graphic', t0: a, t1: b, query: it.queries[0], title: phraseAround(ws, hj) }, rest };
+    }
+    if (layout === 'split') {
+      if (dur < R.splitMin) return { why: 'too short for a split' };
+      const [{ b }, rest] = cut(R.splitMax);
+      const shots = [{ query: it.queries[0], t: a }];
+      if (it.queries[1] && b - a > 2.4) { const w2 = ws.find(w => w.t > a + 1.1 && w.t < b - 1.0 && (VISUAL.has(norm(w.word)) || stockScore(w, 0, [w]) >= 1)) ?? ws.find(w => w.t >= a + (b - a) / 2); if (w2 && w2.t < b - 0.9) shots.push({ query: it.queries[1], t: +(w2.t - 0.1).toFixed(3) }); }
+      return { main: { type: 'split', t0: a, t1: b, shots, face: faceAt(a, b) }, rest };
+    }
+    if (layout === 'wide' || layout === 'post') {
+      if (dur < R.bigtextMin) return { why: `too short for ${layout}` };
+      const [{ b }, rest] = cut(R.bigtextMax);
+      const inWin = ws.filter(w => w.t < b).slice(0, layout === 'wide' ? 6 : 7);
+      return { main: { type: layout, t0: a, t1: b, words: inWin.map((w, j) => layout === 'wide' ? { w: w.word, t: w.t, big: j === hj || BIG.test(clean(w.word)) || /\d/.test(w.word) } : { w: w.word, t: w.t }), face: faceAt(a, b) }, rest };
+    }
+    if (layout === 'orbit') {
+      if (dur < R.bigtextMin) return { why: 'too short for orbit' };
+      const [{ b }, rest] = cut(R.bigtextMax);
+      return { main: { type: 'orbit', t0: a, t1: b, title: ws.filter(w => w.t < b).map(w => w.word).slice(0, 6).join(' '), orbitIcons: it.icons.length ? it.icons : null, face: faceAt(a, b) }, rest };
+    }
+    if (layout === 'topsquare') { const [{ b }, rest] = cut(3.5); return { main: { type: 'topsquare', t0: a, t1: b, face: faceAt(a, b) }, rest }; }
+    if (layout === 'list') {
+      const items = listItems(ws);
+      if (items.length < 2) return { why: 'no list in these words' };
+      return { main: { ...asFace(g), type: 'list', items: items.slice(0, 4) } };
+    }
+    return { why: 'unknown layout' };
+  };
+  const segList = segs.map((g, i) => ({ i, t0: g.t0, t1: g.t1, text: wordsIn(g.t0, g.t1).map(w => w.word + (w.p ?? '')).join(' '), rule: g.type }));
+  const transcript = words.map(w => w.word + (w.p ?? '')).join(' ');
+  const sp = opts.noModel ? { plan: null, valid: new Map(), invalid: [], cache_hit: false, skipped: true }
+    : await metaPlan(dir, { transcript, segments: segList, layouts: LAYOUTS, icons: ICONS, transitions: TRANSITIONS });
+  for (const x of sp.invalid) console.warn(`plan: segment ${x.i} invalid (${x.why}), rule director kept for it`);
+  const planLog = [];
+  const planOf = new WeakMap();
+  const heroPicks = [];
+  if (sp.valid.size) {
+    const out = [];
+    const brollMax2 = R.brollMaxFrac * D, hiddenMax2 = R.hiddenMaxFrac * D;
+    let brollT2 = 0, hiddenT2 = 0;
+    const weight = g => g.type === 'graphic' ? g.t1 - g.t0 : BROLL.has(g.type) ? (g.t1 - g.t0) * 0.5 : 0;
+    // code checks on any B-roll layout: not in the hook or the tail, budgets, and never two B-roll back to back over 3 s
+    const allowed = (g) => {
+      if (!BROLL.has(g.type)) return null;
+      if (g.t0 < R.hookFace - 0.05 || g.t1 > D - R.tailFace + 0.05) return 'inside the face-only hook or tail';
+      if (brollT2 + weight(g) > brollMax2 + 1e-6) return 'b-roll budget';
+      if (g.type === 'graphic' && hiddenT2 + (g.t1 - g.t0) > hiddenMax2 + 1e-6) return 'face-hidden budget';
+      const prev = out.at(-1);
+      if (prev && prev.type === 'graphic' && g.type === 'graphic') return 'two face-hidden cards in a row';
+      return null;
+    };
+    segs.forEach((g, i) => {
+      const it = sp.valid.get(i);
+      if (!it) { const why = allowed(g); out.push(why ? asFace(g) : g); brollT2 += weight(out.at(-1)); hiddenT2 += out.at(-1).type === 'graphic' ? g.t1 - g.t0 : 0; planLog.push({ i, rule: g.type, used: out.at(-1).type, by: 'rules (plan item invalid)' }); return; }
+      const ws = wordsIn(g.t0, g.t1), hw = ws.find(w => clean(w.word) === clean(it.hero));
+      if (hw) heroPicks.push(hw.t);
+      let r = build(it.layout, g, it), why = r.why ?? allowed(r.main), by = 'spark';
+      if (why) {
+        // the model's pick breaks a rule: keep the rule director's own choice for this segment if it passes, else face
+        const keep = allowed(g) ? asFace(g) : g;
+        r = { main: keep }; by = `rules (${it.layout} refused: ${why})`;
+      }
+      const m = r.main;
+      if (by === 'spark') {
+        m.enter = i === 0 ? 'none' : m.type === 'graphic' ? (it.transition === 'wipe' ? 'wipe' : 'wash') : it.transition;
+        if (it.icons.length && ['face', 'split', 'topsquare', 'list'].includes(m.type)) { m.icons = it.icons.slice(0, 2); m.iconT = hw ? hw.t : m.t0 + 0.3; }
+      }
+      planOf.set(m, it); out.push(m); brollT2 += weight(m); hiddenT2 += m.type === 'graphic' ? m.t1 - m.t0 : 0;
+      if (r.rest) { planOf.set(r.rest, it); out.push({ ...r.rest, enter: 'cut' }); }
+      planLog.push({ i, rule: g.type, model: it.layout, used: m.type, by, hero: it.hero, queries: it.queries, icons: it.icons, transition: it.transition });
+    });
+    // after the model's layouts: the segment after a hidden-face card always wipes back to the face (the reference does)
+    out.forEach((g, i) => { if (i && (out[i - 1].type === 'graphic' || out[i - 1].type === 'post') && g.type !== 'graphic') g.enter = 'wipe'; });
+    segs.length = 0; segs.push(...out);
+    // the alternating zoom levels again, and slivers merged, over the new tiling
+    let zj = 0; for (const g of segs) if (g.type === 'face') { const z = M.zoomLevels[zj++ % M.zoomLevels.length]; g.zoom = [z, z + M.pushPerSegment]; }
+    for (let i = 0; i < segs.length; i++) {
+      const g = segs[i];
+      if (g.type === 'face' && g.t1 - g.t0 < 0.6 && segs.length > 1) {
+        const nb = segs[i - 1]?.type === 'face' ? segs[i - 1] : segs[i + 1]?.type === 'face' ? segs[i + 1] : (segs[i - 1] ?? segs[i + 1]);
+        if (nb === segs[i - 1]) nb.t1 = g.t1; else nb.t0 = g.t0;
+        segs.splice(i, 1); i--;
+      }
+    }
+    // a split whose second shot no longer fits after the merge keeps its first shot only
+    for (const g of segs) if (g.type === 'split') g.shots = g.shots.filter((s, n) => n === 0 || s.t < g.t1 - 0.9);
+  }
+  // ---- HARD RULE: every video uses all 8 reference edit types. Coverage pass in plain code, AFTER the Spark plan: any
+  // missing layout goes to the best-fitting stretch of the transcript (carved from a face segment, or from a duplicate
+  // layout when no face room is left). Face-only hook and tail are never touched. ----
+  const ALL8 = ['face', 'graphic', 'orbit', 'topsquare', 'split', 'list', 'post', 'wide'];
+  const coverageLog = [];
+  {
+    const fit = (m, ws) => {
+      const c = ws.map(w => clean(w.word));
+      if (m === 'wide') return (c.some(x => BIG.test(x) || /\d/.test(x)) ? 4 : 0) + Math.max(0, ...ws.map(heroScore)) * 0.2;
+      if (m === 'post') return c.some(x => POST.test(x)) ? 4 : 0;
+      if (m === 'orbit') return (c.some(x => ORBIT.test(x)) ? 4 : 0) + (c.some(x => /^(instagram|youtube|tiktok|facebook|twitter|social)$/.test(x)) ? 2 : 0);
+      if (m === 'topsquare') return c.some(x => TURN.test(x)) ? 3 : 0;
+      if (m === 'list') return (listItems(ws).length >= 2 ? 4 : 0) + Math.min(2, c.filter(x => x && !STOP.has(x)).length * 0.3);
+      return Math.max(0, ...ws.map((w, j) => stockScore(w, j, ws)));
+    };
+    const FIRST = ['wide', 'post', 'list', 'orbit', 'topsquare', 'split', 'graphic'];
+    const maxLen = m => m === 'graphic' ? R.graphicMax : m === 'split' ? Math.min(R.splitMax, 3.2) : m === 'topsquare' ? 3.0 : Math.min(R.bigtextMax, 3.0);
+    const minLen = m => m === 'graphic' ? R.graphicMin : m === 'split' ? R.splitMin : MINHOLD;
+    for (let guard = 0; guard < 12; guard++) {
+      const have = {}; for (const g of segs) have[g.type] = (have[g.type] ?? 0) + 1;
+      const miss = FIRST.filter(m => !have[m]);
+      if (!miss.length) break;
+      let best = null;
+      for (const m of miss) for (let i = 0; i < segs.length; i++) {
+        const g = segs[i];
+        if (g.type !== 'face' && (have[g.type] ?? 0) < 2) continue;                  // never remove the only copy of a layout
+        const lo = Math.max(g.t0, R.hookFace), hi = Math.min(g.t1, D - R.tailFace);
+        if (hi - lo < minLen(m) - 1e-6) continue;
+        // window inside [lo, hi]: start at the best-fitting word, length up to maxLen
+        const len = Math.min(maxLen(m), TARGET, hi - lo), cand = [];
+        for (const a0 of [lo, ...words.map(w => w.t - 0.1).filter(t => t > lo && t < hi - minLen(m))]) {
+          const a = Math.max(lo, a0), b = Math.min(hi, a + len);
+          if (b - a < minLen(m) - 1e-6) continue;
+          const ws = wordsIn(a, b); if (!ws.length) continue;
+          cand.push({ a, b, sc: fit(m, ws) + (g.type === 'face' ? 1.5 : 0) + (b - a) * 0.1 - (m === 'graphic' && g.zoom ? 0 : 0) });
+        }
+        for (const c of cand) if (!best || c.sc > best.sc) best = { ...c, m, i };
+      }
+      if (!best) { coverageLog.push({ missing: miss, why: 'no stretch long enough for any missing layout' }); break; }
+      const g = segs[best.i], donorPlan = planOf.get(g);
+      const ws = wordsIn(best.a, best.b);
+      const hw = [...ws].sort((x, y) => heroScore(y) - heroScore(x))[0] ?? ws[0];
+      const kwq = [...ws].map((w, j) => ({ j, w, s: stockScore(w, j, ws) })).sort((x, y) => y.s - x.s)[0];
+      const it = { hero: hw?.word ?? '', queries: donorPlan?.queries?.length ? donorPlan.queries : [kwq && kwq.s > 0 ? phraseAround(ws, kwq.j) : (hw?.word ?? 'people')], icons: donorPlan?.icons ?? [], transition: 'cut' };
+      let r = build(best.m, { t0: best.a, t1: best.b, type: 'x' }, it);
+      if (r.why && best.m === 'list') {   // no list in the words: bullet the content words of the stretch (code, no model)
+        const items = ws.filter(w => !STOP.has(clean(w.word)) && clean(w.word).length > 2).slice(0, 4).map(w => ({ text: w.word.replace(/[.,;:!?]+$/, ''), t: w.t }));
+        if (items.length >= 2) r = { main: { ...asFace({ t0: best.a, t1: best.b }), type: 'list', items } };
+      }
+      if (r.why) { coverageLog.push({ layout: best.m, why: r.why }); break; }
+      const pieces = [];
+      if (best.a - g.t0 > 0.05) {
+        if (best.a - g.t0 < 0.5 && segs[best.i - 1]) segs[best.i - 1].t1 = +best.a.toFixed(3);   // thin leftover: the previous segment simply runs on
+        else pieces.push({ ...g, t1: +best.a.toFixed(3), face: g.type === 'face' ? faceAt(g.t0, best.a) : g.face });
+      }
+      const main = r.main; main.enter = main.type === 'graphic' ? 'wash' : 'pop'; main.cov = true;
+      let tailStart = main.t1;
+      pieces.push(main);
+      if (r.rest) pieces.push({ ...r.rest, enter: 'cut' }), tailStart = r.rest.t1;
+      if (g.t1 - tailStart > 0.05) pieces.push({ ...g, t0: +tailStart.toFixed(3), face: g.type === 'face' ? faceAt(tailStart, g.t1) : g.face, enter: 'cut' });
+      // a thin leftover before/after the carve joins the new segment's neighbour instead of flashing
+      const fix = pieces.filter(Boolean);
+      for (let k = 0; k < fix.length; k++) if (fix[k] !== main && fix[k].type === 'face' && fix[k].t1 - fix[k].t0 < 0.5 && fix.length > 1) { const nb = fix[k + 1] ?? fix[k - 1]; if (k > 0 && nb === fix[k - 1]) nb.t1 = fix[k].t1; else nb.t0 = fix[k].t0; fix.splice(k, 1); k--; }
+      segs.splice(best.i, 1, ...fix);
+      coverageLog.push({ layout: best.m, at: [+main.t0.toFixed(2), +main.t1.toFixed(2)], from: g.type, fit: +best.sc.toFixed(1) });
+      console.log(`coverage: added ${best.m} at ${main.t0.toFixed(2)}-${main.t1.toFixed(2)} (carved from ${g.type})`);
+    }
+    // cadence cap: a non-face layout never holds longer than ~3.2 s; the rest of its time goes back to the face (jump zoom)
+    for (let i = 0; i < segs.length; i++) {
+      const g = segs[i], len = g.t1 - g.t0;
+      if (g.type === 'face' || len <= 3.05 || g.t1 > D - R.tailFace + 1e-3 && false) continue;
+      const cutT = +(g.t0 + 2.7).toFixed(3);
+      if (g.type === 'list' && (g.items ?? []).filter(x => x.t < cutT - 0.3).length < 2) continue;
+      const rest = { type: 'face', t0: cutT, t1: g.t1, zoom: [1, 1.04], face: faceAt(cutT, g.t1), enter: 'cut' };
+      g.t1 = cutT;
+      if (g.words) g.words = g.words.filter(w => w.t < cutT);
+      if (g.items) g.items = g.items.filter(x => x.t < cutT - 0.3);
+      if (g.shots) g.shots = g.shots.filter((x, n) => n === 0 || x.t < cutT - 0.9);
+      segs.splice(i + 1, 0, rest);
+    }
+    // final tidy: close gaps, merge adjacent short face pieces, give a thin face sliver to its neighbours (never a flash)
+    for (let pass = 0; pass < 3; pass++) {
+      for (let i = 1; i < segs.length; i++) segs[i].t0 = segs[i - 1].t1;
+      for (let i = 0; i < segs.length; i++) {
+        const g = segs[i], prev = segs[i - 1], next = segs[i + 1], len = g.t1 - g.t0;
+        if (g.type === 'face' && prev?.type === 'face' && (len < MINHOLD || prev.t1 - prev.t0 < MINHOLD) && prev.t0 >= R.hookFace - 0.05) { prev.t1 = g.t1; segs.splice(i, 1); i--; continue; }
+        if (g.type === 'face' && next?.type === 'face' && (len < MINHOLD) && g.t0 >= R.hookFace - 0.05) { next.t0 = g.t0; segs.splice(i, 1); i--; continue; }
+        if (g.type === 'face' && len < 0.9 && prev && next && g.t0 >= R.hookFace - 0.05 && g.t1 <= D - R.tailFace + 0.05) { const m = +(g.t0 + len / 2).toFixed(3); prev.t1 = m; next.t0 = m; segs.splice(i, 1); i--; }
+      }
+    }
+    for (const g of segs) if (g.type === 'face') g.face = faceAt(g.t0, g.t1);
+    // the alternating zoom levels over the final tiling, sliver merge, split without a second shot fits
+    let zj = 0; for (const g of segs) if (g.type === 'face') { const z = M.zoomLevels[zj++ % M.zoomLevels.length]; g.zoom = [z, z + M.pushPerSegment]; }
+    const have = new Set(segs.map(g => g.type)); const still = ALL8.filter(m => !have.has(m));
+    if (still.length) console.warn(`coverage: STILL MISSING ${still.join(', ')} (clip too short or too little speech for them)`);
+  }
   // stock images (cached), plus credits
   const images = {}, credits = [];
   const want = new Set();
@@ -292,10 +527,13 @@ export async function direct(dir, opts = {}) {
   // transitions: wash into a graphic, wipe out of a hidden-face card, pop into a split, cut between face zooms
   segs.forEach((g, i) => {
     const prev = segs[i - 1];
+    if (g.enter && prev) return;   // set by the Spark plan (already checked by the rules above)
     g.enter = !prev ? 'none' : g.type === 'graphic' ? 'wash' : (prev.type === 'graphic' || prev.type === 'post' || g.type === 'post') ? 'wipe' : (g.type === 'split' || prev.type === 'orbit') ? 'pop' : 'cut';
   });
 
   const caps = chunks(words, R);
+  // the model's hero word per segment: that caption chunk highlights it (one hero per chunk, as the rules do)
+  for (const ht of heroPicks) { const cp = caps.find(cp => cp.words.some(w => Math.abs(w.t - ht) < 1e-3)); if (cp) cp.words.forEach(w => { w.hero = Math.abs(w.t - ht) < 1e-3; }); }
   const kw = opts.kw ?? (() => { const f = {}; for (const w of words) { const c = clean(w.word); if (stockScore(w, 0, [w]) >= 4) f[c] = (f[c] ?? 0) + 1; } return (Object.entries(f).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'guide').toUpperCase(); })();
   const D_ = T.defaults;
   const sfx = [];
@@ -307,11 +545,18 @@ export async function direct(dir, opts = {}) {
     if (g.type === 'orbit') { sfx.push({ t: g.t0, k: 'wash' }); [0.25, 0.4, 0.55].forEach(o => sfx.push({ t: g.t0 + o, k: 'rise' })); }
     if (g.type === 'wide' || (segs[segs.indexOf(g) - 1]?.type === 'wide')) sfx.push({ t: g.t0, k: 'wipe' });
   }
+  // an SFX on EVERY change (whoosh / pop / click): a boundary with none yet gets a pop (cut) or a soft hit (pop)
+  segs.forEach((g, i) => {
+    if (!i) return;
+    if (sfx.some(x => Math.abs(x.t - g.t0) <= 0.22 || (x.t > g.t0 - 0.3 && x.t < g.t0 + 0.02))) return;
+    sfx.push({ t: +g.t0.toFixed(3), k: g.enter === 'cut' ? 'rise' : g.enter === 'pop' ? 'split' : 'wipe' });
+  });
+  sfx.sort((a, b) => a.t - b.t);
   const spec = {
     version: 1, theme: 'card-studio', duration: D, fps: T.canvas.fps, video: 'graded.mp4', src: 'src.mp4',
     badge: opts.badge ?? D_.badge, handle: opts.handle ?? D_.handle,
     cta: [(opts.cta1 ?? D_.cta1).replace('{KW}', kw), opts.cta2 ?? D_.cta2], ctaWord: kw,
-    director: { model: null, note: 'rules only: card-studio uses no AI', faceRatio: +faceRatio.toFixed(2) },
+    director: { model: sp.skipped ? null : 'muse-spark-1.3', plan: sp.skipped ? 'skipped (--no-model, test only)' : sp.valid.size ? `${sp.valid.size} of ${segList.length} segments planned by Muse Spark, ${sp.invalid.length} by rules` : 'rules (plan unusable)', planCache: sp.cache_hit, decisions: planLog, faceRatio: +faceRatio.toFixed(2), coverage: coverageLog, types: [...new Set(segs.map(g => g.type))] },
     segments: segs, captions: caps, sfx, images, credits,
     storyboard: Object.values(images).slice(0, 3),
   };
@@ -327,14 +572,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // one command, end to end: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge ..] [--handle ..] [--cta1 ..] [--cta2 ..] [--kw ..] [--no-stock] [--no-music]
   // raw video in: prep (1080x1920, face-aware crop, word timings by Groq or free local Whisper, pauses cut) -> rules director
   // -> stock fetch (cached) -> MP4 render. Deterministic: no random choices anywhere; stock is cached per query on disk.
+  requireMetaKey();   // the theme needs the Meta Model API key: no key, no work
   const a = process.argv.slice(2), opt = k => { const i = a.indexOf(k); return i > 0 ? a[i + 1] : undefined; };
   if (!a[0]) { console.error('usage: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge ..] [--handle ..] [--cta1 ..] [--cta2 ..] [--kw ..] [--no-stock] [--no-music]'); process.exit(1); }
   const { statSync } = await import('node:fs');
   const { basename, extname, resolve } = await import('node:path');
   let dir = a[0];
   const isFile = existsSync(a[0]) && statSync(a[0]).isFile();
+  if (!isFile) dir = opt('--dir') ?? dir;
+  if (isFile) dir = opt('--dir') ?? join(ROOT, 'data/clips', basename(a[0], extname(a[0])).replace(/[^\w.-]+/g, '-'));
+  resetUsage(dir);
   if (isFile) {
-    dir = opt('--dir') ?? join(ROOT, 'data/clips', basename(a[0], extname(a[0])).replace(/[^\w.-]+/g, '-'));
     execFileSync(process.execPath, [join(ROOT, 'engine/prep.mjs'), resolve(a[0]), dir], { stdio: 'inherit', env: { ...process.env, THEME: 'card-studio' } });
   }
   await direct(dir, { badge: opt('--badge'), handle: opt('--handle'), cta1: opt('--cta1'), cta2: opt('--cta2'), kw: opt('--kw'), noStock: a.includes('--no-stock') });
@@ -343,4 +591,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     execFileSync(process.execPath, [join(ROOT, 'tools/render-card.mjs'), dir, out, ...(a.includes('--no-music') ? ['--no-music'] : [])], { stdio: 'inherit' });
     console.log(`done: ${out}`);
   }
+  console.log(usageSummary(dir));
 }

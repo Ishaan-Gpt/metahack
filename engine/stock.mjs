@@ -45,7 +45,7 @@ async function openverse(q) {
   const on = r => { const hay = ((r.title ?? '') + ' ' + (r.tags ?? []).map(t => t.name).join(' ')).toLowerCase(); return words.filter(w => w.length > 2 && hay.includes(w.replace(/s$/, ''))).length; };
   const rank = r => on(r) * 2 + ((r.width ?? 0) >= 900 ? 1 : 0) - ((r.title ?? '').split('#').length > 3 ? 5 : 0);
   // relevance by plain matching: every query word should be in the title or tags (on-topic), hashtag-spam titles dropped
-  return (j.results ?? []).filter(r => r.url && (r.width ?? 999) >= 500 && (r.title ?? '').split('#').length <= 3 && on(r) >= Math.min(2, words.filter(w => w.length > 2).length)).sort((a, b) => rank(b) - rank(a)).map(r => ({
+  return (j.results ?? []).filter(r => r.url && !/\b(meme|memes|rage|advice animal|quickmeme|y u no|demotivational|troll)\b/i.test((r.title ?? '') + ' ' + (r.tags ?? []).map(x => x.name).join(' ')) && (r.width ?? 999) >= 500 && (r.title ?? '').split('#').length <= 3 && on(r) >= Math.min(2, words.filter(w => w.length > 2).length)).sort((a, b) => rank(b) - rank(a)).map(r => ({
     url: r.url, w: r.width, h: r.height, page: r.foreign_landing_url, creator: r.creator,
     license: `${(r.license ?? '').toUpperCase()} ${r.license_version ?? ''}`.trim(), source: `openverse/${r.provider ?? r.source ?? ''}`,
     attribution: r.attribution, title: (r.title ?? '').slice(0, 80) }));
@@ -84,7 +84,10 @@ export async function fetchStock(query, { kind = 'photo', orientation = '', want
   const tried = [];
   if (key) { try { cands = await pixabay(query, kind, key, orientation); tried.push('pixabay'); } catch (e) { tried.push('pixabay failed: ' + e.message); } }
   // keyless fallbacks, each tried with the full query and then its last word ("smartphone social media" -> "media")
-  const variants = [...new Set([query, query.split(' ').at(-1), query.split(' ')[0]])];
+  const FILL = /^(on|of|with|in|a|an|the|at|for|and|to|by|from)$/i;
+  const cw = query.split(' ').filter(w => !FILL.test(w));
+  // full query, then content words, then the first pair, last pair and last word ("video editing timeline on monitor" -> "video editing")
+  const variants = [...new Set([query, cw.join(' '), cw.slice(0, 2).join(' '), cw.slice(-2).join(' '), cw.at(-1), cw[0]].filter(Boolean))];
   for (const [name, fn] of [['openverse', openverse], ['commons', commons]]) {
     for (const v of variants) {
       if (cands.length || kind !== 'photo') break;

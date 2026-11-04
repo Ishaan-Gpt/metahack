@@ -34,7 +34,17 @@ lap('ingest');
 // for speakers only (later); a local transformers.js Whisper is the no-key fallback (to port from Moovi local-stt).
 let words;
 const rawPath = join(dir, 'words.raw.json');
-if (existsSync(rawPath)) words = JSON.parse(readFileSync(rawPath, 'utf8'));
+if (process.env.HEAR === 'meta' || process.env.THEME === 'card-studio') {
+  // Card Studio: Meta call 1 of 2, Muse Voice Transcribe (required key; cached by the audio's sha256, so a re-run makes
+  // no call). Meta gives turn times only; engine/meta.mjs places the words inside each turn by plain code.
+  const { metaTranscribe, wordsFromTurns, requireMetaKey } = await import('./meta.mjs');
+  requireMetaKey();
+  const res = await metaTranscribe(dir, join(dir, 'voice.wav'));
+  words = wordsFromTurns(res.turns, join(dir, 'voice.wav'));
+  if (!words.length) { console.error('Muse Voice Transcribe returned no words'); process.exit(3); }
+  writeFileSync(rawPath, JSON.stringify(words, null, 1));
+  console.log(`hear: Muse Voice Transcribe, ${res.turns.length} turns, ${words.length} words`);
+} else if (existsSync(rawPath)) words = JSON.parse(readFileSync(rawPath, 'utf8'));
 else {
   const key = process.env.GROQ_API_KEY;
   if (!key) {

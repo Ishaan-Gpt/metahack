@@ -3,6 +3,7 @@
 // drawFrame(ctx, t, spec, T, res) where res = { video, vw, vh, images: {path: img}, layers: {under, over} }.
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const CHIN = 0.6, MOUTH = 0.22;   // below the face box centre, in face-box heights (chin bottom, mouth line)
 const lerp = (a, b, k) => a + (b - a) * k;
 export const ease = {
   out: k => 1 - Math.pow(1 - clamp(k, 0, 1), 3),
@@ -25,9 +26,11 @@ function cover(ctx, img, iw, ih, x, y, w, h, fx = 0.5, fy = 0.5, z = 1, anchorY 
 function faceZoom(face, vw, vh, w, h, z) {
   if (!face) return z;
   const a = w / h, ch0 = Math.min(vh, vw / a), fh = face[3] * vh, fw = face[2] * vw;
-  const maxZ = Math.min(ch0 / (fh * 2.4), ch0 * a / (fw * 1.9));
+  // also keep the chin above 70% of the card so the caption always has room below the mouth
+  const maxZ = Math.min(ch0 / (fh * 2.4), ch0 * a / (fw * 1.9), (0.70 - 0.36) * ch0 / (face[3] * vh * CHIN));
   return clamp(z, 1, Math.max(1, maxZ));
 }
+const t0Of = seg => seg.t0;
 function drawFace(ctx, res, seg, T, x, y, w, h, z) {
   const f = seg.face ?? [0.5, 0.36, 0.3, 0.17];
   const zz = faceZoom(f, res.vw, res.vh, w, h, z);
@@ -35,7 +38,9 @@ function drawFace(ctx, res, seg, T, x, y, w, h, z) {
   // where the chin lands on the canvas (captions go below it when the face is large in frame)
   const a = w / h, ch = Math.min(res.vh, res.vw / a) / zz;
   const sy = clamp(f[1] * res.vh - T.motion.faceAnchorY * ch, 0, res.vh - ch);
-  res.faceBottom = y + ((f[1] + f[3] * 0.62) * res.vh - sy) / ch * h;
+  res.faceBottom = y + ((f[1] + f[3] * CHIN) * res.vh - sy) / ch * h;
+  res.mouthY = y + ((f[1] + f[3] * MOUTH) * res.vh - sy) / ch * h;
+  res.faceT = t0Of(seg);
 }
 
 export function sparkle(ctx, x, y, r, rot, color) {
@@ -172,7 +177,7 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     const fx = lerp(C.x, sx, z), fy = lerp(C.y, sy, z), fw = lerp(C.w, sw, z), fh = lerp(C.h, sh, z);
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.25)'; ctx.shadowBlur = 30 * z; ctx.shadowOffsetY = 10 * z; ctx.fillStyle = '#000'; rr(ctx, fx, fy, fw, fh, lerp(C.r, 18, z)); ctx.fill(); ctx.restore();
     ctx.save(); rr(ctx, fx, fy, fw, fh, lerp(C.r, 18, z)); ctx.clip(); drawFace(ctx, res, seg, T, fx, fy, fw, fh, 1.0); ctx.restore();
-    const icons = ['ig', 'yt', 'tt', 'fb', 'x'];
+    const icons = seg.orbitIcons?.length ? seg.orbitIcons : ['ig', 'yt', 'tt', 'fb', 'x'];
     icons.forEach((kind, n) => {
       const pop = ease.back((t - seg.t0 - 0.25 - n * 0.08) / 0.3); if (pop <= 0) return;
       const ang = -Math.PI / 2 + n * (Math.PI * 2 / icons.length) + (t - seg.t0) * 0.7;
@@ -257,6 +262,24 @@ export function platformIcon(ctx, kind, x, y, r) {
   } else if (kind === 'fb') {
     ctx.fillStyle = '#1877f2'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     ctx.fillStyle = '#fff'; ctx.font = `bold ${r * 1.5}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('f', r * 0.08, r * 0.12);
+  } else if (kind === 'heart') {
+    sq('#ff3b5c'); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(0, r * 0.5);
+    ctx.bezierCurveTo(-r * 0.75, 0, -r * 0.5, -r * 0.6, 0, -r * 0.22); ctx.bezierCurveTo(r * 0.5, -r * 0.6, r * 0.75, 0, 0, r * 0.5); ctx.fill();
+  } else if (kind === 'play') {
+    sq('#111'); ctx.fillStyle = '#cbe65e'; ctx.beginPath(); ctx.moveTo(-r * 0.28, -r * 0.42); ctx.lineTo(r * 0.46, 0); ctx.lineTo(-r * 0.28, r * 0.42); ctx.closePath(); ctx.fill();
+  } else if (kind === 'chat') {
+    sq('#2f80ed'); ctx.fillStyle = '#fff'; rr(ctx, -r * 0.55, -r * 0.45, r * 1.1, r * 0.75, r * 0.25); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-r * 0.25, r * 0.28); ctx.lineTo(-r * 0.4, r * 0.55); ctx.lineTo(r * 0.05, r * 0.28); ctx.fill();
+  } else if (kind === 'bell') {
+    sq('#ffb020'); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-r * 0.45, r * 0.3); ctx.quadraticCurveTo(-r * 0.4, -r * 0.5, 0, -r * 0.5);
+    ctx.quadraticCurveTo(r * 0.4, -r * 0.5, r * 0.45, r * 0.3); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.arc(0, r * 0.42, r * 0.12, 0, Math.PI * 2); ctx.fill();
+  } else if (kind === 'cash') {
+    sq('#1fa463'); ctx.fillStyle = '#fff'; ctx.font = `bold ${r * 1.3}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('$', 0, r * 0.08);
+  } else if (kind === 'chart') {
+    sq('#111'); ctx.fillStyle = '#cbe65e'; [[-0.5, 0.25], [-0.12, 0.55], [0.26, 0.9]].forEach(([bx, bh]) => ctx.fillRect(bx * r, r * 0.5 - bh * r, r * 0.28, bh * r));
+  } else if (kind === 'camera') {
+    sq('#6b5bff'); ctx.fillStyle = '#fff'; rr(ctx, -r * 0.6, -r * 0.3, r * 0.85, r * 0.6, r * 0.12); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(r * 0.3, -r * 0.05); ctx.lineTo(r * 0.62, -r * 0.28); ctx.lineTo(r * 0.62, r * 0.28); ctx.lineTo(r * 0.3, r * 0.05); ctx.closePath(); ctx.fill();
   } else {
     sq('#111'); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * 0.16; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-r * 0.42, -r * 0.45); ctx.lineTo(r * 0.42, r * 0.45); ctx.moveTo(r * 0.42, -r * 0.45); ctx.lineTo(-r * 0.42, r * 0.45); ctx.stroke();
@@ -289,8 +312,16 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   const hero = hi < 0 ? '' : cap.words[hi].w.toUpperCase();
   const maxW = C.w * L.maxWFrac;
   let cy = seg.type === 'split' ? C.y + T.layout.split.border + (C.h - 2 * T.layout.split.border - T.layout.split.gap) * T.layout.split.topFrac + T.layout.split.gap / 2 : C.y + C.h * L.yFrac;
-  // keep the caption off the mouth: below the chin when the face is big, never below the card's lower safe line
-  if (seg.type !== 'split' && seg.capY == null && res.faceBottom) cy = clamp(Math.max(cy, res.faceBottom + 110), C.y + C.h * L.yFrac, C.y + C.h * 0.84);
+  const heroH0 = hero ? L.heroSize * 0.9 : 0, sH0 = L.smallSize + L.lineGap;
+  let total0 = (before ? sH0 : 0) + heroH0 + (after ? sH0 : 0);
+  // keep the caption off the mouth: the whole block starts below the chin (face box of THIS segment), and never runs
+  // past the card's lower safe line; when both cannot hold, the small words drop and only the hero word stays
+  let heroOnly = false;
+  if (seg.type !== 'split' && seg.capY == null && res.faceBottom && res.faceT === seg.t0) {
+    const top = Math.max(cy - total0 / 2, res.faceBottom + 26), bottom = C.y + C.h - 34;
+    if (top + total0 > bottom && hero && res.faceBottom + 26 + heroH0 <= bottom) { heroOnly = true; total0 = heroH0; }
+    cy = Math.min(top + total0 / 2, bottom - total0 / 2);
+  }
   if (seg.capY != null) cy = C.y + C.h * seg.capY;
   const pale = seg.type === 'topsquare';
   if (pale) cy = C.y + 22 + (C.w - 44) + (C.h - (C.w - 44) - 22) / 2;
@@ -299,10 +330,10 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   const x = C.x + C.w / 2, dy = (1 - k) * 14;
   const small = (s, y) => { if (!s) return; let fs = L.smallSize; ctx.font = font(T, 'sans', fs, 700); while (ctx.measureText(s).width > maxW && fs > 18) { fs -= 2; ctx.font = font(T, 'sans', fs, 700); }
     ctx.shadowColor = pale ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.55)'; ctx.shadowBlur = pale ? 0 : 14; ctx.fillStyle = pale ? P.ink : '#fff'; ctx.fillText(s, x, y + dy); };
-  const heroH = hero ? L.heroSize * 0.9 : 0, sH = L.smallSize + L.lineGap;
-  const total = (before ? sH : 0) + heroH + (after ? sH : 0);
+  const heroH = heroH0, sH = sH0;
+  const total = total0;
   let y = cy - total / 2;
-  if (before) { small(before, y + sH / 2); y += sH; }
+  if (before && !heroOnly) { small(before, y + sH / 2); y += sH; }
   if (hero) {
     let fs = L.heroSize; ctx.font = font(T, 'serifItalic', fs); while (ctx.measureText(hero).width > maxW && fs > 40) { fs -= 4; ctx.font = font(T, 'serifItalic', fs); }
     ctx.save(); ctx.translate(x, y + heroH / 2 + dy); const sc = hero ? lerp(0.82, 1, clamp(hk, 0, 1.2)) : 1; ctx.scale(sc, sc);
@@ -310,7 +341,7 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
     ctx.shadowBlur = 0; ctx.lineWidth = pale ? 2.2 : 1.6; ctx.strokeStyle = pale ? '#9bb532' : P.lime; ctx.strokeText(hero, 0, 0); ctx.restore();
     y += heroH;
   }
-  if (after) small(after, y + sH / 2);
+  if (after && !heroOnly) small(after, y + sH / 2);
   ctx.restore();
 }
 
@@ -360,5 +391,19 @@ export function drawFrame(ctx, t, spec, T, res) {
   } else drawInterior(ctx, t, seg, spec, T, res, C);
   ctx.restore();
   drawCaption(ctx, t, spec, T, C, seg, res);
+  drawStickers(ctx, t, seg, C);
   ctx.drawImage(res.layers.over, 0, 0);
+}
+
+/** icon stickers the Spark plan chose for a segment: they pop onto the card's top right corner at the hero word,
+ *  bob gently, and leave with the segment (never over the face centre or the caption). */
+function drawStickers(ctx, t, seg, C) {
+  if (!seg.icons?.length) return;
+  const t0 = Math.max(seg.t0 + 0.15, seg.iconT ?? seg.t0), out = clamp((seg.t1 - t) / 0.2, 0, 1);
+  seg.icons.forEach((kind, n) => {
+    const k = ease.back((t - t0 - n * 0.12) / 0.32); if (k <= 0) return;
+    const s = clamp(k, 0, 1.2) * out; if (s <= 0.01) return;
+    const x = C.x + C.w - 70 - n * 96, y = C.y + 78 + Math.sin((t - t0) * 2.2 + n) * 5;
+    ctx.save(); ctx.translate(x, y); ctx.rotate((n % 2 ? 1 : -1) * 0.12); platformIcon(ctx, kind, 0, 0, 40 * s); ctx.restore();
+  });
 }

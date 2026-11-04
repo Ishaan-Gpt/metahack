@@ -126,7 +126,7 @@
  "rules": {
   "hookFace": 1.8,
   "tailFace": 1.2,
-  "brollMaxFrac": 0.4,
+  "brollMaxFrac": 0.85,
   "hiddenMaxFrac": 0.25,
   "graphicMax": 2.4,
   "graphicMin": 1.0,
