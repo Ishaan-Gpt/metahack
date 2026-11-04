@@ -1,0 +1,182 @@
+{
+ "name": "card-studio",
+ "label": "Card Studio",
+ "about": "Clean studio card edit modelled on @edita.visuals (reel DerbE18txNg): light grey studio background with a soft peach starburst, the talking head inside a rounded 9:16 card with a soft shadow, dark pill badge above, storyboard card peeking on the left, two-line CTA under the card, 1-3 word captions (small white caps + big lime serif italic hero word), keyword graphic cards, split B-roll, bullet lists, big-text post card, jump zooms at sentence boundaries. All decisions are plain rules over the transcript; no AI.",
+ "canvas": {
+  "w": 1080,
+  "h": 1920,
+  "fps": 30
+ },
+ "auto": {
+  "minFaceRatio": 0.5,
+  "whenSourceNot916": true
+ },
+ "grade": {
+  "contrast": 1.04,
+  "saturate": 1.05,
+  "brightness": 1.01,
+  "warm": 0.02
+ },
+ "palette": {
+  "bgTop": "#fbfbfb",
+  "bgBottom": "#e5e5e3",
+  "blob": "#f2dccb",
+  "blobAlpha": 0.8,
+  "ink": "#111111",
+  "muted": "#5a5a5a",
+  "lime": "#cbe65e",
+  "accent": "#de7e59",
+  "pink": "#ff4f8b",
+  "paper": "#f7f7f5",
+  "white": "#ffffff",
+  "badgeA": "#2a2422",
+  "badgeB": "#4d3c35"
+ },
+ "fonts": {
+  "serifItalic": {
+   "family": "Instrument Serif",
+   "file": "instrument-serif-latin-400-italic.woff2",
+   "style": "italic"
+  },
+  "sans": {
+   "family": "Inter Tight",
+   "file": "inter-tight-latin-wght-normal.woff2",
+   "style": "normal"
+  },
+  "ui": {
+   "family": "Inter",
+   "file": "inter-latin-wght-normal.woff2",
+   "style": "normal"
+  }
+ },
+ "layout": {
+  "card": {
+   "x": 380,
+   "y": 422,
+   "w": 540,
+   "h": 956,
+   "r": 30,
+   "shadowBlur": 56,
+   "shadowY": 20,
+   "shadowColor": "rgba(0,0,0,0.20)"
+  },
+  "badge": {
+   "x": 388,
+   "y": 290,
+   "h": 112,
+   "textSize": 46
+  },
+  "storyboard": {
+   "x": 112,
+   "y": 655,
+   "w": 300,
+   "h": 520,
+   "r": 22,
+   "pillY": 572,
+   "pillH": 70
+  },
+  "blob": {
+   "cx": 430,
+   "cy": 760,
+   "r": 640,
+   "petals": 12
+  },
+  "handle": {
+   "xRight": 950,
+   "y": 150,
+   "size": 36
+  },
+  "cta": {
+   "y1": 1478,
+   "y2": 1552,
+   "size": 56
+  },
+  "caption": {
+   "yFrac": 0.66,
+   "smallSize": 34,
+   "heroSize": 96,
+   "lineGap": 6,
+   "maxWFrac": 0.88
+  },
+  "split": {
+   "border": 14,
+   "gap": 10,
+   "topFrac": 0.5
+  },
+  "graphic": {
+   "titleSize": 66,
+   "blockTopFrac": 0.34
+  },
+  "textBehind": {
+   "widthFrac": 0.95,
+   "maxSize": 330,
+   "capFrac": 0.21,
+   "maxStretch": 2.2,
+   "anchor": -0.05,
+   "slam": 1.14,
+   "drift": 10,
+   "blur": 34,
+   "dim": 0.5,
+   "maxFace": 9,
+   "minScale": 1,
+   "bgZoom": 1.0,
+   "headroom": 0.3,
+   "maxLower": 0.24
+  }
+ },
+ "motion": {
+  "zoomLevels": [
+   1.0,
+   1.16
+  ],
+  "pushPerSegment": 0.04,
+  "faceAnchorY": 0.36,
+  "wash": 0.45,
+  "wipe": 0.2,
+  "pop": 0.18,
+  "captionIn": 0.1,
+  "heroPop": 0.16,
+  "imageRise": 0.5,
+  "kenBurns": 0.08
+ },
+ "rules": {
+  "hookFace": 1.8,
+  "tailFace": 1.2,
+  "brollMaxFrac": 0.85,
+  "hiddenMaxFrac": 0.25,
+  "graphicMax": 2.4,
+  "graphicMin": 1.0,
+  "splitMax": 4.5,
+  "splitMin": 1.6,
+  "bigtextMax": 3.0,
+  "bigtextMin": 1.2,
+  "faceBetween": 1.2,
+  "minSentence": 1.2,
+  "stockScoreMin": 4,
+  "chunkMaxWords": 3,
+  "chunkMaxChars": 16,
+  "chunkGap": 0.28
+ },
+ "sfx": {
+  "wash": "sfx/fs.whoosh.swosh-whoosh-air-cut.wav",
+  "wipe": "sfx/fs.whoosh.swosh-whoosh-air-cut.wav",
+  "rise": "sfx/fs.ui.pop-4.wav",
+  "click": "sfx/kenney.click.wav",
+  "split": "sfx/fs.impact.soft-hit.wav",
+  "gainDb": -15
+ },
+ "music": {
+  "file": "music/bed.mp3",
+  "gainDb": -27
+ },
+ "loudness": {
+  "lufs": -14,
+  "tp": -1.5
+ },
+ "defaults": {
+  "badge": "Meta AI",
+  "handle": "@yourhandle",
+  "cta1": "Follow & comment \"{KW}\"",
+  "cta2": "for the full guide"
+ }
+}

@@ -4,3 +4,4 @@ node_modules/
 data/
 *.log
 out/*.mp4
+__pycache__/

@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- Card Studio live preview: the same drawing module the MP4 renderer uses, over the clip's graded.mp4.
+     open http://127.0.0.1:4700/player/card-studio.html?clip=data/clips/<name>   (node serve.mjs 4700) -->
+<html><head><meta charset="utf-8"><title>Card Studio preview</title>
+<style>
+  html,body{margin:0;background:#111;color:#ddd;font:14px system-ui;display:flex;flex-direction:column;align-items:center}
+  canvas{height:calc(100vh - 60px);aspect-ratio:9/16;background:#222;cursor:pointer}
+  #bar{height:48px;display:flex;gap:12px;align-items:center}
+</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div id="bar"><button id="play">play / pause</button><input id="seek" type="range" min="0" max="1000" value="0" style="width:420px"><span id="t">0.0</span><span id="info"></span></div>
+<video id="v" playsinline preload="auto" style="display:none"></video>
+<script type="module">
+import { buildLayers, drawFrame } from './card-studio.js';
+const q = new URLSearchParams(location.search), CLIP = '/' + (q.get('clip') ?? 'data/clips/demo').replace(/^\/|\/$/g, '') + '/';
+const T = await (await fetch('/engine/templates/card-studio.json')).json();
+const spec = await (await fetch(CLIP + 'spec.card.json')).json();
+for (const f of Object.values(T.fonts)) { const ff = new FontFace(f.family, `url(/assets/renderer/fonts/${f.file})`, { style: f.style, weight: '100 900' }); document.fonts.add(await ff.load()); }
+const v = document.getElementById('v'); v.src = CLIP + spec.video; v.crossOrigin = 'anonymous';
+await new Promise(r => v.addEventListener('loadeddata', r, { once: true }));
+const images = {};
+await Promise.all([...new Set([...Object.values(spec.images ?? {}), ...(spec.storyboard ?? [])])].map(p => new Promise(r => { const im = new Image(); im.onload = () => { images[p] = im; r(); }; im.onerror = r; im.src = CLIP + p; })));
+const res = { video: v, vw: v.videoWidth, vh: v.videoHeight, images };
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+res.layers = buildLayers(spec, T, res, mk);
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const sfx = {}; for (const [k, f] of Object.entries(T.sfx)) if (typeof f === 'string') { sfx[k] = new Audio('/assets/' + f); sfx[k].volume = Math.pow(10, T.sfx.gainDb / 20); }
+let lastT = 0;
+function frame() {
+  const t = v.currentTime;
+  if (!v.paused) for (const s of spec.sfx ?? []) if (s.t > lastT && s.t <= t && sfx[s.k]) { const a = sfx[s.k].cloneNode(); a.volume = sfx[s.k].volume; a.play().catch(() => {}); }
+  lastT = t;
+  drawFrame(ctx, t, spec, T, res);
+  document.getElementById('t').textContent = t.toFixed(2);
+  document.getElementById('seek').value = Math.round(1000 * t / spec.duration);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+const toggle = () => v.paused ? v.play() : v.pause();
+document.getElementById('play').onclick = toggle; c.onclick = toggle;
+document.getElementById('seek').oninput = e => { v.currentTime = e.target.value / 1000 * spec.duration; lastT = v.currentTime; };
+window.__seek = t => new Promise(r => { v.addEventListener('seeked', () => { drawFrame(ctx, t, spec, T, res); r(); }, { once: true }); v.currentTime = t; });
+window.__ready = true;
+document.getElementById('info').textContent = `${spec.segments.length} segments, rules only`;
+</script></body></html>

@@ -15,3 +15,7 @@ Everything here is openly licensed and safe to redistribute.
 | `music/bed.mp3` | A 75 s excerpt of "Funkorama" by Kevin MacLeod (incompetech.com) | CC BY 4.0: credit "Funkorama" by Kevin MacLeod (incompetech.com), CC BY 4.0, in the description of any film you publish with it |
 | `vision/selfie_segmenter.tflite`, `vision/blaze_face_short_range.tflite` | MediaPipe models by Google, from storage.googleapis.com/mediapipe-models: the selfie segmenter (float16, the person matte) and BlazeFace short-range (float16, the face box). Vendored so Premium Caption 3 renders on the server with no CDN | Apache License 2.0 |
 | (npm) `@mediapipe/tasks-vision@0.10.14` | The MediaPipe runtime those models run on (`vision_bundle.mjs` and `wasm/`, about 20 MB): an exact dependency of `@moovi/engine`, installed by pnpm (and so in the Docker image), not copied into git | Apache License 2.0 |
+
+
+## Vision (Card Studio)
+- `vision/face_detection_yunet_2023mar.onnx`: YuNet face detector from opencv/opencv_zoo (MIT licence), used by `engine/faces.py`.

@@ -17,7 +17,15 @@ const ff = args => execFileSync('ffmpeg', ['-v', 'error', '-y', ...args], { maxB
 // 0 ingest: cover-crop to 9:16 and scale to 1080x1920 (landscape is centre-cropped for now; SAM reframing is H4)
 const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height:format=duration', '-of', 'json', src], { encoding: 'utf8' }));
 const { width: W, height: H } = probe.streams[0];
-const crop = W / H > 9 / 16 ? `crop=ih*9/16:ih` : `crop=iw:iw*16/9`;
+let crop = W / H > 9 / 16 ? `crop=ih*9/16:ih` : `crop=iw:iw*16/9`;
+// landscape: crop around the speaker's face (OpenCV, plain code) instead of the centre, so the face is never cut off
+if (W / H > 9 / 16 + 0.01 && process.env.FACE_CROP !== '0') {
+  try {
+    const cx = +execFileSync(process.env.PYTHON ?? 'python3', [join(import.meta.dirname, 'faces.py'), '--center-x', src], { encoding: 'utf8', timeout: 300000 }).trim().split('\n').pop();
+    const cw = Math.round(H * 9 / 16 / 2) * 2, x = Math.round(Math.max(0, Math.min(W - cw, cx * W - cw / 2)));
+    if (Number.isFinite(x)) crop = `crop=${cw}:${H}:${x}:0`;
+  } catch (e) { console.warn('face-aware crop skipped:', e.message.slice(0, 120)); }
+}
 if (!existsSync(join(dir, 'src.mp4'))) ff(['-i', src, '-vf', `${crop},scale=1080:1920:flags=lanczos,fps=30,format=yuv420p`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-g', '15', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', join(dir, 'src.mp4')]);
 ff(['-i', join(dir, 'src.mp4'), '-vn', '-ac', '1', '-ar', '16000', join(dir, 'voice.wav')]);
 lap('ingest');
@@ -26,10 +34,28 @@ lap('ingest');
 // for speakers only (later); a local transformers.js Whisper is the no-key fallback (to port from Moovi local-stt).
 let words;
 const rawPath = join(dir, 'words.raw.json');
-if (existsSync(rawPath)) words = JSON.parse(readFileSync(rawPath, 'utf8'));
+if (process.env.HEAR === 'meta' || process.env.THEME === 'card-studio') {
+  // Card Studio: Meta call 1 of 2, Muse Voice Transcribe (required key; cached by the audio's sha256, so a re-run makes
+  // no call). Meta gives turn times only; engine/meta.mjs places the words inside each turn by plain code.
+  const { metaTranscribe, wordsFromTurns, requireMetaKey } = await import('./meta.mjs');
+  requireMetaKey();
+  const res = await metaTranscribe(dir, join(dir, 'voice.wav'));
+  words = wordsFromTurns(res.turns, join(dir, 'voice.wav'));
+  if (!words.length) { console.error('Muse Voice Transcribe returned no words'); process.exit(3); }
+  writeFileSync(rawPath, JSON.stringify(words, null, 1));
+  console.log(`hear: Muse Voice Transcribe, ${res.turns.length} turns, ${words.length} words`);
+} else if (existsSync(rawPath)) words = JSON.parse(readFileSync(rawPath, 'utf8'));
 else {
   const key = process.env.GROQ_API_KEY;
-  if (!key) { console.error('No GROQ_API_KEY in .env.local: add one (word timings), or port the local Whisper.'); process.exit(2); }
+  if (!key) {
+    // no key: free local faster-whisper on CPU (pip install faster-whisper), same words.raw.json shape, zero credits
+    console.log('No GROQ_API_KEY: word timings from local faster-whisper (CPU, free)');
+    execFileSync(process.env.PYTHON ?? 'python3', [join(import.meta.dirname, 'hear_local.py'), join(dir, 'voice.wav'), rawPath, process.env.WHISPER_MODEL ?? 'small'], { stdio: 'inherit' });
+    words = JSON.parse(readFileSync(rawPath, 'utf8'));
+  }
+}
+if (!words) {
+  const key = process.env.GROQ_API_KEY;
   const fd = new FormData();
   fd.append('file', new Blob([readFileSync(join(dir, 'voice.wav'))], { type: 'audio/wav' }), 'voice.wav');
   fd.append('model', 'whisper-large-v3-turbo');
@@ -67,12 +93,12 @@ ff(['-i', join(dir, 'src.mp4'), '-filter_complex', `${v};${cat}`, '-map', '[v]',
 const toCut = t => { for (const [a, b, s] of map) if (t >= a - 1e-3 && t <= b + 1e-3) return +(s + Math.min(t, b) - a).toFixed(3); const nx = map.find(([a]) => a > t); return nx ? nx[2] : o; };
 const cutWords = words.map(w => ({ ...w, t: toCut(w.t), end: Math.max(toCut(w.t) + 0.05, toCut(w.end)) }));
 // the dialect's base grade baked into a second file, so the player draws the after with no per-frame colour filter
-const G = JSON.parse(readFileSync(join(import.meta.dirname, 'templates', (process.env.DIALECT ?? 'kinetic-brand') + '.json'), 'utf8')).grade;
+const G = JSON.parse(readFileSync(join(import.meta.dirname, 'templates', (process.env.DIALECT ?? process.env.THEME ?? 'kinetic-brand') + '.json'), 'utf8')).grade ?? { contrast: 1, saturate: 1, brightness: 1, warm: 0 };
 ff(['-i', join(dir, 'cut.mp4'), '-vf', `eq=contrast=${G.contrast}:saturation=${G.saturate}:brightness=${(G.brightness - 1).toFixed(3)},colorbalance=rs=${G.warm}:bs=${-G.warm}:rm=${G.warm / 2}:bm=${-G.warm / 2}`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '17', '-g', '15', '-c:a', 'copy', '-movflags', '+faststart', join(dir, 'graded.mp4')]);
 writeFileSync(join(dir, 'cut.json'), JSON.stringify({ map, duration: +o.toFixed(3), source: D }, null, 1));
 writeFileSync(join(dir, 'words.json'), JSON.stringify(cutWords, null, 1));
 lap('clean');
-writeFileSync(join(dir, 'prep.json'), JSON.stringify({ seconds: log, source: D, cut: +o.toFixed(2), pieces: keep.length, words: words.length }, null, 1));
+writeFileSync(join(dir, 'prep.json'), JSON.stringify({ seconds: log, sourceAspect: +(W / H).toFixed(4), source: D, cut: +o.toFixed(2), pieces: keep.length, words: words.length }, null, 1));
 console.log(`cut: ${D.toFixed(1)} s → ${o.toFixed(1)} s in ${keep.length} pieces, ${words.length} words`);
 
 /** Give each word the punctuation that follows it in its segment's text (sentence ends, commas, question marks). */

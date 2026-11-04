@@ -19,6 +19,9 @@ node serve.mjs 4700                                              # then open the
 node engine/matte.mjs data/clips/my-clip                         # → matte.webm (+ faces.json from the bake)
 ```
 
+## Themes
+- `kinetic-brand` (default) and `card-studio` (light studio card edit, rules only, MP4 export): see [docs/themes/THEME_README.md](docs/themes/THEME_README.md); one command: `node engine/card-studio.mjs raw.mp4 --out out.mp4`.
+
 ## Layout
 - `engine/` prep (ingest, hear, clean), read (phrases, roles, hero words), direct (one Muse Spark call + the rule caster),
   edit (writes spec.json), matte (encodes the baked matte), `templates/kinetic-brand.json` (the first dialect: palette,
