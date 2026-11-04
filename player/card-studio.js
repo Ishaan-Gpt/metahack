@@ -200,13 +200,13 @@ function drawTextBehind(ctx, t, seg, T, res, C, m) {
   ctx.font = font(T, 'sans', 100, 900); const w100 = Math.max(1, ctx.measureText(word).width);
   // size: fitted to the card width, then stretched tall; the head top (hair is about half a face box above the box) decides how
   // tall it may be, so that at least ~60% of the letters stay above the head: the word is always readable
-  const headTop = faceTop - 0.45 * faceH + dy, capMax = Math.max(90, (headTop - 24 - C.y) / 0.65);
+  const headTop = faceTop - 0.45 * faceH + dy, capMax = Math.max(90, (headTop - 24 - C.y) / 0.52);
   let fs = Math.min(100 * (C.w * TB.widthFrac) / w100, TB.maxSize), stretch = 1;
   const capTarget = Math.min(TB.capFrac * C.h, capMax);
   if (capTarget < 0.727 * fs) fs = capTarget / 0.727; else stretch = clamp(capTarget / (0.727 * fs), 1, TB.maxStretch);
   const capVis = 0.727 * fs * stretch;
   ctx.font = font(T, 'sans', fs, 900);
-  const cy = Math.max(headTop - 0.15 * capVis, C.y + 24 + capVis / 2), drift = lerp(-TB.drift, TB.drift, ease.inOut(k)), sc = lerp(TB.slam, 1, tin);
+  const cy = Math.max(headTop - 0.02 * capVis, C.y + 24 + capVis / 2), drift = lerp(-TB.drift, TB.drift, ease.inOut(k)), sc = lerp(TB.slam, 1, tin);
   ctx.translate(C.x + C.w / 2 + drift, cy); ctx.scale(sc, sc * stretch); ctx.globalAlpha = al;
   ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = bg === 'pale' ? P.ink : bg === 'warm' ? P.lime : '#ffffff';

@@ -52,8 +52,11 @@ Three layers, back to front: (a) a backdrop, `blur` (a darkened, heavily blurred
 `pale` (the theme's pale card with a peach glow) or `warm` (dark warm gradient), picked by the Spark plan's `background`;
 (b) ONE huge word (the hero word of the segment, bold sans, fitted to the card width and stretched tall like poster type,
 slamming in with a small scale and a slow sideways drift for parallax), sized from the head top so about half of each letter
-stays above the head and the hair hides the lower part; (c) the person on top, cut out with a per frame alpha matte. The face keeps exactly the
-framing of a face card (same crop, same place as in the source). The segment holds 1.5 to 2.5 s, never in the first 1.8 s or
+stays above the head and the hair hides the lower part; (c) the person on top, cut out with a per frame alpha matte. The face keeps the framing of a face card (same crop, same
+x position); only when the head is so high in the frame that there is no room above it for a word, the person is lowered
+(up to 24% of the card, the body just runs off the bottom edge) so the word has headroom (`textBehind.headroom` and
+`maxLower` in the template; `maxFace`/`minScale` can shrink a very large head instead, off by default because it shows the
+source's side edges). The segment holds 1.5 to 2.5 s, never in the first 1.8 s or
 last 1.2 s, starts about 0.35 s before the word is spoken, and has no caption (the word is the caption). The plan may use it on
 1 segment of a clip under 28 s (2 under 50 s, then 3); the coverage pass adds one when the plan has none. No extra Meta call.
 
@@ -67,7 +70,7 @@ last 1.2 s, starts about 0.35 s before the word is spoken, and has no caption (t
   ellipse so the head top never has a hole, blended over 3 frames (small, with a motion guard so there are no ghosts) and
   feathered 2 to 3 px. The frames are 30 fps to match the renderer; only the frames of the text-behind segments (plus 0.1 s
   before and 0.7 s after, for the transition) are processed.
-- Speed (16 cores, 1080x1920 source): about 0.7 s a frame, 83 frames for one segment in about 55 s. A whole 37 s clip
+- Speed (16 cores, 1080x1920 source): about 0.7 s a frame, 83 to 85 frames for one segment in 55 to 70 s. A whole 37 s clip
   (1,100 frames) would take about 13 min, which is why only the segments are matted. Memory is small.
 - Weights go to `$MATTE_WEIGHTS_DIR` (default `~/.cache/card-studio-matte`), downloaded once on first use from the
   U-2-Net release on GitHub; they are never committed.
