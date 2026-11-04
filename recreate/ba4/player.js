@@ -29,7 +29,7 @@ const VDUR = video.duration;
 status('Loading the sound…');
 const AC = new AudioContext(), BUF = {};
 const loadBuf = async (k, url) => { BUF[k] = await AC.decodeAudioData(await (await fetch(url)).arrayBuffer()); };
-await loadBuf('voice', CLIP + 'voice.m4a');
+await Promise.all([loadBuf('voice', CLIP + 'voice.m4a'), loadBuf('bed', '/assets/music/bed.mp3')]);
 
 // ---------- helpers ----------
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)), lerp = (a, b, u) => a + (b - a) * u, win = (t, a, b) => clamp((t - a) / (b - a));
@@ -263,8 +263,10 @@ function desk2(x, t, frozen) {
     x.restore(); }
   x.restore();
 }
+let BULBBG = null;
 function bulbScene(x, t) {
-  x.save(); x.filter = 'blur(18px) brightness(1.06)'; x.translate(540, 900); x.scale(1.3, 1.3); x.translate(-540, -900); desk2(x, 11.99); x.restore(); x.filter = 'none';
+  if (!BULBBG) { const [c, y] = mk2d(W, H), [d, z] = mk2d(W, H); desk2(z, 11.99); y.filter = 'blur(18px) brightness(1.06)'; y.translate(540, 900); y.scale(1.3, 1.3); y.translate(-540, -900); y.drawImage(d, 0, 0); BULBBG = c; }
+  x.drawImage(BULBBG, 0, 0);   // the blurred desk behind the bulb, built once
   const u = eo3(win(t, 12.20, 12.50)), s = lerp(.86, 1, u), cy = lerp(760, 700, u);
   const g = x.createRadialGradient(527, cy - 120, 40, 527, cy - 120, 520); g.addColorStop(0, 'rgba(255,238,140,0.55)'); g.addColorStop(1, 'rgba(255,238,140,0)'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1700);
   put(x, BULB, 527, cy, 480 * s, 0, 1, true);
@@ -290,7 +292,7 @@ function drawMoney(x, t) {
     const left = i % 4 === 3, px = left ? lerp(-150, 120 + hash(i + 5) * 250, u) : lerp(1200 + hash(i + 3) * 200, 420 + hash(i + 5) * 560, u), py = lerp(-220 + hash(i + 7) * 250, 820 + hash(i + 9) * 420, u * u * .6 + u * .4);
     const rot = hash(i + 11) * 6 + u * (3 + hash(i) * 4), sq = Math.cos(u * 9 + i);
     x.save(); x.translate(px, py); x.rotate(rot); x.scale(1, .35 + .65 * Math.abs(sq)); x.globalAlpha = .92 * clamp(u * 6) * clamp((1 - u) * 5);
-    x.filter = 'blur(1.5px)'; bill(x, 390, 166); x.restore(); x.filter = 'none'; }
+    bill(x, 390, 166); x.restore(); }
 }
 
 // ---------- one frame ----------
@@ -322,7 +324,11 @@ function frame(T) {
 // ---------- clock, playback ----------
 let playing = false, T = +(Q.get('t') || 0), wall0 = 0, T0 = 0, srcs = [];
 const master = AC.createGain(); master.connect(AC.destination); master.gain.value = Q.has('mute') ? 0 : 1;
-function startAudio(from) { const at = AC.currentTime + 0.05, v = AC.createBufferSource(); v.buffer = BUF.voice; v.connect(master); if (from < BUF.voice.duration) v.start(at, from); srcs.push(v); return at; }
+// voice +1.1 dB to the ref's overall RMS (-17.0 vs ours -18.1); a bed under it at the ref's measured gap floor (≈-27 dBFS
+// RMS between words; bed.mp3 is -19.8, so x0.44). The ref's music itself is unknown: "Funkorama" (CC BY 4.0) stands in.
+function startAudio(from) { const at = AC.currentTime + 0.05;
+  for (const [k, g] of [['voice', 1.13], ['bed', 0.44]]) { const v = AC.createBufferSource(), gn = AC.createGain(); v.buffer = BUF[k]; gn.gain.value = g; v.connect(gn).connect(master); if (from < BUF[k].duration) v.start(at, from + (k === 'bed' ? 12 : 0)); srcs.push(v); }
+  return at; }
 function stopAudio() { for (const s of srcs) try { s.stop(); } catch { } srcs = []; }
 async function play() {
   if (T >= DURATION - 0.05) T = 0;
