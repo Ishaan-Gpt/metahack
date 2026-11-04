@@ -1,0 +1,68 @@
+{
+ "duration": 19.805,
+ "pieces": [
+  {
+   "a": 19.745,
+   "b": 23.38,
+   "beat": "B1 hook",
+   "text": "What we're seeing over time is more and more hot years",
+   "i": 0,
+   "at": 0,
+   "dur": 3.635
+  },
+  {
+   "a": 113.22,
+   "b": 114.98,
+   "beat": "B2 negative",
+   "text": "These numbers look modest on paper",
+   "i": 1,
+   "at": 3.635,
+   "dur": 1.76
+  },
+  {
+   "a": 202.38,
+   "b": 207.85,
+   "beat": "B3 number",
+   "text": "More than 70% of the Earth's surface is ocean, and we're also seeing record warming over oceans",
+   "i": 2,
+   "at": 5.395,
+   "dur": 5.47
+  },
+  {
+   "a": 211.5,
+   "b": 214.4,
+   "beat": "B4a mechanism",
+   "text": "So they absorb heat and carbon dioxide",
+   "i": 3,
+   "at": 10.865,
+   "dur": 2.9
+  },
+  {
+   "a": 217.1,
+   "b": 218.35,
+   "beat": "B4b mechanism",
+   "text": "it's not in the atmosphere",
+   "i": 4,
+   "at": 13.765,
+   "dur": 1.25
+  },
+  {
+   "a": 515.4,
+   "b": 517.7,
+   "beat": "B5a payoff B&W",
+   "text": "Well, we know what's driving the warming on our planet",
+   "i": 5,
+   "at": 15.015,
+   "dur": 2.3
+  },
+  {
+   "a": 520.84,
+   "b": 523.33,
+   "beat": "B5b payoff colour",
+   "text": "We also know how to limit warming",
+   "i": 6,
+   "at": 17.315,
+   "dur": 2.49
+  }
+ ]
+}

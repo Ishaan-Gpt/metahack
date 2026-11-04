@@ -1,0 +1,247 @@
+{
+ "text": " What we're seeing over time is more and more, more than 70% of the Earth's surface is ocean, and we're also seeing record warming oceans, so they absorb heat and carbon dioxide. It's not. Well we know what's driving them. We also know.",
+ "segments": [
+  {
+   "t": 0,
+   "end": 8.16,
+   "text": "What we're seeing over time is more and more, more than 70% of the Earth's surface is ocean,"
+  },
+  {
+   "t": 8.16,
+   "end": 13.12,
+   "text": "and we're also seeing record warming oceans, so they absorb heat and carbon dioxide."
+  },
+  {
+   "t": 13.12,
+   "end": 15.12,
+   "text": "It's not."
+  },
+  {
+   "t": 15.12,
+   "end": 17.42,
+   "text": "Well we know what's driving them."
+  },
+  {
+   "t": 17.42,
+   "end": 18.8,
+   "text": "We also know."
+  }
+ ],
+ "words": [
+  {
+   "word": "What",
+   "t": 0,
+   "end": 0.06
+  },
+  {
+   "word": "we're",
+   "t": 0.06,
+   "end": 0.18
+  },
+  {
+   "word": "seeing",
+   "t": 0.18,
+   "end": 0.44
+  },
+  {
+   "word": "over",
+   "t": 0.44,
+   "end": 0.62
+  },
+  {
+   "word": "time",
+   "t": 0.62,
+   "end": 0.92
+  },
+  {
+   "word": "is",
+   "t": 0.92,
+   "end": 1.14
+  },
+  {
+   "word": "more",
+   "t": 1.14,
+   "end": 1.38
+  },
+  {
+   "word": "and",
+   "t": 1.38,
+   "end": 1.56
+  },
+  {
+   "word": "more,",
+   "t": 1.56,
+   "end": 2.02
+  },
+  {
+   "word": "more",
+   "t": 2.02,
+   "end": 5.58
+  },
+  {
+   "word": "than",
+   "t": 5.58,
+   "end": 5.74
+  },
+  {
+   "word": "70%",
+   "t": 5.74,
+   "end": 6.42
+  },
+  {
+   "word": "of",
+   "t": 6.42,
+   "end": 6.6
+  },
+  {
+   "word": "the",
+   "t": 6.6,
+   "end": 6.68
+  },
+  {
+   "word": "Earth's",
+   "t": 6.68,
+   "end": 6.94
+  },
+  {
+   "word": "surface",
+   "t": 6.94,
+   "end": 7.2
+  },
+  {
+   "word": "is",
+   "t": 7.2,
+   "end": 7.46
+  },
+  {
+   "word": "ocean,",
+   "t": 7.46,
+   "end": 8.08
+  },
+  {
+   "word": "and",
+   "t": 7.66,
+   "end": 8.2
+  },
+  {
+   "word": "we're",
+   "t": 8.2,
+   "end": 8.28
+  },
+  {
+   "word": "also",
+   "t": 8.28,
+   "end": 8.58
+  },
+  {
+   "word": "seeing",
+   "t": 8.58,
+   "end": 8.88
+  },
+  {
+   "word": "record",
+   "t": 8.88,
+   "end": 9.28
+  },
+  {
+   "word": "warming",
+   "t": 9.28,
+   "end": 9.64
+  },
+  {
+   "word": "oceans,",
+   "t": 9.64,
+   "end": 10.9
+  },
+  {
+   "word": "so",
+   "t": 10.9,
+   "end": 11.16
+  },
+  {
+   "word": "they",
+   "t": 11.16,
+   "end": 11.32
+  },
+  {
+   "word": "absorb",
+   "t": 11.32,
+   "end": 11.7
+  },
+  {
+   "word": "heat",
+   "t": 11.7,
+   "end": 12.04
+  },
+  {
+   "word": "and",
+   "t": 12.04,
+   "end": 12.36
+  },
+  {
+   "word": "carbon",
+   "t": 12.36,
+   "end": 12.62
+  },
+  {
+   "word": "dioxide.",
+   "t": 12.62,
+   "end": 13.6
+  },
+  {
+   "word": "It's",
+   "t": 12.62,
+   "end": 13.88
+  },
+  {
+   "word": "not.",
+   "t": 13.88,
+   "end": 14.36
+  },
+  {
+   "word": "Well",
+   "t": 14.94,
+   "end": 15.2
+  },
+  {
+   "word": "we",
+   "t": 15.2,
+   "end": 15.3
+  },
+  {
+   "word": "know",
+   "t": 15.3,
+   "end": 15.58
+  },
+  {
+   "word": "what's",
+   "t": 15.58,
+   "end": 15.86
+  },
+  {
+   "word": "driving",
+   "t": 15.86,
+   "end": 16.22
+  },
+  {
+   "word": "them.",
+   "t": 16.22,
+   "end": 16.78
+  },
+  {
+   "word": "We",
+   "t": 16.92,
+   "end": 17.5
+  },
+  {
+   "word": "also",
+   "t": 17.5,
+   "end": 17.82
+  },
+  {
+   "word": "know.",
+   "t": 17.82,
+   "end": 19.28
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "text": " So they absorb heat and carbon dioxide.",
+ "segments": [
+  {
+   "t": 0,
+   "end": 3.28,
+   "text": "So they absorb heat and carbon dioxide."
+  }
+ ],
+ "words": [
+  {
+   "word": "So",
+   "t": 0.04,
+   "end": 1.18
+  },
+  {
+   "word": "they",
+   "t": 1.18,
+   "end": 1.44
+  },
+  {
+   "word": "absorb",
+   "t": 1.44,
+   "end": 1.76
+  },
+  {
+   "word": "heat",
+   "t": 1.76,
+   "end": 2.16
+  },
+  {
+   "word": "and",
+   "t": 2.16,
+   "end": 2.48
+  },
+  {
+   "word": "carbon",
+   "t": 2.48,
+   "end": 2.72
+  },
+  {
+   "word": "dioxide.",
+   "t": 2.72,
+   "end": 3.58
+  }
+ ]
+}

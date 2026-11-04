@@ -1,0 +1,149 @@
+dict_keys(['text', 'segments', 'words'])
+2076
+[5.8] Hi, my name is Bernie Burns and I was with TSTV from the years of 1993 to 1996 when I graduated from the University 
+[13.9] of Texas with a degree in computer science. 
+[22.5] Well back when I discovered TSTV I was a pre-med student who was transferring over to computer science because 
+[27.8] the internet was just getting big and not much transferred with it and so I ended up taking things like organic 
+[33.8] chemistry as an elective when it was all said and done. 
+[36.2] I had a lot of spare time because I had to take only computer science courses that were left to graduate so I always 
+[44.8] had an interest in film and I went audited a few RTF classes and thought well I'm not really going to get what 
+[50.8] I need out of this I'm not going to get my hands on any equipment so I just wandered down to TSTV, which at the 
+[56.6] time was in the basement of Hogg Auditorium. 
+[59.1] And within about two or three days, I was trained up on using the editors, the A.B. 
+[62.9] role, and was producing my own content. 
+[65.3] It was around the same time that Robert Rodriguez was making El Mariachi. 
+[68.7] So there was this idea that you could just pick up a camera, have a good idea, and set the world on fire, right? 
+[75.8] But I didn't feel that way when I went and just sat into, you know, an RTF-305 class with, you know 600 other people 
+[82.1] um but tstv it was feeling here's people who are taking time out of their life uh to come down and actually produce 
+[90.8] things and so it was a really cool environment and so yeah i loved it never graduated with a film degree uh never 
+[96.9] really studied film in any official capacity uh just found people who had a passion and immediately started making 
+[103.4] projects with them. 
+[104.5] So I started Sneak Peek back in I think 93 maybe 94 and I started it because it had one very simple goal and that 
+[119.5] was I wanted to go see movies for free and that was the idea behind it and so I got together a couple of my friends 
+[125.1] and we went and saw some movies and just set up some chairs and started making Sneak Peek. 
+[129.9] I'm particularly proud of the fact that if you go in the TSTV studio, there's that faux brick wall. 
+[135.8] I bought that from my budget in Sneak Peek. 
+[137.8] I think my budget was 80 bucks in the first season. 
+[141.6] And now Sneak Peek after I left, I didn't know this. 
+[143.5] They got in contact with me a few layers that had just kept going. 
+[146.7] I passed it off to Tony Salinas. 
+[148.8] He produced it for a few years. 
+[149.8] He passed it off to somebody else. 
+[152.0] And before you know it, now it's the longest running student produced show in the world. 
+[156.6] And that's pretty amazing. 
+[157.9] It's what's crazy thing about it, too, is that after making that and then graduating, a few years later, I started 
+[164.0] Rooster Teeth Productions. 
+[165.3] We started making Red vs. 
+[166.2] Blue. 
+[167.0] Red vs. 
+[167.4] Blue is now the longest-running web series in the history of the Internet. 
+[171.0] So I have a good track record so far with just unbelievable longevity. 
+[181.0] There are people that I met at TSTV that I still work with to this day. 
+[184.2] In fact, some of the newer people that we've hired, I've hired that have come out of TSTV just because I know what 
+[189.4] the environment is like. 
+[190.3] I know they're going to be go-getters. 
+[192.0] They're going to be self-motivated. 
+[194.5] But essentially, when I first started at TSTV, I was just looking for anybody who would kind of take on somebody 
+[200.1] who had a lot of enthusiasm and wanted to learn about moviemaking but didn't know anything. 
+[204.8] And so I met my partner down there, my business partner, Matt Hullum. 
+[209.4] He was a couple of years behind me, but he was a film student and he really wanted to make a movie. 
+[214.5] I wanted to make a movie just to learn about the process of filmmaking. 
+[218.7] And so we got together and we made a 16 millimeter feature length film over the course of about 13 months while 
+[227.0] we were down there. 
+[228.4] And we screened Adobe, sent it around to festivals and everything like that. 
+[231.3] I still work with Matt to this day. 
+[232.6] I met him in the basement of Elgadatorium. 
+[235.1] Our lead actor that we had in that film, Joel Heyman, still work with him to this day. 
+[239.1] He's our most popular character in Red vs. 
+[240.8] Blue. 
+[242.5] And then more recently, hired Brandon Farmahini, Marshall Rimmer, Chris Damaris. 
+[247.3] Those are all guys that we met through TSTV. 
+[255.0] So after we finished the movie that we filmed at TSTV, which was called The Schedule, we entered the environment 
+[260.7] of independent filmmaking that existed back in the late 90s which was you just got your film you sent it out to 
+[268.2] as many film festivals as possible and you basically went through the process of trying to convince people to let 
+[275.6] you show your work to other people i mean it's so strange to talk about it today and we did that for a year we 
+[281.4] did that for about as long as it took to make the movie we were just trying to get it out there and get it into 
+[286.6] theaters where people could see it, whether it was film festivals or just a wider release. 
+[291.3] Then one day, I was just goofing around with some buddies at a tech job that I had, and we filmed a dopey Apple 
+[298.7] TV parody ad where it was one of those old Switch ads where a guy switches to Mac, and he's all happy about it. 
+[305.1] Well, this guy switched to Mac for the games, and he was really upset about it. 
+[309.9] Just a funny little stupid video you make for the Internet. 
+[312.6] But once I put the video online, Matt was working in LA at the time. 
+[317.7] He found the video within 24 hours, and he wasn't looking for it. 
+[321.1] Just he walked into somebody's office, and he saw his friend up on the screen. 
+[324.7] He's like, how do you know these guys? 
+[326.4] And his coworker was like, I don't. 
+[328.5] I just found this funny video online. 
+[330.6] So Matt called me, and he said, wow, this video got to me in less than 24 hours. 
+[333.4] And I was like, yeah, I didn't have time to call you and tell you that I made this thing or tell you to look for 
+[338.2] it. 
+[338.9] And that was kind of a moment where we realized that all those barriers that we previously had experienced were 
+[345.2] just evaporating. 
+[346.6] And we thought, well, this is a unique point in history. 
+[348.8] We've got to take advantage of it. 
+[349.9] And so it was probably six months after that that I started Red vs. 
+[353.3] Blue, started putting it online. 
+[354.9] It was like a light bulb moment. 
+[356.3] We realized that we can put something out there now because of the Internet. 
+[359.9] All these things that we were going through before to try to get distribution, we didn't need that. 
+[364.4] It just had distribution. 
+[366.5] There was this worldwide network that we just had full access to just like anybody else. 
+[370.7] And so we realized that was a pretty unique point in history, and we should try to take advantage of it. 
+[375.3] So six months later, I made Red vs. 
+[377.4] Blue, put the first episodes online, and it paid off immediately. 
+[381.0] I mean, we had probably 3,000 people watch the first episode. 
+[385.2] Then that went around all over the place. 
+[386.2] By the time we put up the second episode, we had about 250,000 people show up to watch it. 
+[391.3] By the end of the month, we were at a million people a week watching the show. 
+[394.8] So it was a completely different world than what we were used to. 
+[397.9] And it was instantaneous. 
+[398.2] I would say it was like the growth of Red vs. 
+[400.7] Blue was like falling up a cliff, is essentially what it felt like. 
+[403.5] And then we had to figure out all these things. 
+[404.9] This was before YouTube. 
+[407.3] So we had to figure out all these things, like how do we get this video out to people to watch it? 
+[409.9] We were running into a different problem now of like, here's people who want to watch it, now how do we service 
+[414.1] that? 
+[414.5] And so that became one of the early challenges of Rooster Teeth. 
+[423.2] So besides Red vs. 
+[423.9] Blue, we also produce Archie Shorts, which are a collection of funny skits that we do, just kind of random, off-the-cup, 
+[430.5] non-sequitur shorts that we do. 
+[432.3] We just started a new series called Past Cast, which is if historical figures had an ability to vlog the way that 
+[439.6] YouTube stars do today. 
+[441.4] And we just finished a show called Immersion, where we test video game concepts in real life. 
+[447.0] That's a ton of fun. 
+[448.5] And then one of our major productions is a show called Achievement Hunter, which is just a focus on video game 
+[453.2] culture in general, playing games, having fun in games, but kind of a subversive take on the culture of video games. 
+[461.1] I should also mention we have the Rooster Teeth podcast as well, which is now the number one video game podcast 
+[465.8] on iTunes. 
+[472.6] I think one of the funniest experiences about working at TSDB is probably all the people that I knew in college 
+[478.9] who were just these kind of crazy characters down at TSTV, all the things that they've gone on to do. 
+[483.6] And I won't name any names, but it's really interesting when you come across even like an academic situation. 
+[487.9] It's like these guys who, you know, you were up till three in the morning with, you know, producing some crazy 
+[492.6] thing for, to go on, you know, cable access, you know, also at three in the morning. 
+[497.7] But probably one of my favorite experiences from TSDV was I was there when we got the broadcast license. 
+[505.0] And that's when we went from being a cable access channel that was sharing time with everything else to being a 
+[511.2] full-fledged broadcast entity. 
+[513.8] That was a very big deal. 
+[514.3] And a cool part about that was we actually got to go up on top of the tower and hang that antenna. 
+[520.2] So that was a ton of fun. 
+[521.6] And it was interesting at the time to be able to go into the tower when it was all closed down and not just go 
+[527.3] into the observation deck, but climb up through the belfry and get on the actual top of the tower. 
+[537.3] My favorite episode of Sneak Peek that I worked on was the one where we got to interview Adam Sandler. 
+[542.8] And it was a little bit of a risk in the interview because I thought, this guy's a comedian. 
+[547.1] We never had anything like this before. 
+[548.0] He was a huge star. 
+[549.5] He'd just come off Saturday Night Live. 
+[551.3] and I thought I might just mess with him a little bit and see what happens and so I started to poke at him a little 
+[555.7] bit and at first he took it in stride but then he really got it you know you know that we were kind of messing 
+[562.3] around a little bit and then he came after me big time and it was like I was way out of my league obviously you 
+[567.0] know when it comes to improv comedy but he was fantastic and that was probably but not just for moments of TSMV 
+[572.8] one of the best moments of my career was just riffing with Adam Sandler you know and I'm in a basement of my college 
+[578.9] tv station it was it was great. 
+[581.3] Looking back on TSTV, I can honestly say that as somebody who owns a production house, that I work in film every 
+[594.0] day, and I'd like to think that I'm very successful at it. 
+[596.6] I would not have been able to do that if not for TSTV, because I was not a film student. 
+[601.7] I didn't have any background in production. 
+[603.5] Everything that I know today in terms of production, I started at TSTV. 
+[608.5] and if that resource had not existed, I honestly don't know what I'd be doing today. 
+[613.2] But I wouldn't be doing this. 

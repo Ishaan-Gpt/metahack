@@ -1,0 +1,412 @@
+{
+ "text": " Now, there are some obvious challenges to studying black holes. They're far away, no light can escape them, but we manage to learn about them in two main ways. We gather observational data, like looking through a telescope. We can observe how the stuff around black holes behave. So, black hole researchers actually have a lot to work with. And we find black holes all over the universe, and in many ways, they're just weird.",
+ "segments": [
+  {
+   "t": 0,
+   "end": 3.44,
+   "text": "Now, there are some obvious challenges to studying black holes."
+  },
+  {
+   "t": 3.44,
+   "end": 9.04,
+   "text": "They're far away, no light can escape them, but we manage to learn about them in two main ways."
+  },
+  {
+   "t": 9.68,
+   "end": 12.8,
+   "text": "We gather observational data, like looking through a telescope."
+  },
+  {
+   "t": 13.44,
+   "end": 16.24,
+   "text": "We can observe how the stuff around black holes behave."
+  },
+  {
+   "t": 16.24,
+   "end": 19.28,
+   "text": "So, black hole researchers actually have a lot to work with."
+  },
+  {
+   "t": 19.84,
+   "end": 25.36,
+   "text": "And we find black holes all over the universe, and in many ways, they're just weird."
+  }
+ ],
+ "words": [
+  {
+   "word": "Now,",
+   "t": 0.1,
+   "end": 0.32
+  },
+  {
+   "word": "there",
+   "t": 0.32,
+   "end": 0.62
+  },
+  {
+   "word": "are",
+   "t": 0.62,
+   "end": 0.76
+  },
+  {
+   "word": "some",
+   "t": 0.76,
+   "end": 0.96
+  },
+  {
+   "word": "obvious",
+   "t": 0.96,
+   "end": 1.54
+  },
+  {
+   "word": "challenges",
+   "t": 1.54,
+   "end": 2.22
+  },
+  {
+   "word": "to",
+   "t": 2.22,
+   "end": 2.56
+  },
+  {
+   "word": "studying",
+   "t": 2.56,
+   "end": 2.88
+  },
+  {
+   "word": "black",
+   "t": 2.88,
+   "end": 3.2
+  },
+  {
+   "word": "holes.",
+   "t": 3.2,
+   "end": 3.44
+  },
+  {
+   "word": "They're",
+   "t": 2.94,
+   "end": 3.68
+  },
+  {
+   "word": "far",
+   "t": 3.68,
+   "end": 4.12
+  },
+  {
+   "word": "away,",
+   "t": 4.12,
+   "end": 4.66
+  },
+  {
+   "word": "no",
+   "t": 4.66,
+   "end": 5.26
+  },
+  {
+   "word": "light",
+   "t": 5.26,
+   "end": 5.6
+  },
+  {
+   "word": "can",
+   "t": 5.6,
+   "end": 5.84
+  },
+  {
+   "word": "escape",
+   "t": 5.84,
+   "end": 6.1
+  },
+  {
+   "word": "them,",
+   "t": 6.1,
+   "end": 6.44
+  },
+  {
+   "word": "but",
+   "t": 6.44,
+   "end": 6.72
+  },
+  {
+   "word": "we",
+   "t": 6.72,
+   "end": 7
+  },
+  {
+   "word": "manage",
+   "t": 7,
+   "end": 7.26
+  },
+  {
+   "word": "to",
+   "t": 7.26,
+   "end": 7.46
+  },
+  {
+   "word": "learn",
+   "t": 7.46,
+   "end": 7.6
+  },
+  {
+   "word": "about",
+   "t": 7.6,
+   "end": 7.82
+  },
+  {
+   "word": "them",
+   "t": 7.82,
+   "end": 8.04
+  },
+  {
+   "word": "in",
+   "t": 8.04,
+   "end": 8.26
+  },
+  {
+   "word": "two",
+   "t": 8.26,
+   "end": 8.44
+  },
+  {
+   "word": "main",
+   "t": 8.44,
+   "end": 8.7
+  },
+  {
+   "word": "ways.",
+   "t": 8.7,
+   "end": 9.06
+  },
+  {
+   "word": "We",
+   "t": 9.8,
+   "end": 9.94
+  },
+  {
+   "word": "gather",
+   "t": 9.94,
+   "end": 10.18
+  },
+  {
+   "word": "observational",
+   "t": 10.18,
+   "end": 10.8
+  },
+  {
+   "word": "data,",
+   "t": 10.8,
+   "end": 11.26
+  },
+  {
+   "word": "like",
+   "t": 11.26,
+   "end": 11.66
+  },
+  {
+   "word": "looking",
+   "t": 11.66,
+   "end": 11.96
+  },
+  {
+   "word": "through",
+   "t": 11.96,
+   "end": 12.2
+  },
+  {
+   "word": "a",
+   "t": 12.2,
+   "end": 12.28
+  },
+  {
+   "word": "telescope.",
+   "t": 12.28,
+   "end": 13
+  },
+  {
+   "word": "We",
+   "t": 13.54,
+   "end": 13.68
+  },
+  {
+   "word": "can",
+   "t": 13.68,
+   "end": 13.82
+  },
+  {
+   "word": "observe",
+   "t": 13.82,
+   "end": 14.12
+  },
+  {
+   "word": "how",
+   "t": 14.12,
+   "end": 14.44
+  },
+  {
+   "word": "the",
+   "t": 14.44,
+   "end": 14.64
+  },
+  {
+   "word": "stuff",
+   "t": 14.64,
+   "end": 14.84
+  },
+  {
+   "word": "around",
+   "t": 14.84,
+   "end": 15.26
+  },
+  {
+   "word": "black",
+   "t": 15.26,
+   "end": 15.52
+  },
+  {
+   "word": "holes",
+   "t": 15.52,
+   "end": 15.82
+  },
+  {
+   "word": "behave.",
+   "t": 15.82,
+   "end": 16.24
+  },
+  {
+   "word": "So,",
+   "t": 15.74,
+   "end": 17.04
+  },
+  {
+   "word": "black",
+   "t": 17.04,
+   "end": 17.12
+  },
+  {
+   "word": "hole",
+   "t": 17.12,
+   "end": 17.28
+  },
+  {
+   "word": "researchers",
+   "t": 17.28,
+   "end": 17.82
+  },
+  {
+   "word": "actually",
+   "t": 17.82,
+   "end": 18.3
+  },
+  {
+   "word": "have",
+   "t": 18.3,
+   "end": 18.54
+  },
+  {
+   "word": "a",
+   "t": 18.54,
+   "end": 18.62
+  },
+  {
+   "word": "lot",
+   "t": 18.62,
+   "end": 18.72
+  },
+  {
+   "word": "to",
+   "t": 18.72,
+   "end": 18.9
+  },
+  {
+   "word": "work",
+   "t": 18.9,
+   "end": 19.04
+  },
+  {
+   "word": "with.",
+   "t": 19.04,
+   "end": 19.46
+  },
+  {
+   "word": "And",
+   "t": 19.92,
+   "end": 20.14
+  },
+  {
+   "word": "we",
+   "t": 20.14,
+   "end": 20.26
+  },
+  {
+   "word": "find",
+   "t": 20.26,
+   "end": 20.62
+  },
+  {
+   "word": "black",
+   "t": 20.62,
+   "end": 20.84
+  },
+  {
+   "word": "holes",
+   "t": 20.84,
+   "end": 21.18
+  },
+  {
+   "word": "all",
+   "t": 21.18,
+   "end": 21.54
+  },
+  {
+   "word": "over",
+   "t": 21.54,
+   "end": 21.82
+  },
+  {
+   "word": "the",
+   "t": 21.82,
+   "end": 21.94
+  },
+  {
+   "word": "universe,",
+   "t": 21.94,
+   "end": 22.34
+  },
+  {
+   "word": "and",
+   "t": 22.34,
+   "end": 22.5
+  },
+  {
+   "word": "in",
+   "t": 22.5,
+   "end": 22.86
+  },
+  {
+   "word": "many",
+   "t": 22.86,
+   "end": 23.06
+  },
+  {
+   "word": "ways,",
+   "t": 23.06,
+   "end": 23.76
+  },
+  {
+   "word": "they're",
+   "t": 23.76,
+   "end": 23.82
+  },
+  {
+   "word": "just",
+   "t": 23.82,
+   "end": 24.3
+  },
+  {
+   "word": "weird.",
+   "t": 24.3,
+   "end": 25.34
+  }
+ ]
+}

@@ -1,0 +1,143 @@
+{
+ "source": "data/clips/ba4c/bb.webm",
+ "duration": 23.788,
+ "note": "Times on the reference's clock. voice [src, srcEnd] plays at 'at'; video covers [va, vb] from the same take (lip sync kept). shot: medium = the ref raw's medium framing scale (face ~ full-height 9:16 crop, k 1.778), close = the ref close-up's absolute face size (face ~600 px wide: k 1.97, only 1.1x our medium, since our medium is already 1.29x the ref's). fx/fy = face centre in the source (Haar median). 388-394 s is Red vs Blue B-roll in the source, so the close-ups use 138 s and 463 s (on camera).",
+ "pieces": [
+  {
+   "beat": "A-roll 1: I wanted to make a movie just to learn about the process of filmmaking",
+   "src": 214.5,
+   "srcEnd": 218.75,
+   "at": 0,
+   "va": 0,
+   "vb": 3.95,
+   "shot": "medium",
+   "fx": 837,
+   "fy": 321,
+   "crop": [
+    607.5,
+    1080,
+    567,
+    0
+   ]
+  },
+  {
+   "beat": "desk 1 (brain): and that was the idea behind it",
+   "src": 121.25,
+   "srcEnd": 122.86,
+   "at": 4.45,
+   "va": 3.95,
+   "vb": 6.45,
+   "shot": "medium",
+   "fx": 684,
+   "fy": 276,
+   "crop": [
+    607.5,
+    1080,
+    414,
+    0
+   ]
+  },
+  {
+   "beat": "A-roll 2: we did that for a year",
+   "src": 280.4,
+   "srcEnd": 281.2,
+   "at": 6.62,
+   "va": 6.45,
+   "vb": 7.5,
+   "shot": "medium",
+   "fx": 850,
+   "fy": 322,
+   "crop": [
+    607.5,
+    1080,
+    580,
+    0
+   ]
+  },
+  {
+   "beat": "desk 2 (storyboard to upload): so six months later I made Red vs Blue, put the first episodes online",
+   "src": 375.22,
+   "srcEnd": 378.74,
+   "at": 7.85,
+   "va": 7.5,
+   "vb": 12,
+   "shot": "medium",
+   "fx": 919,
+   "fy": 338,
+   "crop": [
+    607.5,
+    1080,
+    649,
+    0
+   ]
+  },
+  {
+   "beat": "bulb: it was like a light bulb moment",
+   "src": 354.84,
+   "srcEnd": 356.16,
+   "at": 12.3,
+   "va": 12,
+   "vb": 13.85,
+   "shot": "medium",
+   "fx": 821,
+   "fy": 327,
+   "crop": [
+    607.5,
+    1080,
+    551,
+    0
+   ]
+  },
+  {
+   "beat": "A-roll 3: we made a 16 millimeter feature length film over the course of about 13 months",
+   "src": 220.4,
+   "srcEnd": 226.27,
+   "at": 13.85,
+   "va": 13.85,
+   "vb": 19.633,
+   "shot": "medium",
+   "fx": 828,
+   "fy": 310,
+   "crop": [
+    607.5,
+    1080,
+    558,
+    0
+   ]
+  },
+  {
+   "beat": "close-up 1: I think my budget was 80 bucks",
+   "src": 138.18,
+   "srcEnd": 139.65,
+   "at": 19.88,
+   "va": 19.633,
+   "vb": 21.6,
+   "shot": "close",
+   "fx": 787,
+   "fy": 286,
+   "crop": [
+    548.8,
+    975.6,
+    451.6,
+    0
+   ]
+  },
+  {
+   "beat": "close-up 2: now the number one video game podcast",
+   "src": 463.72,
+   "srcEnd": 465.8,
+   "at": 21.66,
+   "va": 21.6,
+   "vb": 23.788,
+   "shot": "close",
+   "fx": 800,
+   "fy": 300,
+   "crop": [
+    548.8,
+    975.6,
+    464.6,
+    0
+   ]
+  }
+ ]
+}

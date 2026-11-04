@@ -1,0 +1,8 @@
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v0.mp4'
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v1.mp4'
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v2.mp4'
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v3.mp4'
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v4.mp4'
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v5.mp4'
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v6.mp4'
+file 'C:/Ishaan GPT/hackthons/metahack/data/clips/ba4c/v7.mp4'

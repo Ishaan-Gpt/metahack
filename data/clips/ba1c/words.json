@@ -1,0 +1,380 @@
+[
+ {
+  "word": "What",
+  "t": 0.02,
+  "end": 0.04,
+  "piece": 0
+ },
+ {
+  "word": "we're",
+  "t": 0.04,
+  "end": 0.18,
+  "piece": 0
+ },
+ {
+  "word": "seeing",
+  "t": 0.18,
+  "end": 0.44,
+  "piece": 0
+ },
+ {
+  "word": "over",
+  "t": 0.44,
+  "end": 0.64,
+  "piece": 0
+ },
+ {
+  "word": "time",
+  "t": 0.64,
+  "end": 0.92,
+  "piece": 0
+ },
+ {
+  "word": "is",
+  "t": 0.92,
+  "end": 1.14,
+  "piece": 0
+ },
+ {
+  "word": "more",
+  "t": 1.14,
+  "end": 1.38,
+  "piece": 0
+ },
+ {
+  "word": "and",
+  "t": 1.38,
+  "end": 1.56,
+  "piece": 0
+ },
+ {
+  "word": "more",
+  "t": 1.56,
+  "end": 1.84,
+  "piece": 0
+ },
+ {
+  "word": "hot",
+  "t": 1.84,
+  "end": 3.08,
+  "piece": 0
+ },
+ {
+  "word": "years.",
+  "t": 3.08,
+  "end": 3.635,
+  "piece": 0
+ },
+ {
+  "word": "These",
+  "t": 3.635,
+  "end": 3.835,
+  "piece": 1
+ },
+ {
+  "word": "numbers",
+  "t": 3.835,
+  "end": 4.115,
+  "piece": 1
+ },
+ {
+  "word": "look",
+  "t": 4.115,
+  "end": 4.335,
+  "piece": 1
+ },
+ {
+  "word": "modest",
+  "t": 4.335,
+  "end": 4.635,
+  "piece": 1
+ },
+ {
+  "word": "on",
+  "t": 4.635,
+  "end": 4.815,
+  "piece": 1
+ },
+ {
+  "word": "paper.",
+  "t": 4.815,
+  "end": 5.315,
+  "piece": 1
+ },
+ {
+  "word": "More",
+  "t": 5.475,
+  "end": 5.595,
+  "piece": 2
+ },
+ {
+  "word": "than",
+  "t": 5.595,
+  "end": 5.755,
+  "piece": 2
+ },
+ {
+  "word": "70%",
+  "t": 5.755,
+  "end": 6.435,
+  "piece": 2
+ },
+ {
+  "word": "of",
+  "t": 6.435,
+  "end": 6.615,
+  "piece": 2
+ },
+ {
+  "word": "the",
+  "t": 6.615,
+  "end": 6.695,
+  "piece": 2
+ },
+ {
+  "word": "Earth's",
+  "t": 6.695,
+  "end": 6.915,
+  "piece": 2
+ },
+ {
+  "word": "surface",
+  "t": 6.915,
+  "end": 7.215,
+  "piece": 2
+ },
+ {
+  "word": "is",
+  "t": 7.215,
+  "end": 7.455,
+  "piece": 2
+ },
+ {
+  "word": "ocean,",
+  "t": 7.455,
+  "end": 8.075,
+  "piece": 2
+ },
+ {
+  "word": "and",
+  "t": 7.595,
+  "end": 8.175,
+  "piece": 2
+ },
+ {
+  "word": "we're",
+  "t": 8.175,
+  "end": 8.275,
+  "piece": 2
+ },
+ {
+  "word": "also",
+  "t": 8.275,
+  "end": 8.575,
+  "piece": 2
+ },
+ {
+  "word": "seeing",
+  "t": 8.575,
+  "end": 8.875,
+  "piece": 2
+ },
+ {
+  "word": "record",
+  "t": 8.875,
+  "end": 9.275,
+  "piece": 2
+ },
+ {
+  "word": "warming",
+  "t": 9.275,
+  "end": 9.635,
+  "piece": 2
+ },
+ {
+  "word": "over",
+  "t": 9.635,
+  "end": 9.995,
+  "piece": 2
+ },
+ {
+  "word": "oceans.",
+  "t": 9.995,
+  "end": 10.855,
+  "piece": 2
+ },
+ {
+  "word": "So",
+  "t": 10.865,
+  "end": 11.045,
+  "piece": 3
+ },
+ {
+  "word": "they",
+  "t": 11.045,
+  "end": 11.305,
+  "piece": 3
+ },
+ {
+  "word": "absorb",
+  "t": 11.305,
+  "end": 11.625,
+  "piece": 3
+ },
+ {
+  "word": "heat",
+  "t": 11.625,
+  "end": 12.025,
+  "piece": 3
+ },
+ {
+  "word": "and",
+  "t": 12.025,
+  "end": 12.345,
+  "piece": 3
+ },
+ {
+  "word": "carbon",
+  "t": 12.345,
+  "end": 12.585,
+  "piece": 3
+ },
+ {
+  "word": "dioxide.",
+  "t": 12.585,
+  "end": 13.445,
+  "piece": 3
+ },
+ {
+  "word": "It's",
+  "t": 13.765,
+  "end": 13.845,
+  "piece": 4
+ },
+ {
+  "word": "not",
+  "t": 13.845,
+  "end": 14.025,
+  "piece": 4
+ },
+ {
+  "word": "in",
+  "t": 14.025,
+  "end": 14.205,
+  "piece": 4
+ },
+ {
+  "word": "the",
+  "t": 14.205,
+  "end": 14.305,
+  "piece": 4
+ },
+ {
+  "word": "atmosphere.",
+  "t": 14.305,
+  "end": 14.965,
+  "piece": 4
+ },
+ {
+  "word": "Well,",
+  "t": 15.035,
+  "end": 15.235,
+  "piece": 5
+ },
+ {
+  "word": "we",
+  "t": 15.235,
+  "end": 15.315,
+  "piece": 5
+ },
+ {
+  "word": "know",
+  "t": 15.315,
+  "end": 15.535,
+  "piece": 5
+ },
+ {
+  "word": "what's",
+  "t": 15.535,
+  "end": 15.815,
+  "piece": 5
+ },
+ {
+  "word": "driving",
+  "t": 15.815,
+  "end": 16.175,
+  "piece": 5
+ },
+ {
+  "word": "the",
+  "t": 16.175,
+  "end": 16.395,
+  "piece": 5
+ },
+ {
+  "word": "warming",
+  "t": 16.395,
+  "end": 16.595,
+  "piece": 5
+ },
+ {
+  "word": "on",
+  "t": 16.595,
+  "end": 16.775,
+  "piece": 5
+ },
+ {
+  "word": "our",
+  "t": 16.775,
+  "end": 16.895,
+  "piece": 5
+ },
+ {
+  "word": "planet.",
+  "t": 16.895,
+  "end": 17.295,
+  "piece": 5
+ },
+ {
+  "word": "We",
+  "t": 17.375,
+  "end": 17.475,
+  "piece": 6
+ },
+ {
+  "word": "also",
+  "t": 17.475,
+  "end": 17.815,
+  "piece": 6
+ },
+ {
+  "word": "know",
+  "t": 17.815,
+  "end": 18.235,
+  "piece": 6
+ },
+ {
+  "word": "how",
+  "t": 18.235,
+  "end": 18.975,
+  "piece": 6
+ },
+ {
+  "word": "to",
+  "t": 18.975,
+  "end": 19.115,
+  "piece": 6
+ },
+ {
+  "word": "limit",
+  "t": 19.115,
+  "end": 19.375,
+  "piece": 6
+ },
+ {
+  "word": "warming.",
+  "t": 19.375,
+  "end": 19.805,
+  "piece": 6
+ }
+]

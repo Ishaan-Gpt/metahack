@@ -1,0 +1,102 @@
+{
+ "text": " More than 70% of the Earth's surface is ocean, and we're also seeing record warming over oceans.",
+ "segments": [
+  {
+   "t": 0,
+   "end": 3.7,
+   "text": "More than 70% of the Earth's surface is ocean,"
+  },
+  {
+   "t": 3.7,
+   "end": 6.46,
+   "text": "and we're also seeing record warming over oceans."
+  }
+ ],
+ "words": [
+  {
+   "word": "More",
+   "t": 1.08,
+   "end": 1.2
+  },
+  {
+   "word": "than",
+   "t": 1.2,
+   "end": 1.36
+  },
+  {
+   "word": "70%",
+   "t": 1.36,
+   "end": 2.04
+  },
+  {
+   "word": "of",
+   "t": 2.04,
+   "end": 2.22
+  },
+  {
+   "word": "the",
+   "t": 2.22,
+   "end": 2.3
+  },
+  {
+   "word": "Earth's",
+   "t": 2.3,
+   "end": 2.52
+  },
+  {
+   "word": "surface",
+   "t": 2.52,
+   "end": 2.82
+  },
+  {
+   "word": "is",
+   "t": 2.82,
+   "end": 3.06
+  },
+  {
+   "word": "ocean,",
+   "t": 3.06,
+   "end": 3.68
+  },
+  {
+   "word": "and",
+   "t": 3.2,
+   "end": 3.78
+  },
+  {
+   "word": "we're",
+   "t": 3.78,
+   "end": 3.88
+  },
+  {
+   "word": "also",
+   "t": 3.88,
+   "end": 4.18
+  },
+  {
+   "word": "seeing",
+   "t": 4.18,
+   "end": 4.48
+  },
+  {
+   "word": "record",
+   "t": 4.48,
+   "end": 4.88
+  },
+  {
+   "word": "warming",
+   "t": 4.88,
+   "end": 5.24
+  },
+  {
+   "word": "over",
+   "t": 5.24,
+   "end": 5.6
+  },
+  {
+   "word": "oceans.",
+   "t": 5.6,
+   "end": 6.46
+  }
+ ]
+}

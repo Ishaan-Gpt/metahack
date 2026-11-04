@@ -1,0 +1,1228 @@
+{
+ "version": 1,
+ "dialect": "kinetic-brand",
+ "clip": "",
+ "duration": 53.75,
+ "brand": "metahack",
+ "director": {
+  "model": null,
+  "note": "rules only (no MODEL_API_KEY or --no-model)"
+ },
+ "beats": [
+  {
+   "i": 0,
+   "t0": 0.1,
+   "t1": 3.14,
+   "text": "Everybody wants to learn coding but only few learns",
+   "words": [
+    {
+     "w": "Everybody",
+     "t": 0.1,
+     "end": 0.28
+    },
+    {
+     "w": "wants",
+     "t": 0.28,
+     "end": 0.64
+    },
+    {
+     "w": "to",
+     "t": 0.64,
+     "end": 0.82
+    },
+    {
+     "w": "learn",
+     "t": 0.82,
+     "end": 1
+    },
+    {
+     "w": "coding",
+     "t": 1,
+     "end": 1.26
+    },
+    {
+     "w": "but",
+     "t": 1.26,
+     "end": 2
+    },
+    {
+     "w": "only",
+     "t": 2,
+     "end": 2.24
+    },
+    {
+     "w": "few",
+     "t": 2.24,
+     "end": 2.52
+    },
+    {
+     "w": "learns",
+     "t": 2.52,
+     "end": 3.14
+    }
+   ],
+   "role": "hook",
+   "hero": 8,
+   "chapter": null,
+   "list": null,
+   "template": "kb.stack-side",
+   "transition": "flash",
+   "by": "rules"
+  },
+  {
+   "i": 1,
+   "t0": 3.14,
+   "t1": 4.44,
+   "text": "to be an engineer",
+   "words": [
+    {
+     "w": "to",
+     "t": 3.14,
+     "end": 3.34
+    },
+    {
+     "w": "be",
+     "t": 3.34,
+     "end": 3.62
+    },
+    {
+     "w": "an",
+     "t": 3.62,
+     "end": 3.8
+    },
+    {
+     "w": "engineer",
+     "t": 3.8,
+     "end": 4.44
+    }
+   ],
+   "role": "claim",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.rest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 2,
+   "t0": 4.82,
+   "t1": 7.3,
+   "text": "Let me tell you how to think like an engineer",
+   "words": [
+    {
+     "w": "Let",
+     "t": 4.82,
+     "end": 5.1
+    },
+    {
+     "w": "me",
+     "t": 5.1,
+     "end": 5.22
+    },
+    {
+     "w": "tell",
+     "t": 5.22,
+     "end": 5.64
+    },
+    {
+     "w": "you",
+     "t": 5.64,
+     "end": 5.78
+    },
+    {
+     "w": "how",
+     "t": 5.78,
+     "end": 6
+    },
+    {
+     "w": "to",
+     "t": 6,
+     "end": 6.18
+    },
+    {
+     "w": "think",
+     "t": 6.18,
+     "end": 6.48
+    },
+    {
+     "w": "like",
+     "t": 6.48,
+     "end": 6.7
+    },
+    {
+     "w": "an",
+     "t": 6.7,
+     "end": 6.92
+    },
+    {
+     "w": "engineer",
+     "t": 6.92,
+     "end": 7.3
+    }
+   ],
+   "role": "claim",
+   "hero": 9,
+   "chapter": null,
+   "list": null,
+   "template": "kb.hero-chest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 3,
+   "t0": 7.5,
+   "t1": 11.7,
+   "text": "First thing don't just learn syntax in code",
+   "words": [
+    {
+     "w": "First",
+     "t": 7.5,
+     "end": 7.8
+    },
+    {
+     "w": "thing",
+     "t": 7.8,
+     "end": 8.4
+    },
+    {
+     "w": "don't",
+     "t": 8.4,
+     "end": 9.36
+    },
+    {
+     "w": "just",
+     "t": 9.36,
+     "end": 9.54
+    },
+    {
+     "w": "learn",
+     "t": 9.54,
+     "end": 10
+    },
+    {
+     "w": "syntax",
+     "t": 10,
+     "end": 10.56
+    },
+    {
+     "w": "in",
+     "t": 10.56,
+     "end": 10.92
+    },
+    {
+     "w": "code",
+     "t": 10.92,
+     "end": 11.7
+    }
+   ],
+   "role": "chapter",
+   "hero": 5,
+   "chapter": 1,
+   "list": null,
+   "template": "kb.chapter",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 4,
+   "t0": 11.7,
+   "t1": 13.48,
+   "text": "Understand the flow",
+   "words": [
+    {
+     "w": "Understand",
+     "t": 11.7,
+     "end": 12.42
+    },
+    {
+     "w": "the",
+     "t": 12.42,
+     "end": 12.66
+    },
+    {
+     "w": "flow",
+     "t": 12.66,
+     "end": 13.48
+    }
+   ],
+   "role": "claim",
+   "hero": 0,
+   "chapter": null,
+   "list": null,
+   "template": "kb.rest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 5,
+   "t0": 13.68,
+   "t1": 15.34,
+   "text": "Then now second thing",
+   "words": [
+    {
+     "w": "Then",
+     "t": 13.68,
+     "end": 13.88
+    },
+    {
+     "w": "now",
+     "t": 13.88,
+     "end": 14.32
+    },
+    {
+     "w": "second",
+     "t": 14.32,
+     "end": 14.88
+    },
+    {
+     "w": "thing",
+     "t": 14.88,
+     "end": 15.34
+    }
+   ],
+   "role": "chapter",
+   "hero": 3,
+   "chapter": 2,
+   "list": null,
+   "template": "kb.chapter",
+   "transition": "line-wipe",
+   "by": "rules"
+  },
+  {
+   "i": 6,
+   "t0": 15.34,
+   "t1": 17.32,
+   "text": "if you're creating any projects",
+   "words": [
+    {
+     "w": "if",
+     "t": 15.34,
+     "end": 15.9
+    },
+    {
+     "w": "you're",
+     "t": 15.9,
+     "end": 16.04
+    },
+    {
+     "w": "creating",
+     "t": 16.04,
+     "end": 16.36
+    },
+    {
+     "w": "any",
+     "t": 16.36,
+     "end": 16.58
+    },
+    {
+     "w": "projects",
+     "t": 16.58,
+     "end": 17.32
+    }
+   ],
+   "role": "claim",
+   "hero": 4,
+   "chapter": null,
+   "list": null,
+   "template": "kb.hero-chest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 7,
+   "t0": 17.32,
+   "t1": 20.36,
+   "text": "first I want you to make an architecture diagram",
+   "words": [
+    {
+     "w": "first",
+     "t": 17.32,
+     "end": 17.78
+    },
+    {
+     "w": "I",
+     "t": 17.78,
+     "end": 17.96
+    },
+    {
+     "w": "want",
+     "t": 17.96,
+     "end": 18.14
+    },
+    {
+     "w": "you",
+     "t": 18.14,
+     "end": 18.28
+    },
+    {
+     "w": "to",
+     "t": 18.28,
+     "end": 18.4
+    },
+    {
+     "w": "make",
+     "t": 18.4,
+     "end": 18.6
+    },
+    {
+     "w": "an",
+     "t": 18.6,
+     "end": 18.76
+    },
+    {
+     "w": "architecture",
+     "t": 18.76,
+     "end": 19.3
+    },
+    {
+     "w": "diagram",
+     "t": 19.3,
+     "end": 20.36
+    }
+   ],
+   "role": "claim",
+   "hero": 7,
+   "chapter": null,
+   "list": null,
+   "template": "kb.stack-side",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 8,
+   "t0": 20.78,
+   "t1": 22.68,
+   "text": "The entire architecture diagram",
+   "words": [
+    {
+     "w": "The",
+     "t": 20.78,
+     "end": 20.98
+    },
+    {
+     "w": "entire",
+     "t": 20.98,
+     "end": 21.42
+    },
+    {
+     "w": "architecture",
+     "t": 21.42,
+     "end": 21.96
+    },
+    {
+     "w": "diagram",
+     "t": 21.96,
+     "end": 22.68
+    }
+   ],
+   "role": "claim",
+   "hero": 2,
+   "chapter": null,
+   "list": null,
+   "template": "kb.rest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 9,
+   "t0": 22.68,
+   "t1": 24.7,
+   "text": "how your back end is connected to front end",
+   "words": [
+    {
+     "w": "how",
+     "t": 22.68,
+     "end": 22.8
+    },
+    {
+     "w": "your",
+     "t": 22.8,
+     "end": 23
+    },
+    {
+     "w": "back",
+     "t": 23,
+     "end": 23.3
+    },
+    {
+     "w": "end",
+     "t": 23.3,
+     "end": 23.42
+    },
+    {
+     "w": "is",
+     "t": 23.42,
+     "end": 23.6
+    },
+    {
+     "w": "connected",
+     "t": 23.6,
+     "end": 23.9
+    },
+    {
+     "w": "to",
+     "t": 23.9,
+     "end": 24.08
+    },
+    {
+     "w": "front",
+     "t": 24.08,
+     "end": 24.26
+    },
+    {
+     "w": "end",
+     "t": 24.26,
+     "end": 24.7
+    }
+   ],
+   "role": "claim",
+   "hero": 5,
+   "chapter": null,
+   "list": null,
+   "template": "kb.hero-chest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 10,
+   "t0": 24.7,
+   "t1": 25.74,
+   "text": "what are the API things",
+   "words": [
+    {
+     "w": "what",
+     "t": 24.7,
+     "end": 24.82
+    },
+    {
+     "w": "are",
+     "t": 24.82,
+     "end": 24.96
+    },
+    {
+     "w": "the",
+     "t": 24.96,
+     "end": 25.04
+    },
+    {
+     "w": "API",
+     "t": 25.04,
+     "end": 25.28
+    },
+    {
+     "w": "things",
+     "t": 25.28,
+     "end": 25.74
+    }
+   ],
+   "role": "claim",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.stack-side",
+   "transition": "flash",
+   "by": "rules"
+  },
+  {
+   "i": 11,
+   "t0": 26.06,
+   "t1": 27.42,
+   "text": "rather than just starting",
+   "words": [
+    {
+     "w": "rather",
+     "t": 26.06,
+     "end": 26.32
+    },
+    {
+     "w": "than",
+     "t": 26.32,
+     "end": 26.5
+    },
+    {
+     "w": "just",
+     "t": 26.5,
+     "end": 26.68
+    },
+    {
+     "w": "starting",
+     "t": 26.68,
+     "end": 27.42
+    }
+   ],
+   "role": "negative",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.rest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 12,
+   "t0": 27.42,
+   "t1": 28.64,
+   "text": "let me start with front end",
+   "words": [
+    {
+     "w": "let",
+     "t": 27.42,
+     "end": 27.56
+    },
+    {
+     "w": "me",
+     "t": 27.56,
+     "end": 27.7
+    },
+    {
+     "w": "start",
+     "t": 27.7,
+     "end": 27.9
+    },
+    {
+     "w": "with",
+     "t": 27.9,
+     "end": 28.1
+    },
+    {
+     "w": "front",
+     "t": 28.1,
+     "end": 28.34
+    },
+    {
+     "w": "end",
+     "t": 28.34,
+     "end": 28.64
+    }
+   ],
+   "role": "claim",
+   "hero": 4,
+   "chapter": null,
+   "list": null,
+   "template": "kb.hero-chest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 13,
+   "t0": 28.84,
+   "t1": 29.62,
+   "text": "That's not the thing",
+   "words": [
+    {
+     "w": "That's",
+     "t": 28.84,
+     "end": 29.1
+    },
+    {
+     "w": "not",
+     "t": 29.1,
+     "end": 29.22
+    },
+    {
+     "w": "the",
+     "t": 29.22,
+     "end": 29.38
+    },
+    {
+     "w": "thing",
+     "t": 29.38,
+     "end": 29.62
+    }
+   ],
+   "role": "negative",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.field-hot",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 14,
+   "t0": 29.82,
+   "t1": 32.62,
+   "text": "You see here these are the architectures I have designed",
+   "words": [
+    {
+     "w": "You",
+     "t": 29.82,
+     "end": 29.96
+    },
+    {
+     "w": "see",
+     "t": 29.96,
+     "end": 30.2
+    },
+    {
+     "w": "here",
+     "t": 30.2,
+     "end": 30.6
+    },
+    {
+     "w": "these",
+     "t": 30.6,
+     "end": 31.04
+    },
+    {
+     "w": "are",
+     "t": 31.04,
+     "end": 31.18
+    },
+    {
+     "w": "the",
+     "t": 31.18,
+     "end": 31.3
+    },
+    {
+     "w": "architectures",
+     "t": 31.3,
+     "end": 31.84
+    },
+    {
+     "w": "I",
+     "t": 31.84,
+     "end": 31.98
+    },
+    {
+     "w": "have",
+     "t": 31.98,
+     "end": 32.1
+    },
+    {
+     "w": "designed",
+     "t": 32.1,
+     "end": 32.62
+    }
+   ],
+   "role": "claim",
+   "hero": 9,
+   "chapter": null,
+   "list": null,
+   "template": "kb.hero-chest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 15,
+   "t0": 32.82,
+   "t1": 34.26,
+   "text": "Now the main thing",
+   "words": [
+    {
+     "w": "Now",
+     "t": 32.82,
+     "end": 33.12
+    },
+    {
+     "w": "the",
+     "t": 33.12,
+     "end": 33.74
+    },
+    {
+     "w": "main",
+     "t": 33.74,
+     "end": 33.9
+    },
+    {
+     "w": "thing",
+     "t": 33.9,
+     "end": 34.26
+    }
+   ],
+   "role": "claim",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.stack-side",
+   "transition": "line-wipe",
+   "by": "rules"
+  },
+  {
+   "i": 16,
+   "t0": 34.26,
+   "t1": 36.94,
+   "text": "not anymore you'll be writing most of the code",
+   "words": [
+    {
+     "w": "not",
+     "t": 34.26,
+     "end": 34.94
+    },
+    {
+     "w": "anymore",
+     "t": 34.94,
+     "end": 35.28
+    },
+    {
+     "w": "you'll",
+     "t": 35.28,
+     "end": 35.64
+    },
+    {
+     "w": "be",
+     "t": 35.64,
+     "end": 35.74
+    },
+    {
+     "w": "writing",
+     "t": 35.74,
+     "end": 35.98
+    },
+    {
+     "w": "most",
+     "t": 35.98,
+     "end": 36.26
+    },
+    {
+     "w": "of",
+     "t": 36.26,
+     "end": 36.42
+    },
+    {
+     "w": "the",
+     "t": 36.42,
+     "end": 36.52
+    },
+    {
+     "w": "code",
+     "t": 36.52,
+     "end": 36.94
+    }
+   ],
+   "role": "negative",
+   "hero": 4,
+   "chapter": null,
+   "list": null,
+   "template": "kb.rest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 17,
+   "t0": 37.18,
+   "t1": 38.56,
+   "text": "but you'll be debugging the code",
+   "words": [
+    {
+     "w": "but",
+     "t": 37.18,
+     "end": 37.34
+    },
+    {
+     "w": "you'll",
+     "t": 37.34,
+     "end": 37.54
+    },
+    {
+     "w": "be",
+     "t": 37.54,
+     "end": 37.62
+    },
+    {
+     "w": "debugging",
+     "t": 37.62,
+     "end": 38.04
+    },
+    {
+     "w": "the",
+     "t": 38.04,
+     "end": 38.32
+    },
+    {
+     "w": "code",
+     "t": 38.32,
+     "end": 38.56
+    }
+   ],
+   "role": "claim",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.hero-chest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 18,
+   "t0": 38.76,
+   "t1": 40.2,
+   "text": "AI agents will write the code",
+   "words": [
+    {
+     "w": "AI",
+     "t": 38.76,
+     "end": 38.94
+    },
+    {
+     "w": "agents",
+     "t": 38.94,
+     "end": 39.24
+    },
+    {
+     "w": "will",
+     "t": 39.24,
+     "end": 39.42
+    },
+    {
+     "w": "write",
+     "t": 39.42,
+     "end": 39.64
+    },
+    {
+     "w": "the",
+     "t": 39.64,
+     "end": 39.8
+    },
+    {
+     "w": "code",
+     "t": 39.8,
+     "end": 40.2
+    }
+   ],
+   "role": "claim",
+   "hero": 1,
+   "chapter": null,
+   "list": null,
+   "template": "kb.stack-side",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 19,
+   "t0": 40.2,
+   "t1": 43.22,
+   "text": "but still you need to understand what the code",
+   "words": [
+    {
+     "w": "but",
+     "t": 40.2,
+     "end": 40.56
+    },
+    {
+     "w": "still",
+     "t": 40.56,
+     "end": 40.78
+    },
+    {
+     "w": "you",
+     "t": 40.78,
+     "end": 40.94
+    },
+    {
+     "w": "need",
+     "t": 40.94,
+     "end": 41.06
+    },
+    {
+     "w": "to",
+     "t": 41.06,
+     "end": 41.18
+    },
+    {
+     "w": "understand",
+     "t": 41.18,
+     "end": 41.68
+    },
+    {
+     "w": "what",
+     "t": 41.3,
+     "end": 42.86
+    },
+    {
+     "w": "the",
+     "t": 42.86,
+     "end": 43.06
+    },
+    {
+     "w": "code",
+     "t": 43.06,
+     "end": 43.22
+    }
+   ],
+   "role": "claim",
+   "hero": 5,
+   "chapter": null,
+   "list": null,
+   "template": "kb.rest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 20,
+   "t0": 43.22,
+   "t1": 44.8,
+   "text": "is written and why the code is written",
+   "words": [
+    {
+     "w": "is",
+     "t": 43.22,
+     "end": 43.36
+    },
+    {
+     "w": "written",
+     "t": 43.36,
+     "end": 43.6
+    },
+    {
+     "w": "and",
+     "t": 43.6,
+     "end": 43.9
+    },
+    {
+     "w": "why",
+     "t": 43.9,
+     "end": 44.12
+    },
+    {
+     "w": "the",
+     "t": 44.12,
+     "end": 44.28
+    },
+    {
+     "w": "code",
+     "t": 44.28,
+     "end": 44.44
+    },
+    {
+     "w": "is",
+     "t": 44.44,
+     "end": 44.58
+    },
+    {
+     "w": "written",
+     "t": 44.58,
+     "end": 44.8
+    }
+   ],
+   "role": "claim",
+   "hero": 7,
+   "chapter": null,
+   "list": null,
+   "template": "kb.hero-chest",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 21,
+   "t0": 45,
+   "t1": 46.56,
+   "text": "Now this is how you become an engineer",
+   "words": [
+    {
+     "w": "Now",
+     "t": 45,
+     "end": 45.2
+    },
+    {
+     "w": "this",
+     "t": 45.2,
+     "end": 45.34
+    },
+    {
+     "w": "is",
+     "t": 45.34,
+     "end": 45.46
+    },
+    {
+     "w": "how",
+     "t": 45.46,
+     "end": 45.56
+    },
+    {
+     "w": "you",
+     "t": 45.56,
+     "end": 45.72
+    },
+    {
+     "w": "become",
+     "t": 45.72,
+     "end": 45.94
+    },
+    {
+     "w": "an",
+     "t": 45.94,
+     "end": 46.14
+    },
+    {
+     "w": "engineer",
+     "t": 46.14,
+     "end": 46.56
+    }
+   ],
+   "role": "claim",
+   "hero": 7,
+   "chapter": null,
+   "list": null,
+   "template": "kb.stack-side",
+   "transition": "flash",
+   "by": "rules"
+  },
+  {
+   "i": 22,
+   "t0": 46.76,
+   "t1": 48.02,
+   "text": "And follow these three steps",
+   "words": [
+    {
+     "w": "And",
+     "t": 46.76,
+     "end": 46.96
+    },
+    {
+     "w": "follow",
+     "t": 46.96,
+     "end": 47.22
+    },
+    {
+     "w": "these",
+     "t": 47.22,
+     "end": 47.42
+    },
+    {
+     "w": "three",
+     "t": 47.42,
+     "end": 47.58
+    },
+    {
+     "w": "steps",
+     "t": 47.58,
+     "end": 48.02
+    }
+   ],
+   "role": "number",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.void-stat",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 23,
+   "t0": 48.02,
+   "t1": 50.78,
+   "text": "and you will learn how to be an engineer",
+   "words": [
+    {
+     "w": "and",
+     "t": 48.02,
+     "end": 48.94
+    },
+    {
+     "w": "you",
+     "t": 48.94,
+     "end": 49.3
+    },
+    {
+     "w": "will",
+     "t": 49.3,
+     "end": 49.48
+    },
+    {
+     "w": "learn",
+     "t": 49.48,
+     "end": 49.96
+    },
+    {
+     "w": "how",
+     "t": 49.96,
+     "end": 50.1
+    },
+    {
+     "w": "to",
+     "t": 50.1,
+     "end": 50.3
+    },
+    {
+     "w": "be",
+     "t": 50.3,
+     "end": 50.42
+    },
+    {
+     "w": "an",
+     "t": 50.42,
+     "end": 50.54
+    },
+    {
+     "w": "engineer",
+     "t": 50.54,
+     "end": 50.78
+    }
+   ],
+   "role": "claim",
+   "hero": 8,
+   "chapter": null,
+   "list": null,
+   "template": "kb.mono",
+   "transition": "cut",
+   "by": "rules"
+  },
+  {
+   "i": 24,
+   "t0": 50.42,
+   "t1": 52.62,
+   "text": "rather than just learning code",
+   "words": [
+    {
+     "w": "rather",
+     "t": 50.42,
+     "end": 51.42
+    },
+    {
+     "w": "than",
+     "t": 51.42,
+     "end": 51.66
+    },
+    {
+     "w": "just",
+     "t": 51.66,
+     "end": 51.86
+    },
+    {
+     "w": "learning",
+     "t": 51.86,
+     "end": 52.18
+    },
+    {
+     "w": "code",
+     "t": 52.18,
+     "end": 52.62
+    }
+   ],
+   "role": "negative",
+   "hero": 3,
+   "chapter": null,
+   "list": null,
+   "template": "kb.field-hot",
+   "transition": "flash",
+   "by": "rules"
+  },
+  {
+   "i": 25,
+   "t0": 52.9,
+   "t1": 53.4,
+   "text": "Thank you",
+   "words": [
+    {
+     "w": "Thank",
+     "t": 52.9,
+     "end": 53.08
+    },
+    {
+     "w": "you",
+     "t": 53.08,
+     "end": 53.4
+    }
+   ],
+   "role": "cta",
+   "hero": 0,
+   "chapter": null,
+   "list": null,
+   "template": "kb.rest",
+   "transition": "cut",
+   "by": "rules"
+  }
+ ]
+}

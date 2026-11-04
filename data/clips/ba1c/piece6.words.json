@@ -1,0 +1,47 @@
+{
+ "text": " We also know how to limit warming.",
+ "segments": [
+  {
+   "t": 0,
+   "end": 3.48,
+   "text": "We also know how to limit warming."
+  }
+ ],
+ "words": [
+  {
+   "word": "We",
+   "t": 1.06,
+   "end": 1.16
+  },
+  {
+   "word": "also",
+   "t": 1.16,
+   "end": 1.5
+  },
+  {
+   "word": "know",
+   "t": 1.5,
+   "end": 1.92
+  },
+  {
+   "word": "how",
+   "t": 1.92,
+   "end": 2.66
+  },
+  {
+   "word": "to",
+   "t": 2.66,
+   "end": 2.8
+  },
+  {
+   "word": "limit",
+   "t": 2.8,
+   "end": 3.06
+  },
+  {
+   "word": "warming.",
+   "t": 3.06,
+   "end": 3.9
+  }
+ ]
+}

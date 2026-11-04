@@ -1,0 +1,32 @@
+{
+ "duration": 24.11,
+ "pieces": [
+  {
+   "a": 439,
+   "b": 441.22,
+   "beat": "hook claim",
+   "text": "The moon remembers everything.",
+   "i": 0,
+   "at": 0,
+   "dur": 2.22
+  },
+  {
+   "a": 442.4,
+   "b": 452.72,
+   "beat": "contrast: Earth erases",
+   "text": "You know, on the Earth, all of this is erased by weather and tectonics and all kinds of things that make cratering events and other things just go away.",
+   "i": 1,
+   "at": 2.22,
+   "dur": 10.32
+  },
+  {
+   "a": 453.05,
+   "b": 464.62,
+   "beat": "turn, number, payoff",
+   "text": "But all of that's remembered on the moon. And so we can look at craters that were formed three and four billion years ago and learn about what was going on in the early solar system from that. I think that's just very cool.",
+   "i": 2,
+   "at": 12.54,
+   "dur": 11.57
+  }
+ ]
+}

@@ -1,0 +1,5812 @@
+{
+ "text": " So a total lunar eclipse happens when the Sun, the Earth, and the Moon are aligned. The Moon goes around the Earth once a month, but we don't get an eclipse every month because the Moon's orbit is a little bit tilted. We get that alignment about every six months. And so the Earth's shadow stretches across 240,000 miles and lands on the Moon. The great thing about a lunar eclipse is that you don't need special equipment and you don't need to be in a particular location. Everybody in the United States is going to be able to see this. just need to go outside and locate the Moon. So Lunar Reconnaissance Orbiter or LRO has been in orbit around the Moon since 2009. It's been making global maps of the color and the shape of the Moon, the temperature, some forms of radiation from the Moon. And so we're learning a lot about what it's made of, more about where it came from and therefore where the earth, how it formed. And we're also learning the shape of the terrain to a level of detail that will allow us to land there safely and explore. Well, maybe you can tell. I'm old enough to remember the Apollo era, and we went there for a few years. We landed astronauts on the moon. We gathered a bunch of really important samples, and then there was sort of a quiet period for a while We now going back with not only NASA itself but its commercial partners to sample the surface and explore And the moon is a great destination for this because it remembers everything that has happened over the 4.6 billion years the solar system has been in existence. This is how we can find out where we came from, where the earth came from, where the moon came from, how the solar system formed. And so I think that's really exciting. We've only landed people in five or six different places on the moon, and those places were all near the equator. We're now sending both people and robots to all kinds of places, including the South Pole that we haven't explored yet at all. The great thing about the South Pole is that it can trap volatiles like water, trap it as ice that may have been there for a billion years. And this is a great way to sample the history of the solar system. But it also means that we might be able to find ways to sustain a human presence on the surface. Right, exactly. So in order for us to create a sustained presence on the moon with people, we need to know as much as possible about what it's like there, what resources are available, what the illumination is going to be like. If we land at the South Pole, the sun is never more than a degree and a half above the horizon. The lighting situation is very unusual there. So we need to gather as much information as we can in order to plan those missions and make them as productive and survivable as possible So pi is this incredibly important number in mathematics and science. It's just the ratio of the circumference of the circle to its diameter, but it shows up in all kinds of other places. So when I do eclipse calculations to figure out where the shadow is going to fall, that involves trigonometry, and all of trigonometry is built on pi. Now pi day is March 14th. It just so happens that the first three digits of pi are 3.14 and so the third month and the 14th day becomes pi day and this lunar eclipse is going to happen on pi day. That happens once every 350 years or so so it's quite unusual. it's a fun way to celebrate not just the moon but math and pie of both kinds so think of fruit pies and pizza pies and and all kinds of things that you can add to your observation of the moon and your celebration of science So I mentioned this before, eclipses don't happen every month because the moon's orbit is tilted by about 5 degrees. And so some months during the full moon it's going to pass a little bit above the Earth's shadow, and some months it's going to pass a little bit below. But about once every six months it actually passes through the Earth's shadow. Now it doesn't hit the middle of that shadow every time, so some lunar eclipses are just partial. But every year or year and a half, we, on average, we get a total lunar eclipse where the moon passes through the center of the Earth shadow and every part of the moon is blocked from the sun I will absolutely be outside watching this eclipse. The best thing about a lunar eclipse is that it's beautiful. So the moon during totality will turn shades of orange and red and brown. It's being hit by all of the sunrises and sunsets projected from the Earth. and those colors will change over time and the moon will be dim enough that it kind of looks almost transparent. This is something I've noticed over watching the past few total lunar eclipses that it almost seems to be disappearing like the Cheshire Cat. So it's an unusual thing to watch. It lasts for an hour so you have plenty of time to look around and see what other effects there are and it makes you think about our place in the solar system I mean we're standing at night every night we're standing in the shadow of the earth but on this particular night we get to see that shadow its extent all the way across space from here to the moon and so it's a it's just a lovely thing to watch and to think about The moon remembers everything. You know, on the Earth, all of this is erased by weather and tectonics and all kinds of things that make cratering events and other things just go away. But all of that's remembered on the moon. And so we can look at craters that were formed three and four billion years ago and learn about what was going on in the early solar system from that. I think that's just very cool. To learn more about the Moon and about this eclipse, go to science.nasta.gov slash moon.",
+ "segments": [
+  {
+   "a": 0,
+   "b": 15.339999,
+   "text": " So a total lunar eclipse happens when the Sun, the Earth, and the Moon are aligned."
+  },
+  {
+   "a": 15.339999,
+   "b": 20.16,
+   "text": " The Moon goes around the Earth once a month, but we don't get an eclipse every month because"
+  },
+  {
+   "a": 20.16,
+   "b": 23.56,
+   "text": " the Moon's orbit is a little bit tilted."
+  },
+  {
+   "a": 23.56,
+   "b": 26.619999,
+   "text": " We get that alignment about every six months."
+  },
+  {
+   "a": 26.619999,
+   "b": 42.059998,
+   "text": " And so the Earth's shadow stretches across 240,000 miles and lands on the Moon."
+  },
+  {
+   "a": 42.059998,
+   "b": 46.18,
+   "text": " The great thing about a lunar eclipse is that you don't need special equipment and you don't"
+  },
+  {
+   "a": 46.18,
+   "b": 48.62,
+   "text": " need to be in a particular location."
+  },
+  {
+   "a": 48.62,
+   "b": 51.8,
+   "text": " Everybody in the United States is going to be able to see this."
+  },
+  {
+   "a": 51.8,
+   "b": 63.26,
+   "text": " just need to go outside and locate the Moon."
+  },
+  {
+   "a": 63.26,
+   "b": 68.659996,
+   "text": " So Lunar Reconnaissance Orbiter or LRO has been in orbit around the Moon since 2009."
+  },
+  {
+   "a": 68.659996,
+   "b": 74.56,
+   "text": " It's been making global maps of the color and the shape of the Moon, the temperature,"
+  },
+  {
+   "a": 74.56,
+   "b": 77.08,
+   "text": " some forms of radiation from the Moon."
+  },
+  {
+   "a": 77.08,
+   "b": 83.26,
+   "text": " And so we're learning a lot about what it's made of, more about where it came from and"
+  },
+  {
+   "a": 83.26,
+   "b": 86.78,
+   "text": " therefore where the earth, how it formed."
+  },
+  {
+   "a": 86.78,
+   "b": 91.74,
+   "text": " And we're also learning the shape of the terrain to a level of detail that will allow"
+  },
+  {
+   "a": 91.74,
+   "b": 103.12,
+   "text": " us to land there safely and explore."
+  },
+  {
+   "a": 103.12,
+   "b": 104.56,
+   "text": " Well, maybe you can tell."
+  },
+  {
+   "a": 104.56,
+   "b": 106.579994,
+   "text": " I'm old enough to remember the Apollo era,"
+  },
+  {
+   "a": 106.579994,
+   "b": 108.659996,
+   "text": " and we went there for a few years."
+  },
+  {
+   "a": 108.659996,
+   "b": 110.21999,
+   "text": " We landed astronauts on the moon."
+  },
+  {
+   "a": 110.21999,
+   "b": 113.49999,
+   "text": " We gathered a bunch of really important samples,"
+  },
+  {
+   "a": 113.49999,
+   "b": 129.64532,
+   "text": " and then there was sort of a quiet period for a while We now going back with not only NASA itself but its commercial partners to sample the surface and explore And the moon is a great destination for this because"
+  },
+  {
+   "a": 129.64532,
+   "b": 135.94533,
+   "text": " it remembers everything that has happened over the 4.6 billion years the solar system has been"
+  },
+  {
+   "a": 135.94533,
+   "b": 141.78532,
+   "text": " in existence. This is how we can find out where we came from, where the earth came from, where the"
+  },
+  {
+   "a": 141.78532,
+   "b": 147.06532,
+   "text": " moon came from, how the solar system formed. And so I think that's really exciting."
+  },
+  {
+   "a": 156.84534,
+   "b": 163.46533,
+   "text": " We've only landed people in five or six different places on the moon, and those places were all near"
+  },
+  {
+   "a": 163.46533,
+   "b": 169.80533,
+   "text": " the equator. We're now sending both people and robots to all kinds of places, including the"
+  },
+  {
+   "a": 169.80533,
+   "b": 173.80533,
+   "text": " South Pole that we haven't explored yet at all."
+  },
+  {
+   "a": 173.80533,
+   "b": 179.60533,
+   "text": " The great thing about the South Pole is that it can trap volatiles like water, trap it"
+  },
+  {
+   "a": 179.60533,
+   "b": 183.90533,
+   "text": " as ice that may have been there for a billion years."
+  },
+  {
+   "a": 183.90533,
+   "b": 187.88533,
+   "text": " And this is a great way to sample the history of the solar system."
+  },
+  {
+   "a": 187.88533,
+   "b": 192.64532,
+   "text": " But it also means that we might be able to find ways to sustain a human presence on the"
+  },
+  {
+   "a": 192.64532,
+   "b": 193.20532,
+   "text": " surface."
+  },
+  {
+   "a": 199.80533,
+   "b": 215.86533,
+   "text": " Right, exactly. So in order for us to create a sustained presence on the moon with people, we need to know as much as possible about what it's like there, what resources are available, what the illumination is going to be like."
+  },
+  {
+   "a": 215.86533,
+   "b": 221.30533,
+   "text": " If we land at the South Pole, the sun is never more than a degree and a half above the horizon."
+  },
+  {
+   "a": 221.94533,
+   "b": 224.76532,
+   "text": " The lighting situation is very unusual there."
+  },
+  {
+   "a": 225.20532,
+   "b": 230.96533,
+   "text": " So we need to gather as much information as we can in order to plan those missions"
+  },
+  {
+   "a": 230.96533,
+   "b": 236.89066,
+   "text": " and make them as productive and survivable as possible"
+  },
+  {
+   "a": 244.73065,
+   "b": 249.25066,
+   "text": " So pi is this incredibly important number in mathematics and science. It's"
+  },
+  {
+   "a": 249.25066,
+   "b": 253.83066,
+   "text": " just the ratio of the circumference of the circle to its diameter, but it shows"
+  },
+  {
+   "a": 253.83066,
+   "b": 258.57065,
+   "text": " up in all kinds of other places. So when I do eclipse calculations to figure out"
+  },
+  {
+   "a": 258.57065,
+   "b": 263.11066,
+   "text": " where the shadow is going to fall, that involves trigonometry, and all of"
+  },
+  {
+   "a": 263.11066,
+   "b": 271.81067,
+   "text": " trigonometry is built on pi. Now pi day is March 14th. It just so happens that the first three"
+  },
+  {
+   "a": 271.81067,
+   "b": 280.29065,
+   "text": " digits of pi are 3.14 and so the third month and the 14th day becomes pi day and this lunar eclipse"
+  },
+  {
+   "a": 280.29065,
+   "b": 288.19064,
+   "text": " is going to happen on pi day. That happens once every 350 years or so so it's quite unusual."
+  },
+  {
+   "a": 288.19064,
+   "b": 298.03064,
+   "text": " it's a fun way to celebrate not just the moon but math and pie of both kinds so"
+  },
+  {
+   "a": 298.03064,
+   "b": 304.45065,
+   "text": " think of fruit pies and pizza pies and and all kinds of things that you can add"
+  },
+  {
+   "a": 304.45065,
+   "b": 311.07065,
+   "text": " to your observation of the moon and your celebration of science"
+  },
+  {
+   "a": 311.07065,
+   "b": 322.15067,
+   "text": " So I mentioned this before, eclipses don't happen every month because the moon's orbit"
+  },
+  {
+   "a": 322.15067,
+   "b": 324.45065,
+   "text": " is tilted by about 5 degrees."
+  },
+  {
+   "a": 324.45065,
+   "b": 329.57065,
+   "text": " And so some months during the full moon it's going to pass a little bit above the Earth's"
+  },
+  {
+   "a": 329.57065,
+   "b": 333.57065,
+   "text": " shadow, and some months it's going to pass a little bit below."
+  },
+  {
+   "a": 333.57065,
+   "b": 337.95065,
+   "text": " But about once every six months it actually passes through the Earth's shadow."
+  },
+  {
+   "a": 337.95065,
+   "b": 342.57065,
+   "text": " Now it doesn't hit the middle of that shadow every time, so some lunar eclipses are just"
+  },
+  {
+   "a": 342.57065,
+   "b": 343.89066,
+   "text": " partial."
+  },
+  {
+   "a": 343.89066,
+   "b": 349.77066,
+   "text": " But every year or year and a half, we, on average, we get a total lunar eclipse where"
+  },
+  {
+   "a": 349.77066,
+   "b": 355.576,
+   "text": " the moon passes through the center of the Earth shadow and every part of the moon is blocked from the sun"
+  },
+  {
+   "a": 364.976,
+   "b": 367.716,
+   "text": " I will absolutely be outside watching this eclipse."
+  },
+  {
+   "a": 368.376,
+   "b": 371.096,
+   "text": " The best thing about a lunar eclipse is that it's beautiful."
+  },
+  {
+   "a": 371.816,
+   "b": 376.936,
+   "text": " So the moon during totality will turn shades of orange and red and brown."
+  },
+  {
+   "a": 377.156,
+   "b": 382.476,
+   "text": " It's being hit by all of the sunrises and sunsets projected from the Earth."
+  },
+  {
+   "a": 382.476,
+   "b": 390.236,
+   "text": " and those colors will change over time and the moon will be dim enough that it kind of looks"
+  },
+  {
+   "a": 390.236,
+   "b": 397.336,
+   "text": " almost transparent. This is something I've noticed over watching the past few total lunar"
+  },
+  {
+   "a": 397.336,
+   "b": 403.236,
+   "text": " eclipses that it almost seems to be disappearing like the Cheshire Cat. So it's an unusual thing"
+  },
+  {
+   "a": 403.236,
+   "b": 410.856,
+   "text": " to watch. It lasts for an hour so you have plenty of time to look around and see what other effects"
+  },
+  {
+   "a": 410.856,
+   "b": 416.836,
+   "text": " there are and it makes you think about our place in the solar system I mean"
+  },
+  {
+   "a": 416.836,
+   "b": 420.236,
+   "text": " we're standing at night every night we're standing in the shadow of the"
+  },
+  {
+   "a": 420.236,
+   "b": 425.676,
+   "text": " earth but on this particular night we get to see that shadow its extent all"
+  },
+  {
+   "a": 425.676,
+   "b": 430.41602,
+   "text": " the way across space from here to the moon and so it's a it's just a lovely"
+  },
+  {
+   "a": 430.41602,
+   "b": 433.476,
+   "text": " thing to watch and to think about"
+  },
+  {
+   "a": 433.476,
+   "b": 440.856,
+   "text": " The moon remembers everything."
+  },
+  {
+   "a": 442.356,
+   "b": 452.676,
+   "text": " You know, on the Earth, all of this is erased by weather and tectonics and all kinds of things that make cratering events and other things just go away."
+  },
+  {
+   "a": 452.836,
+   "b": 454.69598,
+   "text": " But all of that's remembered on the moon."
+  },
+  {
+   "a": 454.69598,
+   "b": 462.81598,
+   "text": " And so we can look at craters that were formed three and four billion years ago and learn about what was going on in the early solar system from that."
+  },
+  {
+   "a": 462.81598,
+   "b": 469.81598,
+   "text": " I think that's just very cool."
+  },
+  {
+   "a": 471.356,
+   "b": 476.19598,
+   "text": " To learn more about the Moon and about this eclipse, go to science.nasta.gov slash moon."
+  }
+ ],
+ "words": [
+  {
+   "w": "So",
+   "a": 10.6,
+   "b": 10.62
+  },
+  {
+   "w": "a",
+   "a": 10.62,
+   "b": 10.72
+  },
+  {
+   "w": "total",
+   "a": 10.72,
+   "b": 11
+  },
+  {
+   "w": "lunar",
+   "a": 11,
+   "b": 11.18
+  },
+  {
+   "w": "eclipse",
+   "a": 11.18,
+   "b": 11.5
+  },
+  {
+   "w": "happens",
+   "a": 11.5,
+   "b": 11.92
+  },
+  {
+   "w": "when",
+   "a": 11.92,
+   "b": 12.2
+  },
+  {
+   "w": "the",
+   "a": 12.2,
+   "b": 12.36
+  },
+  {
+   "w": "Sun,",
+   "a": 12.36,
+   "b": 13.04
+  },
+  {
+   "w": "the",
+   "a": 13.04,
+   "b": 13.06
+  },
+  {
+   "w": "Earth,",
+   "a": 13.06,
+   "b": 13.58
+  },
+  {
+   "w": "and",
+   "a": 13.58,
+   "b": 13.68
+  },
+  {
+   "w": "the",
+   "a": 13.68,
+   "b": 13.78
+  },
+  {
+   "w": "Moon",
+   "a": 13.78,
+   "b": 14
+  },
+  {
+   "w": "are",
+   "a": 14,
+   "b": 14.42
+  },
+  {
+   "w": "aligned.",
+   "a": 14.42,
+   "b": 15.24
+  },
+  {
+   "w": "The",
+   "a": 14.84,
+   "b": 15.46
+  },
+  {
+   "w": "Moon",
+   "a": 15.46,
+   "b": 15.7
+  },
+  {
+   "w": "goes",
+   "a": 15.7,
+   "b": 16.08
+  },
+  {
+   "w": "around",
+   "a": 16.08,
+   "b": 16.36
+  },
+  {
+   "w": "the",
+   "a": 16.36,
+   "b": 16.52
+  },
+  {
+   "w": "Earth",
+   "a": 16.52,
+   "b": 16.72
+  },
+  {
+   "w": "once",
+   "a": 16.72,
+   "b": 17.04
+  },
+  {
+   "w": "a",
+   "a": 17.04,
+   "b": 17.22
+  },
+  {
+   "w": "month,",
+   "a": 17.22,
+   "b": 17.64
+  },
+  {
+   "w": "but",
+   "a": 17.64,
+   "b": 18.08
+  },
+  {
+   "w": "we",
+   "a": 18.08,
+   "b": 18.22
+  },
+  {
+   "w": "don't",
+   "a": 18.22,
+   "b": 18.34
+  },
+  {
+   "w": "get",
+   "a": 18.34,
+   "b": 18.56
+  },
+  {
+   "w": "an",
+   "a": 18.56,
+   "b": 18.68
+  },
+  {
+   "w": "eclipse",
+   "a": 18.68,
+   "b": 18.92
+  },
+  {
+   "w": "every",
+   "a": 18.92,
+   "b": 19.2
+  },
+  {
+   "w": "month",
+   "a": 19.2,
+   "b": 19.44
+  },
+  {
+   "w": "because",
+   "a": 19.44,
+   "b": 19.92
+  },
+  {
+   "w": "the",
+   "a": 19.66,
+   "b": 20.34
+  },
+  {
+   "w": "Moon's",
+   "a": 20.34,
+   "b": 20.74
+  },
+  {
+   "w": "orbit",
+   "a": 20.74,
+   "b": 21.06
+  },
+  {
+   "w": "is",
+   "a": 21.06,
+   "b": 21.3
+  },
+  {
+   "w": "a",
+   "a": 21.3,
+   "b": 21.4
+  },
+  {
+   "w": "little",
+   "a": 21.4,
+   "b": 21.6
+  },
+  {
+   "w": "bit",
+   "a": 21.6,
+   "b": 21.7
+  },
+  {
+   "w": "tilted.",
+   "a": 21.7,
+   "b": 22.32
+  },
+  {
+   "w": "We",
+   "a": 23.06,
+   "b": 23.62
+  },
+  {
+   "w": "get",
+   "a": 23.62,
+   "b": 23.78
+  },
+  {
+   "w": "that",
+   "a": 23.78,
+   "b": 23.96
+  },
+  {
+   "w": "alignment",
+   "a": 23.96,
+   "b": 24.42
+  },
+  {
+   "w": "about",
+   "a": 24.42,
+   "b": 24.84
+  },
+  {
+   "w": "every",
+   "a": 24.84,
+   "b": 25.24
+  },
+  {
+   "w": "six",
+   "a": 25.24,
+   "b": 25.5
+  },
+  {
+   "w": "months.",
+   "a": 25.5,
+   "b": 26.34
+  },
+  {
+   "w": "And",
+   "a": 26.9,
+   "b": 26.92
+  },
+  {
+   "w": "so",
+   "a": 26.92,
+   "b": 27.08
+  },
+  {
+   "w": "the",
+   "a": 27.08,
+   "b": 27.52
+  },
+  {
+   "w": "Earth's",
+   "a": 27.52,
+   "b": 27.9
+  },
+  {
+   "w": "shadow",
+   "a": 27.9,
+   "b": 28.3
+  },
+  {
+   "w": "stretches",
+   "a": 28.3,
+   "b": 29.3
+  },
+  {
+   "w": "across",
+   "a": 29.3,
+   "b": 29.7
+  },
+  {
+   "w": "240,000",
+   "a": 29.7,
+   "b": 31.06
+  },
+  {
+   "w": "miles",
+   "a": 31.06,
+   "b": 31.54
+  },
+  {
+   "w": "and",
+   "a": 31.54,
+   "b": 32.08
+  },
+  {
+   "w": "lands",
+   "a": 32.08,
+   "b": 32.62
+  },
+  {
+   "w": "on",
+   "a": 32.62,
+   "b": 32.8
+  },
+  {
+   "w": "the",
+   "a": 32.8,
+   "b": 32.9
+  },
+  {
+   "w": "Moon.",
+   "a": 32.9,
+   "b": 33.28
+  },
+  {
+   "w": "The",
+   "a": 41.56,
+   "b": 42.12
+  },
+  {
+   "w": "great",
+   "a": 42.12,
+   "b": 42.38
+  },
+  {
+   "w": "thing",
+   "a": 42.38,
+   "b": 42.54
+  },
+  {
+   "w": "about",
+   "a": 42.54,
+   "b": 42.72
+  },
+  {
+   "w": "a",
+   "a": 42.72,
+   "b": 42.88
+  },
+  {
+   "w": "lunar",
+   "a": 42.88,
+   "b": 43.08
+  },
+  {
+   "w": "eclipse",
+   "a": 43.08,
+   "b": 43.4
+  },
+  {
+   "w": "is",
+   "a": 43.4,
+   "b": 43.66
+  },
+  {
+   "w": "that",
+   "a": 43.66,
+   "b": 43.88
+  },
+  {
+   "w": "you",
+   "a": 43.88,
+   "b": 44.1
+  },
+  {
+   "w": "don't",
+   "a": 44.1,
+   "b": 44.28
+  },
+  {
+   "w": "need",
+   "a": 44.28,
+   "b": 44.56
+  },
+  {
+   "w": "special",
+   "a": 44.56,
+   "b": 44.92
+  },
+  {
+   "w": "equipment",
+   "a": 44.92,
+   "b": 45.4
+  },
+  {
+   "w": "and",
+   "a": 45.4,
+   "b": 45.84
+  },
+  {
+   "w": "you",
+   "a": 45.84,
+   "b": 45.98
+  },
+  {
+   "w": "don't",
+   "a": 45.98,
+   "b": 46.1
+  },
+  {
+   "w": "need",
+   "a": 45.68,
+   "b": 46.32
+  },
+  {
+   "w": "to",
+   "a": 46.32,
+   "b": 46.48
+  },
+  {
+   "w": "be",
+   "a": 46.48,
+   "b": 46.66
+  },
+  {
+   "w": "in",
+   "a": 46.66,
+   "b": 46.8
+  },
+  {
+   "w": "a",
+   "a": 46.8,
+   "b": 46.9
+  },
+  {
+   "w": "particular",
+   "a": 46.9,
+   "b": 47.4
+  },
+  {
+   "w": "location.",
+   "a": 47.4,
+   "b": 48.2
+  },
+  {
+   "w": "Everybody",
+   "a": 48.12,
+   "b": 48.78
+  },
+  {
+   "w": "in",
+   "a": 48.78,
+   "b": 49.14
+  },
+  {
+   "w": "the",
+   "a": 49.14,
+   "b": 49.24
+  },
+  {
+   "w": "United",
+   "a": 49.24,
+   "b": 49.4
+  },
+  {
+   "w": "States",
+   "a": 49.4,
+   "b": 49.84
+  },
+  {
+   "w": "is",
+   "a": 49.84,
+   "b": 50.06
+  },
+  {
+   "w": "going",
+   "a": 50.06,
+   "b": 50.2
+  },
+  {
+   "w": "to",
+   "a": 50.2,
+   "b": 50.34
+  },
+  {
+   "w": "be",
+   "a": 50.34,
+   "b": 50.44
+  },
+  {
+   "w": "able",
+   "a": 50.44,
+   "b": 50.62
+  },
+  {
+   "w": "to",
+   "a": 50.62,
+   "b": 50.74
+  },
+  {
+   "w": "see",
+   "a": 50.74,
+   "b": 50.94
+  },
+  {
+   "w": "this.",
+   "a": 50.94,
+   "b": 51.36
+  },
+  {
+   "w": "just",
+   "a": 51.8,
+   "b": 52.02
+  },
+  {
+   "w": "need",
+   "a": 52.02,
+   "b": 52.28
+  },
+  {
+   "w": "to",
+   "a": 52.28,
+   "b": 52.4
+  },
+  {
+   "w": "go",
+   "a": 52.4,
+   "b": 52.52
+  },
+  {
+   "w": "outside",
+   "a": 52.52,
+   "b": 52.9
+  },
+  {
+   "w": "and",
+   "a": 52.9,
+   "b": 53.2
+  },
+  {
+   "w": "locate",
+   "a": 53.2,
+   "b": 53.52
+  },
+  {
+   "w": "the",
+   "a": 53.52,
+   "b": 53.78
+  },
+  {
+   "w": "Moon.",
+   "a": 53.78,
+   "b": 54.2
+  },
+  {
+   "w": "So",
+   "a": 63.06,
+   "b": 63.34
+  },
+  {
+   "w": "Lunar",
+   "a": 63.34,
+   "b": 63.5
+  },
+  {
+   "w": "Reconnaissance",
+   "a": 63.5,
+   "b": 63.94
+  },
+  {
+   "w": "Orbiter",
+   "a": 63.94,
+   "b": 64.32
+  },
+  {
+   "w": "or",
+   "a": 64.32,
+   "b": 64.56
+  },
+  {
+   "w": "LRO",
+   "a": 64.56,
+   "b": 65
+  },
+  {
+   "w": "has",
+   "a": 65,
+   "b": 65.26
+  },
+  {
+   "w": "been",
+   "a": 65.26,
+   "b": 65.5
+  },
+  {
+   "w": "in",
+   "a": 65.5,
+   "b": 65.74
+  },
+  {
+   "w": "orbit",
+   "a": 65.74,
+   "b": 66.1
+  },
+  {
+   "w": "around",
+   "a": 66.1,
+   "b": 66.34
+  },
+  {
+   "w": "the",
+   "a": 66.34,
+   "b": 66.48
+  },
+  {
+   "w": "Moon",
+   "a": 66.48,
+   "b": 66.6
+  },
+  {
+   "w": "since",
+   "a": 66.6,
+   "b": 66.9
+  },
+  {
+   "w": "2009.",
+   "a": 66.9,
+   "b": 68.18
+  },
+  {
+   "w": "It's",
+   "a": 68.16,
+   "b": 68.72
+  },
+  {
+   "w": "been",
+   "a": 68.72,
+   "b": 68.82
+  },
+  {
+   "w": "making",
+   "a": 68.82,
+   "b": 69.16
+  },
+  {
+   "w": "global",
+   "a": 69.16,
+   "b": 69.62
+  },
+  {
+   "w": "maps",
+   "a": 69.62,
+   "b": 70.04
+  },
+  {
+   "w": "of",
+   "a": 70.04,
+   "b": 70.36
+  },
+  {
+   "w": "the",
+   "a": 70.36,
+   "b": 70.6
+  },
+  {
+   "w": "color",
+   "a": 70.6,
+   "b": 71.02
+  },
+  {
+   "w": "and",
+   "a": 71.02,
+   "b": 71.38
+  },
+  {
+   "w": "the",
+   "a": 71.38,
+   "b": 71.5
+  },
+  {
+   "w": "shape",
+   "a": 71.5,
+   "b": 71.74
+  },
+  {
+   "w": "of",
+   "a": 71.74,
+   "b": 71.92
+  },
+  {
+   "w": "the",
+   "a": 71.92,
+   "b": 72.04
+  },
+  {
+   "w": "Moon,",
+   "a": 72.04,
+   "b": 72.72
+  },
+  {
+   "w": "the",
+   "a": 72.72,
+   "b": 72.92
+  },
+  {
+   "w": "temperature,",
+   "a": 72.92,
+   "b": 74.04
+  },
+  {
+   "w": "some",
+   "a": 74.06,
+   "b": 74.62
+  },
+  {
+   "w": "forms",
+   "a": 74.62,
+   "b": 74.96
+  },
+  {
+   "w": "of",
+   "a": 74.96,
+   "b": 75.16
+  },
+  {
+   "w": "radiation",
+   "a": 75.16,
+   "b": 75.6
+  },
+  {
+   "w": "from",
+   "a": 75.6,
+   "b": 75.9
+  },
+  {
+   "w": "the",
+   "a": 75.9,
+   "b": 76.06
+  },
+  {
+   "w": "Moon.",
+   "a": 76.06,
+   "b": 76.46
+  },
+  {
+   "w": "And",
+   "a": 77.08,
+   "b": 77.1
+  },
+  {
+   "w": "so",
+   "a": 77.1,
+   "b": 77.28
+  },
+  {
+   "w": "we're",
+   "a": 77.28,
+   "b": 77.54
+  },
+  {
+   "w": "learning",
+   "a": 77.54,
+   "b": 77.82
+  },
+  {
+   "w": "a",
+   "a": 77.82,
+   "b": 78.04
+  },
+  {
+   "w": "lot",
+   "a": 78.04,
+   "b": 78.24
+  },
+  {
+   "w": "about",
+   "a": 78.24,
+   "b": 78.64
+  },
+  {
+   "w": "what",
+   "a": 78.64,
+   "b": 79.38
+  },
+  {
+   "w": "it's",
+   "a": 79.38,
+   "b": 79.56
+  },
+  {
+   "w": "made",
+   "a": 79.56,
+   "b": 79.8
+  },
+  {
+   "w": "of,",
+   "a": 79.8,
+   "b": 80.34
+  },
+  {
+   "w": "more",
+   "a": 80.34,
+   "b": 81.34
+  },
+  {
+   "w": "about",
+   "a": 81.34,
+   "b": 81.7
+  },
+  {
+   "w": "where",
+   "a": 81.7,
+   "b": 82.2
+  },
+  {
+   "w": "it",
+   "a": 82.2,
+   "b": 82.58
+  },
+  {
+   "w": "came",
+   "a": 82.58,
+   "b": 82.8
+  },
+  {
+   "w": "from",
+   "a": 82.8,
+   "b": 83.06
+  },
+  {
+   "w": "and",
+   "a": 83.06,
+   "b": 83.28
+  },
+  {
+   "w": "therefore",
+   "a": 82.76,
+   "b": 83.56
+  },
+  {
+   "w": "where",
+   "a": 83.56,
+   "b": 83.86
+  },
+  {
+   "w": "the",
+   "a": 83.86,
+   "b": 84.04
+  },
+  {
+   "w": "earth,",
+   "a": 84.04,
+   "b": 84.54
+  },
+  {
+   "w": "how",
+   "a": 84.54,
+   "b": 84.66
+  },
+  {
+   "w": "it",
+   "a": 84.66,
+   "b": 84.9
+  },
+  {
+   "w": "formed.",
+   "a": 84.9,
+   "b": 85.5
+  },
+  {
+   "w": "And",
+   "a": 86.28,
+   "b": 86.84
+  },
+  {
+   "w": "we're",
+   "a": 86.84,
+   "b": 87.02
+  },
+  {
+   "w": "also",
+   "a": 87.02,
+   "b": 87.26
+  },
+  {
+   "w": "learning",
+   "a": 87.26,
+   "b": 87.74
+  },
+  {
+   "w": "the",
+   "a": 87.74,
+   "b": 88.62
+  },
+  {
+   "w": "shape",
+   "a": 88.62,
+   "b": 89.22
+  },
+  {
+   "w": "of",
+   "a": 89.22,
+   "b": 89.38
+  },
+  {
+   "w": "the",
+   "a": 89.38,
+   "b": 89.5
+  },
+  {
+   "w": "terrain",
+   "a": 89.5,
+   "b": 89.94
+  },
+  {
+   "w": "to",
+   "a": 89.94,
+   "b": 90.28
+  },
+  {
+   "w": "a",
+   "a": 90.28,
+   "b": 90.44
+  },
+  {
+   "w": "level",
+   "a": 90.44,
+   "b": 90.66
+  },
+  {
+   "w": "of",
+   "a": 90.66,
+   "b": 90.82
+  },
+  {
+   "w": "detail",
+   "a": 90.82,
+   "b": 91.14
+  },
+  {
+   "w": "that",
+   "a": 91.14,
+   "b": 91.4
+  },
+  {
+   "w": "will",
+   "a": 91.4,
+   "b": 91.54
+  },
+  {
+   "w": "allow",
+   "a": 91.54,
+   "b": 91.8
+  },
+  {
+   "w": "us",
+   "a": 91.24,
+   "b": 92.04
+  },
+  {
+   "w": "to",
+   "a": 92.04,
+   "b": 92.28
+  },
+  {
+   "w": "land",
+   "a": 92.28,
+   "b": 92.72
+  },
+  {
+   "w": "there",
+   "a": 92.72,
+   "b": 92.96
+  },
+  {
+   "w": "safely",
+   "a": 92.96,
+   "b": 93.48
+  },
+  {
+   "w": "and",
+   "a": 93.48,
+   "b": 94.06
+  },
+  {
+   "w": "explore.",
+   "a": 94.06,
+   "b": 100.8
+  },
+  {
+   "w": "Well,",
+   "a": 103.12,
+   "b": 103.52
+  },
+  {
+   "w": "maybe",
+   "a": 103.52,
+   "b": 103.92
+  },
+  {
+   "w": "you",
+   "a": 103.92,
+   "b": 104.08
+  },
+  {
+   "w": "can",
+   "a": 104.08,
+   "b": 104.22
+  },
+  {
+   "w": "tell.",
+   "a": 104.22,
+   "b": 104.5
+  },
+  {
+   "w": "I'm",
+   "a": 104.06,
+   "b": 104.68
+  },
+  {
+   "w": "old",
+   "a": 104.68,
+   "b": 104.86
+  },
+  {
+   "w": "enough",
+   "a": 104.86,
+   "b": 105.1
+  },
+  {
+   "w": "to",
+   "a": 105.1,
+   "b": 105.24
+  },
+  {
+   "w": "remember",
+   "a": 105.24,
+   "b": 105.5
+  },
+  {
+   "w": "the",
+   "a": 105.5,
+   "b": 105.66
+  },
+  {
+   "w": "Apollo",
+   "a": 105.66,
+   "b": 105.98
+  },
+  {
+   "w": "era,",
+   "a": 105.98,
+   "b": 106.66
+  },
+  {
+   "w": "and",
+   "a": 106.08,
+   "b": 106.76
+  },
+  {
+   "w": "we",
+   "a": 106.76,
+   "b": 106.96
+  },
+  {
+   "w": "went",
+   "a": 106.96,
+   "b": 107.22
+  },
+  {
+   "w": "there",
+   "a": 107.22,
+   "b": 107.48
+  },
+  {
+   "w": "for",
+   "a": 107.48,
+   "b": 107.84
+  },
+  {
+   "w": "a",
+   "a": 107.84,
+   "b": 108
+  },
+  {
+   "w": "few",
+   "a": 108,
+   "b": 108.16
+  },
+  {
+   "w": "years.",
+   "a": 108.16,
+   "b": 108.68
+  },
+  {
+   "w": "We",
+   "a": 108.16,
+   "b": 108.74
+  },
+  {
+   "w": "landed",
+   "a": 108.74,
+   "b": 109.04
+  },
+  {
+   "w": "astronauts",
+   "a": 109.04,
+   "b": 109.6
+  },
+  {
+   "w": "on",
+   "a": 109.6,
+   "b": 109.8
+  },
+  {
+   "w": "the",
+   "a": 109.8,
+   "b": 109.9
+  },
+  {
+   "w": "moon.",
+   "a": 109.9,
+   "b": 110.18
+  },
+  {
+   "w": "We",
+   "a": 109.72,
+   "b": 110.3
+  },
+  {
+   "w": "gathered",
+   "a": 110.3,
+   "b": 110.56
+  },
+  {
+   "w": "a",
+   "a": 110.56,
+   "b": 110.84
+  },
+  {
+   "w": "bunch",
+   "a": 110.84,
+   "b": 111
+  },
+  {
+   "w": "of",
+   "a": 111,
+   "b": 111.16
+  },
+  {
+   "w": "really",
+   "a": 111.16,
+   "b": 111.4
+  },
+  {
+   "w": "important",
+   "a": 111.4,
+   "b": 111.76
+  },
+  {
+   "w": "samples,",
+   "a": 111.76,
+   "b": 112.64
+  },
+  {
+   "w": "and",
+   "a": 113,
+   "b": 113.64
+  },
+  {
+   "w": "then",
+   "a": 113.64,
+   "b": 113.76
+  },
+  {
+   "w": "there",
+   "a": 113.76,
+   "b": 113.98
+  },
+  {
+   "w": "was",
+   "a": 113.98,
+   "b": 114.12
+  },
+  {
+   "w": "sort",
+   "a": 114.12,
+   "b": 114.26
+  },
+  {
+   "w": "of",
+   "a": 114.26,
+   "b": 114.36
+  },
+  {
+   "w": "a",
+   "a": 114.36,
+   "b": 114.44
+  },
+  {
+   "w": "quiet",
+   "a": 114.44,
+   "b": 114.74
+  },
+  {
+   "w": "period",
+   "a": 114.74,
+   "b": 115.1
+  },
+  {
+   "w": "for",
+   "a": 115.1,
+   "b": 115.36
+  },
+  {
+   "w": "a",
+   "a": 115.36,
+   "b": 115.44
+  },
+  {
+   "w": "while.",
+   "a": 115.44,
+   "b": 115.8
+  },
+  {
+   "w": "We're",
+   "a": 115.66,
+   "b": 116.26
+  },
+  {
+   "w": "now",
+   "a": 116.26,
+   "b": 116.48
+  },
+  {
+   "w": "going",
+   "a": 116.48,
+   "b": 116.88
+  },
+  {
+   "w": "back",
+   "a": 116.88,
+   "b": 117.3
+  },
+  {
+   "w": "with",
+   "a": 117.3,
+   "b": 117.68
+  },
+  {
+   "w": "not",
+   "a": 117.68,
+   "b": 118.48
+  },
+  {
+   "w": "only",
+   "a": 118.48,
+   "b": 118.78
+  },
+  {
+   "w": "NASA",
+   "a": 118.765,
+   "b": 119.145
+  },
+  {
+   "w": "itself,",
+   "a": 119.145,
+   "b": 119.925
+  },
+  {
+   "w": "but",
+   "a": 119.925,
+   "b": 120.005
+  },
+  {
+   "w": "its",
+   "a": 120.005,
+   "b": 120.185
+  },
+  {
+   "w": "commercial",
+   "a": 120.185,
+   "b": 120.525
+  },
+  {
+   "w": "partners",
+   "a": 120.145,
+   "b": 121.105
+  },
+  {
+   "w": "to",
+   "a": 121.105,
+   "b": 121.845
+  },
+  {
+   "w": "sample",
+   "a": 121.845,
+   "b": 122.345
+  },
+  {
+   "w": "the",
+   "a": 122.345,
+   "b": 122.565
+  },
+  {
+   "w": "surface",
+   "a": 122.565,
+   "b": 122.925
+  },
+  {
+   "w": "and",
+   "a": 122.925,
+   "b": 123.445
+  },
+  {
+   "w": "explore.",
+   "a": 123.445,
+   "b": 124.065
+  },
+  {
+   "w": "And",
+   "a": 124.065,
+   "b": 125.545
+  },
+  {
+   "w": "the",
+   "a": 125.545,
+   "b": 126.245
+  },
+  {
+   "w": "moon",
+   "a": 126.245,
+   "b": 126.485
+  },
+  {
+   "w": "is",
+   "a": 126.485,
+   "b": 127.245
+  },
+  {
+   "w": "a",
+   "a": 127.245,
+   "b": 127.625
+  },
+  {
+   "w": "great",
+   "a": 127.625,
+   "b": 128.025
+  },
+  {
+   "w": "destination",
+   "a": 128.025,
+   "b": 128.465
+  },
+  {
+   "w": "for",
+   "a": 128.465,
+   "b": 128.925
+  },
+  {
+   "w": "this",
+   "a": 128.925,
+   "b": 129.165
+  },
+  {
+   "w": "because",
+   "a": 129.165,
+   "b": 129.585
+  },
+  {
+   "w": "it",
+   "a": 129.145,
+   "b": 130.665
+  },
+  {
+   "w": "remembers",
+   "a": 130.665,
+   "b": 131.285
+  },
+  {
+   "w": "everything",
+   "a": 131.285,
+   "b": 131.925
+  },
+  {
+   "w": "that",
+   "a": 131.925,
+   "b": 132.225
+  },
+  {
+   "w": "has",
+   "a": 132.225,
+   "b": 132.325
+  },
+  {
+   "w": "happened",
+   "a": 132.325,
+   "b": 132.665
+  },
+  {
+   "w": "over",
+   "a": 132.665,
+   "b": 133.005
+  },
+  {
+   "w": "the",
+   "a": 133.005,
+   "b": 133.205
+  },
+  {
+   "w": "4.6",
+   "a": 133.205,
+   "b": 133.945
+  },
+  {
+   "w": "billion",
+   "a": 133.945,
+   "b": 134.305
+  },
+  {
+   "w": "years",
+   "a": 134.305,
+   "b": 134.725
+  },
+  {
+   "w": "the",
+   "a": 134.725,
+   "b": 135.005
+  },
+  {
+   "w": "solar",
+   "a": 135.005,
+   "b": 135.205
+  },
+  {
+   "w": "system",
+   "a": 135.205,
+   "b": 135.545
+  },
+  {
+   "w": "has",
+   "a": 135.545,
+   "b": 135.765
+  },
+  {
+   "w": "been",
+   "a": 135.765,
+   "b": 135.905
+  },
+  {
+   "w": "in",
+   "a": 135.645,
+   "b": 136.045
+  },
+  {
+   "w": "existence.",
+   "a": 136.045,
+   "b": 136.345
+  },
+  {
+   "w": "This",
+   "a": 136.345,
+   "b": 137.285
+  },
+  {
+   "w": "is",
+   "a": 137.285,
+   "b": 137.445
+  },
+  {
+   "w": "how",
+   "a": 137.445,
+   "b": 137.585
+  },
+  {
+   "w": "we",
+   "a": 137.585,
+   "b": 137.765
+  },
+  {
+   "w": "can",
+   "a": 137.765,
+   "b": 137.885
+  },
+  {
+   "w": "find",
+   "a": 137.885,
+   "b": 138.185
+  },
+  {
+   "w": "out",
+   "a": 138.185,
+   "b": 138.505
+  },
+  {
+   "w": "where",
+   "a": 138.505,
+   "b": 139.525
+  },
+  {
+   "w": "we",
+   "a": 139.525,
+   "b": 139.745
+  },
+  {
+   "w": "came",
+   "a": 139.745,
+   "b": 139.985
+  },
+  {
+   "w": "from,",
+   "a": 139.985,
+   "b": 140.425
+  },
+  {
+   "w": "where",
+   "a": 140.425,
+   "b": 140.605
+  },
+  {
+   "w": "the",
+   "a": 140.605,
+   "b": 140.845
+  },
+  {
+   "w": "earth",
+   "a": 140.845,
+   "b": 140.945
+  },
+  {
+   "w": "came",
+   "a": 140.945,
+   "b": 141.185
+  },
+  {
+   "w": "from,",
+   "a": 141.185,
+   "b": 141.565
+  },
+  {
+   "w": "where",
+   "a": 141.565,
+   "b": 141.625
+  },
+  {
+   "w": "the",
+   "a": 141.625,
+   "b": 141.765
+  },
+  {
+   "w": "moon",
+   "a": 141.785,
+   "b": 141.905
+  },
+  {
+   "w": "came",
+   "a": 141.905,
+   "b": 142.165
+  },
+  {
+   "w": "from,",
+   "a": 142.165,
+   "b": 142.485
+  },
+  {
+   "w": "how",
+   "a": 142.485,
+   "b": 142.645
+  },
+  {
+   "w": "the",
+   "a": 142.645,
+   "b": 142.785
+  },
+  {
+   "w": "solar",
+   "a": 142.785,
+   "b": 142.985
+  },
+  {
+   "w": "system",
+   "a": 142.985,
+   "b": 143.385
+  },
+  {
+   "w": "formed.",
+   "a": 143.385,
+   "b": 143.945
+  },
+  {
+   "w": "And",
+   "a": 143.945,
+   "b": 145.065
+  },
+  {
+   "w": "so",
+   "a": 145.065,
+   "b": 145.285
+  },
+  {
+   "w": "I",
+   "a": 145.285,
+   "b": 145.705
+  },
+  {
+   "w": "think",
+   "a": 145.705,
+   "b": 146.025
+  },
+  {
+   "w": "that's",
+   "a": 146.025,
+   "b": 146.205
+  },
+  {
+   "w": "really",
+   "a": 146.205,
+   "b": 146.505
+  },
+  {
+   "w": "exciting.",
+   "a": 146.505,
+   "b": 147.065
+  },
+  {
+   "w": "We've",
+   "a": 157.185,
+   "b": 157.445
+  },
+  {
+   "w": "only",
+   "a": 157.445,
+   "b": 157.665
+  },
+  {
+   "w": "landed",
+   "a": 157.665,
+   "b": 158.065
+  },
+  {
+   "w": "people",
+   "a": 158.065,
+   "b": 158.605
+  },
+  {
+   "w": "in",
+   "a": 158.605,
+   "b": 159.145
+  },
+  {
+   "w": "five",
+   "a": 159.145,
+   "b": 159.985
+  },
+  {
+   "w": "or",
+   "a": 159.985,
+   "b": 160.165
+  },
+  {
+   "w": "six",
+   "a": 160.165,
+   "b": 160.365
+  },
+  {
+   "w": "different",
+   "a": 160.365,
+   "b": 160.585
+  },
+  {
+   "w": "places",
+   "a": 160.585,
+   "b": 160.965
+  },
+  {
+   "w": "on",
+   "a": 160.965,
+   "b": 161.245
+  },
+  {
+   "w": "the",
+   "a": 161.245,
+   "b": 161.345
+  },
+  {
+   "w": "moon,",
+   "a": 161.345,
+   "b": 161.505
+  },
+  {
+   "w": "and",
+   "a": 161.505,
+   "b": 161.845
+  },
+  {
+   "w": "those",
+   "a": 161.845,
+   "b": 162.405
+  },
+  {
+   "w": "places",
+   "a": 162.405,
+   "b": 162.785
+  },
+  {
+   "w": "were",
+   "a": 162.785,
+   "b": 163.105
+  },
+  {
+   "w": "all",
+   "a": 163.105,
+   "b": 163.225
+  },
+  {
+   "w": "near",
+   "a": 163.225,
+   "b": 163.425
+  },
+  {
+   "w": "the",
+   "a": 162.965,
+   "b": 163.605
+  },
+  {
+   "w": "equator.",
+   "a": 163.605,
+   "b": 163.905
+  },
+  {
+   "w": "We're",
+   "a": 163.905,
+   "b": 164.765
+  },
+  {
+   "w": "now",
+   "a": 164.765,
+   "b": 165.025
+  },
+  {
+   "w": "sending",
+   "a": 165.025,
+   "b": 165.505
+  },
+  {
+   "w": "both",
+   "a": 165.505,
+   "b": 165.885
+  },
+  {
+   "w": "people",
+   "a": 165.885,
+   "b": 166.305
+  },
+  {
+   "w": "and",
+   "a": 166.305,
+   "b": 166.705
+  },
+  {
+   "w": "robots",
+   "a": 166.705,
+   "b": 167.065
+  },
+  {
+   "w": "to",
+   "a": 167.065,
+   "b": 167.565
+  },
+  {
+   "w": "all",
+   "a": 167.565,
+   "b": 168.025
+  },
+  {
+   "w": "kinds",
+   "a": 168.025,
+   "b": 168.405
+  },
+  {
+   "w": "of",
+   "a": 168.405,
+   "b": 168.565
+  },
+  {
+   "w": "places,",
+   "a": 168.565,
+   "b": 168.905
+  },
+  {
+   "w": "including",
+   "a": 168.905,
+   "b": 169.485
+  },
+  {
+   "w": "the",
+   "a": 169.485,
+   "b": 169.765
+  },
+  {
+   "w": "South",
+   "a": 169.805,
+   "b": 169.925
+  },
+  {
+   "w": "Pole",
+   "a": 169.925,
+   "b": 170.285
+  },
+  {
+   "w": "that",
+   "a": 170.285,
+   "b": 171.005
+  },
+  {
+   "w": "we",
+   "a": 171.005,
+   "b": 171.145
+  },
+  {
+   "w": "haven't",
+   "a": 171.145,
+   "b": 171.485
+  },
+  {
+   "w": "explored",
+   "a": 171.485,
+   "b": 171.905
+  },
+  {
+   "w": "yet",
+   "a": 171.905,
+   "b": 172.165
+  },
+  {
+   "w": "at",
+   "a": 172.165,
+   "b": 172.465
+  },
+  {
+   "w": "all.",
+   "a": 172.465,
+   "b": 172.945
+  },
+  {
+   "w": "The",
+   "a": 173.305,
+   "b": 173.905
+  },
+  {
+   "w": "great",
+   "a": 173.905,
+   "b": 174.145
+  },
+  {
+   "w": "thing",
+   "a": 174.145,
+   "b": 174.305
+  },
+  {
+   "w": "about",
+   "a": 174.305,
+   "b": 174.465
+  },
+  {
+   "w": "the",
+   "a": 174.465,
+   "b": 174.605
+  },
+  {
+   "w": "South",
+   "a": 174.605,
+   "b": 174.785
+  },
+  {
+   "w": "Pole",
+   "a": 174.785,
+   "b": 175.185
+  },
+  {
+   "w": "is",
+   "a": 175.185,
+   "b": 175.525
+  },
+  {
+   "w": "that",
+   "a": 175.525,
+   "b": 175.785
+  },
+  {
+   "w": "it",
+   "a": 175.785,
+   "b": 176.045
+  },
+  {
+   "w": "can",
+   "a": 176.045,
+   "b": 176.245
+  },
+  {
+   "w": "trap",
+   "a": 176.245,
+   "b": 176.785
+  },
+  {
+   "w": "volatiles",
+   "a": 176.785,
+   "b": 178.005
+  },
+  {
+   "w": "like",
+   "a": 178.005,
+   "b": 178.245
+  },
+  {
+   "w": "water,",
+   "a": 178.245,
+   "b": 178.965
+  },
+  {
+   "w": "trap",
+   "a": 178.965,
+   "b": 179.485
+  },
+  {
+   "w": "it",
+   "a": 179.485,
+   "b": 179.625
+  },
+  {
+   "w": "as",
+   "a": 179.105,
+   "b": 179.785
+  },
+  {
+   "w": "ice",
+   "a": 179.785,
+   "b": 180.105
+  },
+  {
+   "w": "that",
+   "a": 180.105,
+   "b": 180.385
+  },
+  {
+   "w": "may",
+   "a": 180.385,
+   "b": 180.665
+  },
+  {
+   "w": "have",
+   "a": 180.665,
+   "b": 180.985
+  },
+  {
+   "w": "been",
+   "a": 180.985,
+   "b": 181.265
+  },
+  {
+   "w": "there",
+   "a": 181.265,
+   "b": 181.745
+  },
+  {
+   "w": "for",
+   "a": 181.745,
+   "b": 182.045
+  },
+  {
+   "w": "a",
+   "a": 182.045,
+   "b": 182.205
+  },
+  {
+   "w": "billion",
+   "a": 182.205,
+   "b": 182.445
+  },
+  {
+   "w": "years.",
+   "a": 182.445,
+   "b": 182.985
+  },
+  {
+   "w": "And",
+   "a": 183.405,
+   "b": 183.965
+  },
+  {
+   "w": "this",
+   "a": 183.965,
+   "b": 184.065
+  },
+  {
+   "w": "is",
+   "a": 184.065,
+   "b": 184.205
+  },
+  {
+   "w": "a",
+   "a": 184.205,
+   "b": 184.285
+  },
+  {
+   "w": "great",
+   "a": 184.285,
+   "b": 184.525
+  },
+  {
+   "w": "way",
+   "a": 184.525,
+   "b": 184.745
+  },
+  {
+   "w": "to",
+   "a": 184.745,
+   "b": 184.965
+  },
+  {
+   "w": "sample",
+   "a": 184.965,
+   "b": 185.445
+  },
+  {
+   "w": "the",
+   "a": 185.445,
+   "b": 185.765
+  },
+  {
+   "w": "history",
+   "a": 185.765,
+   "b": 186.045
+  },
+  {
+   "w": "of",
+   "a": 186.045,
+   "b": 186.185
+  },
+  {
+   "w": "the",
+   "a": 186.185,
+   "b": 186.265
+  },
+  {
+   "w": "solar",
+   "a": 186.265,
+   "b": 186.445
+  },
+  {
+   "w": "system.",
+   "a": 186.445,
+   "b": 186.985
+  },
+  {
+   "w": "But",
+   "a": 187.385,
+   "b": 187.945
+  },
+  {
+   "w": "it",
+   "a": 187.945,
+   "b": 188.025
+  },
+  {
+   "w": "also",
+   "a": 188.025,
+   "b": 188.265
+  },
+  {
+   "w": "means",
+   "a": 188.265,
+   "b": 188.605
+  },
+  {
+   "w": "that",
+   "a": 188.605,
+   "b": 188.825
+  },
+  {
+   "w": "we",
+   "a": 188.825,
+   "b": 188.965
+  },
+  {
+   "w": "might",
+   "a": 188.965,
+   "b": 189.145
+  },
+  {
+   "w": "be",
+   "a": 189.145,
+   "b": 189.345
+  },
+  {
+   "w": "able",
+   "a": 189.345,
+   "b": 189.505
+  },
+  {
+   "w": "to",
+   "a": 189.505,
+   "b": 189.645
+  },
+  {
+   "w": "find",
+   "a": 189.645,
+   "b": 189.905
+  },
+  {
+   "w": "ways",
+   "a": 189.905,
+   "b": 190.325
+  },
+  {
+   "w": "to",
+   "a": 190.325,
+   "b": 191.005
+  },
+  {
+   "w": "sustain",
+   "a": 191.005,
+   "b": 191.525
+  },
+  {
+   "w": "a",
+   "a": 191.525,
+   "b": 191.745
+  },
+  {
+   "w": "human",
+   "a": 191.745,
+   "b": 191.905
+  },
+  {
+   "w": "presence",
+   "a": 191.905,
+   "b": 192.345
+  },
+  {
+   "w": "on",
+   "a": 192.345,
+   "b": 192.585
+  },
+  {
+   "w": "the",
+   "a": 192.585,
+   "b": 192.705
+  },
+  {
+   "w": "surface.",
+   "a": 192.145,
+   "b": 193.325
+  },
+  {
+   "w": "Right,",
+   "a": 201.085,
+   "b": 201.405
+  },
+  {
+   "w": "exactly.",
+   "a": 201.405,
+   "b": 201.925
+  },
+  {
+   "w": "So",
+   "a": 201.925,
+   "b": 202.025
+  },
+  {
+   "w": "in",
+   "a": 202.025,
+   "b": 202.665
+  },
+  {
+   "w": "order",
+   "a": 202.665,
+   "b": 202.885
+  },
+  {
+   "w": "for",
+   "a": 202.885,
+   "b": 203.105
+  },
+  {
+   "w": "us",
+   "a": 203.105,
+   "b": 203.285
+  },
+  {
+   "w": "to",
+   "a": 203.285,
+   "b": 203.465
+  },
+  {
+   "w": "create",
+   "a": 203.465,
+   "b": 203.885
+  },
+  {
+   "w": "a",
+   "a": 203.885,
+   "b": 204.085
+  },
+  {
+   "w": "sustained",
+   "a": 204.085,
+   "b": 204.405
+  },
+  {
+   "w": "presence",
+   "a": 204.405,
+   "b": 204.825
+  },
+  {
+   "w": "on",
+   "a": 204.825,
+   "b": 205.045
+  },
+  {
+   "w": "the",
+   "a": 205.045,
+   "b": 205.165
+  },
+  {
+   "w": "moon",
+   "a": 205.165,
+   "b": 205.245
+  },
+  {
+   "w": "with",
+   "a": 205.245,
+   "b": 205.425
+  },
+  {
+   "w": "people,",
+   "a": 205.425,
+   "b": 205.925
+  },
+  {
+   "w": "we",
+   "a": 205.925,
+   "b": 206.565
+  },
+  {
+   "w": "need",
+   "a": 206.565,
+   "b": 206.725
+  },
+  {
+   "w": "to",
+   "a": 206.725,
+   "b": 206.885
+  },
+  {
+   "w": "know",
+   "a": 206.885,
+   "b": 207.025
+  },
+  {
+   "w": "as",
+   "a": 207.025,
+   "b": 207.225
+  },
+  {
+   "w": "much",
+   "a": 207.225,
+   "b": 207.445
+  },
+  {
+   "w": "as",
+   "a": 207.445,
+   "b": 207.665
+  },
+  {
+   "w": "possible",
+   "a": 207.665,
+   "b": 208.085
+  },
+  {
+   "w": "about",
+   "a": 208.085,
+   "b": 208.465
+  },
+  {
+   "w": "what",
+   "a": 208.465,
+   "b": 208.765
+  },
+  {
+   "w": "it's",
+   "a": 208.765,
+   "b": 208.945
+  },
+  {
+   "w": "like",
+   "a": 208.945,
+   "b": 209.165
+  },
+  {
+   "w": "there,",
+   "a": 209.165,
+   "b": 209.625
+  },
+  {
+   "w": "what",
+   "a": 209.625,
+   "b": 210.765
+  },
+  {
+   "w": "resources",
+   "a": 210.765,
+   "b": 211.225
+  },
+  {
+   "w": "are",
+   "a": 211.225,
+   "b": 211.625
+  },
+  {
+   "w": "available,",
+   "a": 211.625,
+   "b": 212.085
+  },
+  {
+   "w": "what",
+   "a": 212.085,
+   "b": 213.365
+  },
+  {
+   "w": "the",
+   "a": 213.365,
+   "b": 213.825
+  },
+  {
+   "w": "illumination",
+   "a": 213.825,
+   "b": 214.785
+  },
+  {
+   "w": "is",
+   "a": 214.785,
+   "b": 215.085
+  },
+  {
+   "w": "going",
+   "a": 215.085,
+   "b": 215.225
+  },
+  {
+   "w": "to",
+   "a": 215.225,
+   "b": 215.365
+  },
+  {
+   "w": "be",
+   "a": 215.365,
+   "b": 215.445
+  },
+  {
+   "w": "like.",
+   "a": 215.445,
+   "b": 215.845
+  },
+  {
+   "w": "If",
+   "a": 215.865,
+   "b": 216.145
+  },
+  {
+   "w": "we",
+   "a": 216.145,
+   "b": 216.345
+  },
+  {
+   "w": "land",
+   "a": 216.345,
+   "b": 216.605
+  },
+  {
+   "w": "at",
+   "a": 216.605,
+   "b": 216.765
+  },
+  {
+   "w": "the",
+   "a": 216.765,
+   "b": 216.865
+  },
+  {
+   "w": "South",
+   "a": 216.865,
+   "b": 217.025
+  },
+  {
+   "w": "Pole,",
+   "a": 217.025,
+   "b": 217.645
+  },
+  {
+   "w": "the",
+   "a": 217.645,
+   "b": 217.745
+  },
+  {
+   "w": "sun",
+   "a": 217.745,
+   "b": 217.945
+  },
+  {
+   "w": "is",
+   "a": 217.945,
+   "b": 218.185
+  },
+  {
+   "w": "never",
+   "a": 218.185,
+   "b": 218.365
+  },
+  {
+   "w": "more",
+   "a": 218.365,
+   "b": 218.605
+  },
+  {
+   "w": "than",
+   "a": 218.605,
+   "b": 218.845
+  },
+  {
+   "w": "a",
+   "a": 218.845,
+   "b": 219.045
+  },
+  {
+   "w": "degree",
+   "a": 219.045,
+   "b": 219.345
+  },
+  {
+   "w": "and",
+   "a": 219.345,
+   "b": 219.545
+  },
+  {
+   "w": "a",
+   "a": 219.545,
+   "b": 219.625
+  },
+  {
+   "w": "half",
+   "a": 219.625,
+   "b": 219.785
+  },
+  {
+   "w": "above",
+   "a": 219.785,
+   "b": 220.085
+  },
+  {
+   "w": "the",
+   "a": 220.085,
+   "b": 220.405
+  },
+  {
+   "w": "horizon.",
+   "a": 220.405,
+   "b": 221.305
+  },
+  {
+   "w": "The",
+   "a": 222.245,
+   "b": 222.425
+  },
+  {
+   "w": "lighting",
+   "a": 222.425,
+   "b": 222.705
+  },
+  {
+   "w": "situation",
+   "a": 222.705,
+   "b": 223.085
+  },
+  {
+   "w": "is",
+   "a": 223.085,
+   "b": 223.525
+  },
+  {
+   "w": "very",
+   "a": 223.525,
+   "b": 223.925
+  },
+  {
+   "w": "unusual",
+   "a": 223.925,
+   "b": 224.325
+  },
+  {
+   "w": "there.",
+   "a": 224.325,
+   "b": 224.745
+  },
+  {
+   "w": "So",
+   "a": 225.285,
+   "b": 225.465
+  },
+  {
+   "w": "we",
+   "a": 225.465,
+   "b": 226.145
+  },
+  {
+   "w": "need",
+   "a": 226.145,
+   "b": 226.385
+  },
+  {
+   "w": "to",
+   "a": 226.385,
+   "b": 226.585
+  },
+  {
+   "w": "gather",
+   "a": 226.585,
+   "b": 226.965
+  },
+  {
+   "w": "as",
+   "a": 226.965,
+   "b": 227.385
+  },
+  {
+   "w": "much",
+   "a": 227.385,
+   "b": 227.585
+  },
+  {
+   "w": "information",
+   "a": 227.585,
+   "b": 227.945
+  },
+  {
+   "w": "as",
+   "a": 227.945,
+   "b": 228.365
+  },
+  {
+   "w": "we",
+   "a": 228.365,
+   "b": 228.505
+  },
+  {
+   "w": "can",
+   "a": 228.505,
+   "b": 228.825
+  },
+  {
+   "w": "in",
+   "a": 228.825,
+   "b": 229.525
+  },
+  {
+   "w": "order",
+   "a": 229.525,
+   "b": 229.745
+  },
+  {
+   "w": "to",
+   "a": 229.745,
+   "b": 229.925
+  },
+  {
+   "w": "plan",
+   "a": 229.925,
+   "b": 230.265
+  },
+  {
+   "w": "those",
+   "a": 230.265,
+   "b": 230.485
+  },
+  {
+   "w": "missions",
+   "a": 230.485,
+   "b": 230.865
+  },
+  {
+   "w": "and",
+   "a": 230.465,
+   "b": 231.265
+  },
+  {
+   "w": "make",
+   "a": 231.265,
+   "b": 231.545
+  },
+  {
+   "w": "them",
+   "a": 231.545,
+   "b": 231.725
+  },
+  {
+   "w": "as",
+   "a": 231.725,
+   "b": 232.205
+  },
+  {
+   "w": "productive",
+   "a": 232.205,
+   "b": 232.785
+  },
+  {
+   "w": "and",
+   "a": 232.785,
+   "b": 233.505
+  },
+  {
+   "w": "survivable",
+   "a": 233.505,
+   "b": 234.285
+  },
+  {
+   "w": "as",
+   "a": 234.285,
+   "b": 234.485
+  },
+  {
+   "w": "possible.",
+   "a": 234.471,
+   "b": 235.171
+  },
+  {
+   "w": "So",
+   "a": 245.631,
+   "b": 245.771
+  },
+  {
+   "w": "pi",
+   "a": 245.771,
+   "b": 246.131
+  },
+  {
+   "w": "is",
+   "a": 246.131,
+   "b": 246.351
+  },
+  {
+   "w": "this",
+   "a": 246.351,
+   "b": 246.491
+  },
+  {
+   "w": "incredibly",
+   "a": 246.491,
+   "b": 246.971
+  },
+  {
+   "w": "important",
+   "a": 246.971,
+   "b": 247.371
+  },
+  {
+   "w": "number",
+   "a": 247.371,
+   "b": 247.671
+  },
+  {
+   "w": "in",
+   "a": 247.671,
+   "b": 247.831
+  },
+  {
+   "w": "mathematics",
+   "a": 247.831,
+   "b": 248.091
+  },
+  {
+   "w": "and",
+   "a": 248.091,
+   "b": 248.551
+  },
+  {
+   "w": "science.",
+   "a": 248.551,
+   "b": 249.131
+  },
+  {
+   "w": "It's",
+   "a": 249.131,
+   "b": 249.291
+  },
+  {
+   "w": "just",
+   "a": 248.751,
+   "b": 249.591
+  },
+  {
+   "w": "the",
+   "a": 249.591,
+   "b": 249.811
+  },
+  {
+   "w": "ratio",
+   "a": 249.811,
+   "b": 250.191
+  },
+  {
+   "w": "of",
+   "a": 250.191,
+   "b": 250.511
+  },
+  {
+   "w": "the",
+   "a": 250.511,
+   "b": 250.771
+  },
+  {
+   "w": "circumference",
+   "a": 250.771,
+   "b": 251.311
+  },
+  {
+   "w": "of",
+   "a": 251.311,
+   "b": 251.491
+  },
+  {
+   "w": "the",
+   "a": 251.491,
+   "b": 251.591
+  },
+  {
+   "w": "circle",
+   "a": 251.591,
+   "b": 251.851
+  },
+  {
+   "w": "to",
+   "a": 251.851,
+   "b": 252.071
+  },
+  {
+   "w": "its",
+   "a": 252.071,
+   "b": 252.191
+  },
+  {
+   "w": "diameter,",
+   "a": 252.191,
+   "b": 252.831
+  },
+  {
+   "w": "but",
+   "a": 252.831,
+   "b": 253.431
+  },
+  {
+   "w": "it",
+   "a": 253.431,
+   "b": 253.571
+  },
+  {
+   "w": "shows",
+   "a": 253.571,
+   "b": 253.831
+  },
+  {
+   "w": "up",
+   "a": 253.331,
+   "b": 254.051
+  },
+  {
+   "w": "in",
+   "a": 254.051,
+   "b": 254.171
+  },
+  {
+   "w": "all",
+   "a": 254.171,
+   "b": 254.511
+  },
+  {
+   "w": "kinds",
+   "a": 254.511,
+   "b": 254.771
+  },
+  {
+   "w": "of",
+   "a": 254.771,
+   "b": 254.931
+  },
+  {
+   "w": "other",
+   "a": 254.931,
+   "b": 255.031
+  },
+  {
+   "w": "places.",
+   "a": 255.031,
+   "b": 255.631
+  },
+  {
+   "w": "So",
+   "a": 255.631,
+   "b": 255.771
+  },
+  {
+   "w": "when",
+   "a": 255.771,
+   "b": 256.511
+  },
+  {
+   "w": "I",
+   "a": 256.511,
+   "b": 256.671
+  },
+  {
+   "w": "do",
+   "a": 256.671,
+   "b": 256.891
+  },
+  {
+   "w": "eclipse",
+   "a": 256.891,
+   "b": 257.211
+  },
+  {
+   "w": "calculations",
+   "a": 257.211,
+   "b": 257.871
+  },
+  {
+   "w": "to",
+   "a": 257.871,
+   "b": 258.151
+  },
+  {
+   "w": "figure",
+   "a": 258.151,
+   "b": 258.351
+  },
+  {
+   "w": "out",
+   "a": 258.351,
+   "b": 258.571
+  },
+  {
+   "w": "where",
+   "a": 258.071,
+   "b": 258.931
+  },
+  {
+   "w": "the",
+   "a": 258.931,
+   "b": 259.191
+  },
+  {
+   "w": "shadow",
+   "a": 259.191,
+   "b": 259.531
+  },
+  {
+   "w": "is",
+   "a": 259.531,
+   "b": 259.731
+  },
+  {
+   "w": "going",
+   "a": 259.731,
+   "b": 259.871
+  },
+  {
+   "w": "to",
+   "a": 259.871,
+   "b": 259.991
+  },
+  {
+   "w": "fall,",
+   "a": 259.991,
+   "b": 260.451
+  },
+  {
+   "w": "that",
+   "a": 260.451,
+   "b": 261.031
+  },
+  {
+   "w": "involves",
+   "a": 261.031,
+   "b": 261.391
+  },
+  {
+   "w": "trigonometry,",
+   "a": 261.391,
+   "b": 262.391
+  },
+  {
+   "w": "and",
+   "a": 262.391,
+   "b": 262.491
+  },
+  {
+   "w": "all",
+   "a": 262.491,
+   "b": 262.991
+  },
+  {
+   "w": "of",
+   "a": 262.991,
+   "b": 263.111
+  },
+  {
+   "w": "trigonometry",
+   "a": 263.111,
+   "b": 263.751
+  },
+  {
+   "w": "is",
+   "a": 263.751,
+   "b": 263.951
+  },
+  {
+   "w": "built",
+   "a": 263.951,
+   "b": 264.171
+  },
+  {
+   "w": "on",
+   "a": 264.171,
+   "b": 264.431
+  },
+  {
+   "w": "pi.",
+   "a": 264.431,
+   "b": 264.991
+  },
+  {
+   "w": "Now",
+   "a": 264.991,
+   "b": 266.651
+  },
+  {
+   "w": "pi",
+   "a": 266.651,
+   "b": 267.371
+  },
+  {
+   "w": "day",
+   "a": 267.371,
+   "b": 267.711
+  },
+  {
+   "w": "is",
+   "a": 267.711,
+   "b": 268.411
+  },
+  {
+   "w": "March",
+   "a": 268.411,
+   "b": 268.771
+  },
+  {
+   "w": "14th.",
+   "a": 268.771,
+   "b": 269.591
+  },
+  {
+   "w": "It",
+   "a": 269.591,
+   "b": 269.911
+  },
+  {
+   "w": "just",
+   "a": 269.911,
+   "b": 270.031
+  },
+  {
+   "w": "so",
+   "a": 270.031,
+   "b": 270.231
+  },
+  {
+   "w": "happens",
+   "a": 270.231,
+   "b": 270.651
+  },
+  {
+   "w": "that",
+   "a": 270.651,
+   "b": 270.991
+  },
+  {
+   "w": "the",
+   "a": 270.991,
+   "b": 271.231
+  },
+  {
+   "w": "first",
+   "a": 271.231,
+   "b": 271.471
+  },
+  {
+   "w": "three",
+   "a": 271.471,
+   "b": 271.731
+  },
+  {
+   "w": "digits",
+   "a": 271.311,
+   "b": 272.091
+  },
+  {
+   "w": "of",
+   "a": 272.091,
+   "b": 272.351
+  },
+  {
+   "w": "pi",
+   "a": 272.351,
+   "b": 272.611
+  },
+  {
+   "w": "are",
+   "a": 272.611,
+   "b": 272.831
+  },
+  {
+   "w": "3.14",
+   "a": 272.831,
+   "b": 273.831
+  },
+  {
+   "w": "and",
+   "a": 273.831,
+   "b": 274.371
+  },
+  {
+   "w": "so",
+   "a": 274.371,
+   "b": 274.651
+  },
+  {
+   "w": "the",
+   "a": 274.651,
+   "b": 275.471
+  },
+  {
+   "w": "third",
+   "a": 275.471,
+   "b": 275.691
+  },
+  {
+   "w": "month",
+   "a": 275.691,
+   "b": 276.091
+  },
+  {
+   "w": "and",
+   "a": 276.091,
+   "b": 276.271
+  },
+  {
+   "w": "the",
+   "a": 276.271,
+   "b": 276.331
+  },
+  {
+   "w": "14th",
+   "a": 276.331,
+   "b": 276.851
+  },
+  {
+   "w": "day",
+   "a": 276.851,
+   "b": 277.031
+  },
+  {
+   "w": "becomes",
+   "a": 277.031,
+   "b": 277.511
+  },
+  {
+   "w": "pi",
+   "a": 277.511,
+   "b": 277.951
+  },
+  {
+   "w": "day",
+   "a": 277.951,
+   "b": 278.251
+  },
+  {
+   "w": "and",
+   "a": 278.251,
+   "b": 279.091
+  },
+  {
+   "w": "this",
+   "a": 279.091,
+   "b": 279.591
+  },
+  {
+   "w": "lunar",
+   "a": 279.591,
+   "b": 279.931
+  },
+  {
+   "w": "eclipse",
+   "a": 279.931,
+   "b": 280.251
+  },
+  {
+   "w": "is",
+   "a": 279.791,
+   "b": 280.591
+  },
+  {
+   "w": "going",
+   "a": 280.591,
+   "b": 280.851
+  },
+  {
+   "w": "to",
+   "a": 280.851,
+   "b": 280.971
+  },
+  {
+   "w": "happen",
+   "a": 280.971,
+   "b": 281.331
+  },
+  {
+   "w": "on",
+   "a": 281.331,
+   "b": 281.611
+  },
+  {
+   "w": "pi",
+   "a": 281.611,
+   "b": 281.811
+  },
+  {
+   "w": "day.",
+   "a": 281.811,
+   "b": 282.171
+  },
+  {
+   "w": "That",
+   "a": 282.171,
+   "b": 283.511
+  },
+  {
+   "w": "happens",
+   "a": 283.511,
+   "b": 283.931
+  },
+  {
+   "w": "once",
+   "a": 283.931,
+   "b": 284.471
+  },
+  {
+   "w": "every",
+   "a": 284.471,
+   "b": 284.871
+  },
+  {
+   "w": "350",
+   "a": 284.871,
+   "b": 285.591
+  },
+  {
+   "w": "years",
+   "a": 285.591,
+   "b": 286.331
+  },
+  {
+   "w": "or",
+   "a": 286.331,
+   "b": 286.591
+  },
+  {
+   "w": "so",
+   "a": 286.591,
+   "b": 286.791
+  },
+  {
+   "w": "so",
+   "a": 286.791,
+   "b": 287.051
+  },
+  {
+   "w": "it's",
+   "a": 287.051,
+   "b": 287.371
+  },
+  {
+   "w": "quite",
+   "a": 287.371,
+   "b": 287.711
+  },
+  {
+   "w": "unusual.",
+   "a": 287.711,
+   "b": 288.191
+  },
+  {
+   "w": "it's",
+   "a": 289.191,
+   "b": 289.331
+  },
+  {
+   "w": "a",
+   "a": 289.331,
+   "b": 289.431
+  },
+  {
+   "w": "fun",
+   "a": 289.431,
+   "b": 289.711
+  },
+  {
+   "w": "way",
+   "a": 289.711,
+   "b": 290.331
+  },
+  {
+   "w": "to",
+   "a": 290.331,
+   "b": 290.551
+  },
+  {
+   "w": "celebrate",
+   "a": 290.551,
+   "b": 291.011
+  },
+  {
+   "w": "not",
+   "a": 291.011,
+   "b": 291.371
+  },
+  {
+   "w": "just",
+   "a": 291.371,
+   "b": 291.791
+  },
+  {
+   "w": "the",
+   "a": 291.791,
+   "b": 292.271
+  },
+  {
+   "w": "moon",
+   "a": 292.271,
+   "b": 292.531
+  },
+  {
+   "w": "but",
+   "a": 292.531,
+   "b": 293.251
+  },
+  {
+   "w": "math",
+   "a": 293.251,
+   "b": 294.211
+  },
+  {
+   "w": "and",
+   "a": 294.211,
+   "b": 294.791
+  },
+  {
+   "w": "pie",
+   "a": 294.791,
+   "b": 295.171
+  },
+  {
+   "w": "of",
+   "a": 295.171,
+   "b": 296.351
+  },
+  {
+   "w": "both",
+   "a": 296.351,
+   "b": 296.611
+  },
+  {
+   "w": "kinds",
+   "a": 296.611,
+   "b": 297.211
+  },
+  {
+   "w": "so",
+   "a": 297.211,
+   "b": 298.031
+  },
+  {
+   "w": "think",
+   "a": 297.851,
+   "b": 298.551
+  },
+  {
+   "w": "of",
+   "a": 298.551,
+   "b": 298.751
+  },
+  {
+   "w": "fruit",
+   "a": 298.751,
+   "b": 299.051
+  },
+  {
+   "w": "pies",
+   "a": 299.051,
+   "b": 299.351
+  },
+  {
+   "w": "and",
+   "a": 299.351,
+   "b": 299.571
+  },
+  {
+   "w": "pizza",
+   "a": 299.571,
+   "b": 299.771
+  },
+  {
+   "w": "pies",
+   "a": 299.771,
+   "b": 300.051
+  },
+  {
+   "w": "and",
+   "a": 300.051,
+   "b": 300.471
+  },
+  {
+   "w": "and",
+   "a": 300.471,
+   "b": 300.771
+  },
+  {
+   "w": "all",
+   "a": 300.771,
+   "b": 301.011
+  },
+  {
+   "w": "kinds",
+   "a": 301.011,
+   "b": 301.211
+  },
+  {
+   "w": "of",
+   "a": 301.211,
+   "b": 301.311
+  },
+  {
+   "w": "things",
+   "a": 301.311,
+   "b": 301.571
+  },
+  {
+   "w": "that",
+   "a": 301.571,
+   "b": 303.291
+  },
+  {
+   "w": "you",
+   "a": 303.291,
+   "b": 303.491
+  },
+  {
+   "w": "can",
+   "a": 303.491,
+   "b": 303.851
+  },
+  {
+   "w": "add",
+   "a": 303.851,
+   "b": 304.551
+  },
+  {
+   "w": "to",
+   "a": 304.191,
+   "b": 304.811
+  },
+  {
+   "w": "your",
+   "a": 304.811,
+   "b": 305.171
+  },
+  {
+   "w": "observation",
+   "a": 305.171,
+   "b": 306.111
+  },
+  {
+   "w": "of",
+   "a": 306.111,
+   "b": 306.311
+  },
+  {
+   "w": "the",
+   "a": 306.311,
+   "b": 306.411
+  },
+  {
+   "w": "moon",
+   "a": 306.411,
+   "b": 306.631
+  },
+  {
+   "w": "and",
+   "a": 306.631,
+   "b": 307.051
+  },
+  {
+   "w": "your",
+   "a": 307.051,
+   "b": 307.251
+  },
+  {
+   "w": "celebration",
+   "a": 307.251,
+   "b": 307.811
+  },
+  {
+   "w": "of",
+   "a": 307.811,
+   "b": 308.411
+  },
+  {
+   "w": "science",
+   "a": 308.411,
+   "b": 309.051
+  },
+  {
+   "w": "So",
+   "a": 317.351,
+   "b": 317.371
+  },
+  {
+   "w": "I",
+   "a": 317.371,
+   "b": 317.471
+  },
+  {
+   "w": "mentioned",
+   "a": 317.471,
+   "b": 317.711
+  },
+  {
+   "w": "this",
+   "a": 317.711,
+   "b": 317.911
+  },
+  {
+   "w": "before,",
+   "a": 317.911,
+   "b": 319.051
+  },
+  {
+   "w": "eclipses",
+   "a": 319.051,
+   "b": 319.391
+  },
+  {
+   "w": "don't",
+   "a": 319.391,
+   "b": 319.591
+  },
+  {
+   "w": "happen",
+   "a": 319.591,
+   "b": 319.911
+  },
+  {
+   "w": "every",
+   "a": 319.911,
+   "b": 320.191
+  },
+  {
+   "w": "month",
+   "a": 320.191,
+   "b": 320.551
+  },
+  {
+   "w": "because",
+   "a": 320.551,
+   "b": 321.051
+  },
+  {
+   "w": "the",
+   "a": 321.051,
+   "b": 321.511
+  },
+  {
+   "w": "moon's",
+   "a": 321.511,
+   "b": 321.851
+  },
+  {
+   "w": "orbit",
+   "a": 321.851,
+   "b": 322.131
+  },
+  {
+   "w": "is",
+   "a": 321.651,
+   "b": 322.291
+  },
+  {
+   "w": "tilted",
+   "a": 322.291,
+   "b": 322.631
+  },
+  {
+   "w": "by",
+   "a": 322.631,
+   "b": 322.951
+  },
+  {
+   "w": "about",
+   "a": 322.951,
+   "b": 323.171
+  },
+  {
+   "w": "5",
+   "a": 323.171,
+   "b": 323.551
+  },
+  {
+   "w": "degrees.",
+   "a": 323.551,
+   "b": 324.151
+  },
+  {
+   "w": "And",
+   "a": 323.951,
+   "b": 324.511
+  },
+  {
+   "w": "so",
+   "a": 324.511,
+   "b": 324.791
+  },
+  {
+   "w": "some",
+   "a": 324.791,
+   "b": 325.531
+  },
+  {
+   "w": "months",
+   "a": 325.531,
+   "b": 325.971
+  },
+  {
+   "w": "during",
+   "a": 325.971,
+   "b": 326.351
+  },
+  {
+   "w": "the",
+   "a": 326.351,
+   "b": 326.551
+  },
+  {
+   "w": "full",
+   "a": 326.551,
+   "b": 326.811
+  },
+  {
+   "w": "moon",
+   "a": 326.811,
+   "b": 327.031
+  },
+  {
+   "w": "it's",
+   "a": 327.031,
+   "b": 327.391
+  },
+  {
+   "w": "going",
+   "a": 327.391,
+   "b": 327.551
+  },
+  {
+   "w": "to",
+   "a": 327.551,
+   "b": 327.711
+  },
+  {
+   "w": "pass",
+   "a": 327.711,
+   "b": 328.031
+  },
+  {
+   "w": "a",
+   "a": 328.031,
+   "b": 328.271
+  },
+  {
+   "w": "little",
+   "a": 328.271,
+   "b": 328.391
+  },
+  {
+   "w": "bit",
+   "a": 328.391,
+   "b": 328.531
+  },
+  {
+   "w": "above",
+   "a": 328.531,
+   "b": 328.831
+  },
+  {
+   "w": "the",
+   "a": 328.831,
+   "b": 329.111
+  },
+  {
+   "w": "Earth's",
+   "a": 329.111,
+   "b": 329.391
+  },
+  {
+   "w": "shadow,",
+   "a": 329.071,
+   "b": 329.851
+  },
+  {
+   "w": "and",
+   "a": 329.851,
+   "b": 330.311
+  },
+  {
+   "w": "some",
+   "a": 330.311,
+   "b": 330.551
+  },
+  {
+   "w": "months",
+   "a": 330.551,
+   "b": 330.871
+  },
+  {
+   "w": "it's",
+   "a": 330.871,
+   "b": 331.091
+  },
+  {
+   "w": "going",
+   "a": 331.091,
+   "b": 331.191
+  },
+  {
+   "w": "to",
+   "a": 331.191,
+   "b": 331.291
+  },
+  {
+   "w": "pass",
+   "a": 331.291,
+   "b": 331.551
+  },
+  {
+   "w": "a",
+   "a": 331.551,
+   "b": 331.731
+  },
+  {
+   "w": "little",
+   "a": 331.731,
+   "b": 331.851
+  },
+  {
+   "w": "bit",
+   "a": 331.851,
+   "b": 331.971
+  },
+  {
+   "w": "below.",
+   "a": 331.971,
+   "b": 332.571
+  },
+  {
+   "w": "But",
+   "a": 333.071,
+   "b": 333.631
+  },
+  {
+   "w": "about",
+   "a": 333.631,
+   "b": 333.771
+  },
+  {
+   "w": "once",
+   "a": 333.771,
+   "b": 334.091
+  },
+  {
+   "w": "every",
+   "a": 334.091,
+   "b": 334.311
+  },
+  {
+   "w": "six",
+   "a": 334.311,
+   "b": 334.531
+  },
+  {
+   "w": "months",
+   "a": 334.531,
+   "b": 334.931
+  },
+  {
+   "w": "it",
+   "a": 334.931,
+   "b": 335.171
+  },
+  {
+   "w": "actually",
+   "a": 335.171,
+   "b": 335.471
+  },
+  {
+   "w": "passes",
+   "a": 335.471,
+   "b": 335.991
+  },
+  {
+   "w": "through",
+   "a": 335.991,
+   "b": 336.391
+  },
+  {
+   "w": "the",
+   "a": 336.391,
+   "b": 336.611
+  },
+  {
+   "w": "Earth's",
+   "a": 336.611,
+   "b": 336.871
+  },
+  {
+   "w": "shadow.",
+   "a": 336.871,
+   "b": 337.291
+  },
+  {
+   "w": "Now",
+   "a": 337.951,
+   "b": 337.991
+  },
+  {
+   "w": "it",
+   "a": 337.991,
+   "b": 338.291
+  },
+  {
+   "w": "doesn't",
+   "a": 338.291,
+   "b": 338.671
+  },
+  {
+   "w": "hit",
+   "a": 338.671,
+   "b": 339.011
+  },
+  {
+   "w": "the",
+   "a": 339.011,
+   "b": 339.171
+  },
+  {
+   "w": "middle",
+   "a": 339.171,
+   "b": 339.411
+  },
+  {
+   "w": "of",
+   "a": 339.411,
+   "b": 339.591
+  },
+  {
+   "w": "that",
+   "a": 339.591,
+   "b": 339.711
+  },
+  {
+   "w": "shadow",
+   "a": 339.711,
+   "b": 340.091
+  },
+  {
+   "w": "every",
+   "a": 340.091,
+   "b": 340.351
+  },
+  {
+   "w": "time,",
+   "a": 340.351,
+   "b": 341.031
+  },
+  {
+   "w": "so",
+   "a": 341.031,
+   "b": 341.091
+  },
+  {
+   "w": "some",
+   "a": 341.091,
+   "b": 341.491
+  },
+  {
+   "w": "lunar",
+   "a": 341.491,
+   "b": 341.791
+  },
+  {
+   "w": "eclipses",
+   "a": 341.791,
+   "b": 342.251
+  },
+  {
+   "w": "are",
+   "a": 342.251,
+   "b": 342.431
+  },
+  {
+   "w": "just",
+   "a": 342.431,
+   "b": 342.551
+  },
+  {
+   "w": "partial.",
+   "a": 342.071,
+   "b": 343.251
+  },
+  {
+   "w": "But",
+   "a": 343.571,
+   "b": 343.991
+  },
+  {
+   "w": "every",
+   "a": 343.991,
+   "b": 344.951
+  },
+  {
+   "w": "year",
+   "a": 344.951,
+   "b": 345.431
+  },
+  {
+   "w": "or",
+   "a": 345.431,
+   "b": 345.611
+  },
+  {
+   "w": "year",
+   "a": 345.611,
+   "b": 345.731
+  },
+  {
+   "w": "and",
+   "a": 345.731,
+   "b": 345.891
+  },
+  {
+   "w": "a",
+   "a": 345.891,
+   "b": 345.951
+  },
+  {
+   "w": "half,",
+   "a": 345.951,
+   "b": 347.031
+  },
+  {
+   "w": "we,",
+   "a": 347.031,
+   "b": 347.211
+  },
+  {
+   "w": "on",
+   "a": 347.211,
+   "b": 347.551
+  },
+  {
+   "w": "average,",
+   "a": 347.551,
+   "b": 348.011
+  },
+  {
+   "w": "we",
+   "a": 348.011,
+   "b": 348.091
+  },
+  {
+   "w": "get",
+   "a": 348.091,
+   "b": 348.351
+  },
+  {
+   "w": "a",
+   "a": 348.351,
+   "b": 348.631
+  },
+  {
+   "w": "total",
+   "a": 348.631,
+   "b": 349.031
+  },
+  {
+   "w": "lunar",
+   "a": 349.031,
+   "b": 349.231
+  },
+  {
+   "w": "eclipse",
+   "a": 349.231,
+   "b": 349.571
+  },
+  {
+   "w": "where",
+   "a": 349.571,
+   "b": 349.791
+  },
+  {
+   "w": "the",
+   "a": 349.271,
+   "b": 349.991
+  },
+  {
+   "w": "moon",
+   "a": 349.991,
+   "b": 350.071
+  },
+  {
+   "w": "passes",
+   "a": 350.071,
+   "b": 350.591
+  },
+  {
+   "w": "through",
+   "a": 350.591,
+   "b": 350.871
+  },
+  {
+   "w": "the",
+   "a": 350.871,
+   "b": 351.051
+  },
+  {
+   "w": "center",
+   "a": 351.051,
+   "b": 351.411
+  },
+  {
+   "w": "of",
+   "a": 351.411,
+   "b": 351.631
+  },
+  {
+   "w": "the",
+   "a": 351.631,
+   "b": 351.751
+  },
+  {
+   "w": "Earth's",
+   "a": 351.751,
+   "b": 351.991
+  },
+  {
+   "w": "shadow",
+   "a": 351.991,
+   "b": 352.291
+  },
+  {
+   "w": "and",
+   "a": 352.291,
+   "b": 353.071
+  },
+  {
+   "w": "every",
+   "a": 353.071,
+   "b": 353.511
+  },
+  {
+   "w": "part",
+   "a": 353.511,
+   "b": 353.791
+  },
+  {
+   "w": "of",
+   "a": 353.791,
+   "b": 353.911
+  },
+  {
+   "w": "the",
+   "a": 353.911,
+   "b": 354.031
+  },
+  {
+   "w": "moon",
+   "a": 354.031,
+   "b": 354.191
+  },
+  {
+   "w": "is",
+   "a": 354.176,
+   "b": 354.516
+  },
+  {
+   "w": "blocked",
+   "a": 354.516,
+   "b": 354.856
+  },
+  {
+   "w": "from",
+   "a": 354.856,
+   "b": 355.116
+  },
+  {
+   "w": "the",
+   "a": 355.116,
+   "b": 355.236
+  },
+  {
+   "w": "sun.",
+   "a": 355.236,
+   "b": 355.636
+  },
+  {
+   "w": "I",
+   "a": 365.336,
+   "b": 365.476
+  },
+  {
+   "w": "will",
+   "a": 365.476,
+   "b": 365.696
+  },
+  {
+   "w": "absolutely",
+   "a": 365.696,
+   "b": 366.076
+  },
+  {
+   "w": "be",
+   "a": 366.076,
+   "b": 366.416
+  },
+  {
+   "w": "outside",
+   "a": 366.416,
+   "b": 366.676
+  },
+  {
+   "w": "watching",
+   "a": 366.676,
+   "b": 367.076
+  },
+  {
+   "w": "this",
+   "a": 367.076,
+   "b": 367.336
+  },
+  {
+   "w": "eclipse.",
+   "a": 367.336,
+   "b": 367.636
+  },
+  {
+   "w": "The",
+   "a": 368.736,
+   "b": 368.896
+  },
+  {
+   "w": "best",
+   "a": 368.896,
+   "b": 369.236
+  },
+  {
+   "w": "thing",
+   "a": 369.236,
+   "b": 369.396
+  },
+  {
+   "w": "about",
+   "a": 369.396,
+   "b": 369.556
+  },
+  {
+   "w": "a",
+   "a": 369.556,
+   "b": 369.676
+  },
+  {
+   "w": "lunar",
+   "a": 369.676,
+   "b": 369.816
+  },
+  {
+   "w": "eclipse",
+   "a": 369.816,
+   "b": 370.096
+  },
+  {
+   "w": "is",
+   "a": 370.096,
+   "b": 370.336
+  },
+  {
+   "w": "that",
+   "a": 370.336,
+   "b": 370.496
+  },
+  {
+   "w": "it's",
+   "a": 370.496,
+   "b": 370.616
+  },
+  {
+   "w": "beautiful.",
+   "a": 370.616,
+   "b": 371.056
+  },
+  {
+   "w": "So",
+   "a": 371.796,
+   "b": 371.956
+  },
+  {
+   "w": "the",
+   "a": 371.956,
+   "b": 372.856
+  },
+  {
+   "w": "moon",
+   "a": 372.856,
+   "b": 373.116
+  },
+  {
+   "w": "during",
+   "a": 373.116,
+   "b": 373.416
+  },
+  {
+   "w": "totality",
+   "a": 373.416,
+   "b": 374.016
+  },
+  {
+   "w": "will",
+   "a": 374.016,
+   "b": 374.316
+  },
+  {
+   "w": "turn",
+   "a": 374.316,
+   "b": 374.716
+  },
+  {
+   "w": "shades",
+   "a": 374.716,
+   "b": 375.216
+  },
+  {
+   "w": "of",
+   "a": 375.216,
+   "b": 375.476
+  },
+  {
+   "w": "orange",
+   "a": 375.476,
+   "b": 375.816
+  },
+  {
+   "w": "and",
+   "a": 375.816,
+   "b": 376.136
+  },
+  {
+   "w": "red",
+   "a": 376.136,
+   "b": 376.356
+  },
+  {
+   "w": "and",
+   "a": 376.356,
+   "b": 376.536
+  },
+  {
+   "w": "brown.",
+   "a": 376.536,
+   "b": 376.896
+  },
+  {
+   "w": "It's",
+   "a": 377.476,
+   "b": 377.696
+  },
+  {
+   "w": "being",
+   "a": 377.696,
+   "b": 378.056
+  },
+  {
+   "w": "hit",
+   "a": 378.056,
+   "b": 378.976
+  },
+  {
+   "w": "by",
+   "a": 378.976,
+   "b": 379.236
+  },
+  {
+   "w": "all",
+   "a": 379.236,
+   "b": 379.716
+  },
+  {
+   "w": "of",
+   "a": 379.716,
+   "b": 379.896
+  },
+  {
+   "w": "the",
+   "a": 379.896,
+   "b": 380.096
+  },
+  {
+   "w": "sunrises",
+   "a": 380.096,
+   "b": 380.596
+  },
+  {
+   "w": "and",
+   "a": 380.596,
+   "b": 380.836
+  },
+  {
+   "w": "sunsets",
+   "a": 380.836,
+   "b": 381.276
+  },
+  {
+   "w": "projected",
+   "a": 381.276,
+   "b": 381.616
+  },
+  {
+   "w": "from",
+   "a": 381.616,
+   "b": 382.016
+  },
+  {
+   "w": "the",
+   "a": 382.016,
+   "b": 382.176
+  },
+  {
+   "w": "Earth.",
+   "a": 382.176,
+   "b": 382.616
+  },
+  {
+   "w": "and",
+   "a": 383.616,
+   "b": 383.656
+  },
+  {
+   "w": "those",
+   "a": 383.656,
+   "b": 384.116
+  },
+  {
+   "w": "colors",
+   "a": 384.116,
+   "b": 384.496
+  },
+  {
+   "w": "will",
+   "a": 384.496,
+   "b": 384.796
+  },
+  {
+   "w": "change",
+   "a": 384.796,
+   "b": 385.196
+  },
+  {
+   "w": "over",
+   "a": 385.196,
+   "b": 385.436
+  },
+  {
+   "w": "time",
+   "a": 385.436,
+   "b": 385.856
+  },
+  {
+   "w": "and",
+   "a": 385.856,
+   "b": 387.336
+  },
+  {
+   "w": "the",
+   "a": 387.336,
+   "b": 388.236
+  },
+  {
+   "w": "moon",
+   "a": 388.236,
+   "b": 388.376
+  },
+  {
+   "w": "will",
+   "a": 388.376,
+   "b": 388.556
+  },
+  {
+   "w": "be",
+   "a": 388.556,
+   "b": 388.656
+  },
+  {
+   "w": "dim",
+   "a": 388.656,
+   "b": 388.896
+  },
+  {
+   "w": "enough",
+   "a": 388.896,
+   "b": 389.136
+  },
+  {
+   "w": "that",
+   "a": 389.136,
+   "b": 389.356
+  },
+  {
+   "w": "it",
+   "a": 389.356,
+   "b": 389.476
+  },
+  {
+   "w": "kind",
+   "a": 389.476,
+   "b": 389.816
+  },
+  {
+   "w": "of",
+   "a": 389.816,
+   "b": 389.976
+  },
+  {
+   "w": "looks",
+   "a": 389.976,
+   "b": 390.176
+  },
+  {
+   "w": "almost",
+   "a": 389.736,
+   "b": 390.596
+  },
+  {
+   "w": "transparent.",
+   "a": 390.596,
+   "b": 391.776
+  },
+  {
+   "w": "This",
+   "a": 391.776,
+   "b": 392.696
+  },
+  {
+   "w": "is",
+   "a": 392.696,
+   "b": 392.816
+  },
+  {
+   "w": "something",
+   "a": 392.816,
+   "b": 392.976
+  },
+  {
+   "w": "I've",
+   "a": 392.976,
+   "b": 393.236
+  },
+  {
+   "w": "noticed",
+   "a": 393.236,
+   "b": 393.516
+  },
+  {
+   "w": "over",
+   "a": 393.516,
+   "b": 393.896
+  },
+  {
+   "w": "watching",
+   "a": 393.896,
+   "b": 394.976
+  },
+  {
+   "w": "the",
+   "a": 394.976,
+   "b": 395.536
+  },
+  {
+   "w": "past",
+   "a": 395.536,
+   "b": 395.916
+  },
+  {
+   "w": "few",
+   "a": 395.916,
+   "b": 396.116
+  },
+  {
+   "w": "total",
+   "a": 396.116,
+   "b": 397.056
+  },
+  {
+   "w": "lunar",
+   "a": 397.056,
+   "b": 397.276
+  },
+  {
+   "w": "eclipses",
+   "a": 396.836,
+   "b": 397.776
+  },
+  {
+   "w": "that",
+   "a": 397.776,
+   "b": 398.016
+  },
+  {
+   "w": "it",
+   "a": 398.016,
+   "b": 398.256
+  },
+  {
+   "w": "almost",
+   "a": 398.256,
+   "b": 398.476
+  },
+  {
+   "w": "seems",
+   "a": 398.476,
+   "b": 398.716
+  },
+  {
+   "w": "to",
+   "a": 398.716,
+   "b": 398.856
+  },
+  {
+   "w": "be",
+   "a": 398.856,
+   "b": 398.896
+  },
+  {
+   "w": "disappearing",
+   "a": 398.896,
+   "b": 399.256
+  },
+  {
+   "w": "like",
+   "a": 399.256,
+   "b": 399.576
+  },
+  {
+   "w": "the",
+   "a": 399.576,
+   "b": 399.696
+  },
+  {
+   "w": "Cheshire",
+   "a": 399.696,
+   "b": 399.996
+  },
+  {
+   "w": "Cat.",
+   "a": 399.996,
+   "b": 400.516
+  },
+  {
+   "w": "So",
+   "a": 400.516,
+   "b": 401.396
+  },
+  {
+   "w": "it's",
+   "a": 401.396,
+   "b": 402.336
+  },
+  {
+   "w": "an",
+   "a": 402.336,
+   "b": 402.456
+  },
+  {
+   "w": "unusual",
+   "a": 402.456,
+   "b": 402.756
+  },
+  {
+   "w": "thing",
+   "a": 402.756,
+   "b": 403.136
+  },
+  {
+   "w": "to",
+   "a": 402.736,
+   "b": 403.436
+  },
+  {
+   "w": "watch.",
+   "a": 403.436,
+   "b": 404.776
+  },
+  {
+   "w": "It",
+   "a": 404.776,
+   "b": 405.896
+  },
+  {
+   "w": "lasts",
+   "a": 405.896,
+   "b": 406.676
+  },
+  {
+   "w": "for",
+   "a": 406.676,
+   "b": 406.976
+  },
+  {
+   "w": "an",
+   "a": 406.976,
+   "b": 407.116
+  },
+  {
+   "w": "hour",
+   "a": 407.116,
+   "b": 407.416
+  },
+  {
+   "w": "so",
+   "a": 407.416,
+   "b": 407.656
+  },
+  {
+   "w": "you",
+   "a": 407.656,
+   "b": 407.796
+  },
+  {
+   "w": "have",
+   "a": 407.796,
+   "b": 407.916
+  },
+  {
+   "w": "plenty",
+   "a": 407.916,
+   "b": 408.216
+  },
+  {
+   "w": "of",
+   "a": 408.216,
+   "b": 408.416
+  },
+  {
+   "w": "time",
+   "a": 408.416,
+   "b": 408.716
+  },
+  {
+   "w": "to",
+   "a": 408.716,
+   "b": 409.036
+  },
+  {
+   "w": "look",
+   "a": 409.036,
+   "b": 409.436
+  },
+  {
+   "w": "around",
+   "a": 409.436,
+   "b": 409.716
+  },
+  {
+   "w": "and",
+   "a": 409.716,
+   "b": 409.956
+  },
+  {
+   "w": "see",
+   "a": 409.956,
+   "b": 410.136
+  },
+  {
+   "w": "what",
+   "a": 410.136,
+   "b": 410.276
+  },
+  {
+   "w": "other",
+   "a": 410.276,
+   "b": 410.436
+  },
+  {
+   "w": "effects",
+   "a": 410.436,
+   "b": 410.816
+  },
+  {
+   "w": "there",
+   "a": 410.876,
+   "b": 411.036
+  },
+  {
+   "w": "are",
+   "a": 411.036,
+   "b": 411.316
+  },
+  {
+   "w": "and",
+   "a": 411.316,
+   "b": 412.716
+  },
+  {
+   "w": "it",
+   "a": 412.716,
+   "b": 414.076
+  },
+  {
+   "w": "makes",
+   "a": 414.076,
+   "b": 414.316
+  },
+  {
+   "w": "you",
+   "a": 414.316,
+   "b": 414.456
+  },
+  {
+   "w": "think",
+   "a": 414.456,
+   "b": 414.736
+  },
+  {
+   "w": "about",
+   "a": 414.736,
+   "b": 415.016
+  },
+  {
+   "w": "our",
+   "a": 415.016,
+   "b": 415.216
+  },
+  {
+   "w": "place",
+   "a": 415.216,
+   "b": 415.516
+  },
+  {
+   "w": "in",
+   "a": 415.516,
+   "b": 415.736
+  },
+  {
+   "w": "the",
+   "a": 415.736,
+   "b": 415.796
+  },
+  {
+   "w": "solar",
+   "a": 415.796,
+   "b": 415.976
+  },
+  {
+   "w": "system",
+   "a": 415.976,
+   "b": 416.396
+  },
+  {
+   "w": "I",
+   "a": 416.396,
+   "b": 416.616
+  },
+  {
+   "w": "mean",
+   "a": 416.616,
+   "b": 416.796
+  },
+  {
+   "w": "we're",
+   "a": 416.336,
+   "b": 417.056
+  },
+  {
+   "w": "standing",
+   "a": 417.056,
+   "b": 417.576
+  },
+  {
+   "w": "at",
+   "a": 417.576,
+   "b": 418.276
+  },
+  {
+   "w": "night",
+   "a": 418.276,
+   "b": 418.516
+  },
+  {
+   "w": "every",
+   "a": 418.516,
+   "b": 418.796
+  },
+  {
+   "w": "night",
+   "a": 418.796,
+   "b": 418.996
+  },
+  {
+   "w": "we're",
+   "a": 418.996,
+   "b": 419.156
+  },
+  {
+   "w": "standing",
+   "a": 419.156,
+   "b": 419.436
+  },
+  {
+   "w": "in",
+   "a": 419.436,
+   "b": 419.656
+  },
+  {
+   "w": "the",
+   "a": 419.656,
+   "b": 419.696
+  },
+  {
+   "w": "shadow",
+   "a": 419.696,
+   "b": 419.956
+  },
+  {
+   "w": "of",
+   "a": 419.956,
+   "b": 420.136
+  },
+  {
+   "w": "the",
+   "a": 420.136,
+   "b": 420.236
+  },
+  {
+   "w": "earth",
+   "a": 419.736,
+   "b": 420.476
+  },
+  {
+   "w": "but",
+   "a": 420.476,
+   "b": 420.836
+  },
+  {
+   "w": "on",
+   "a": 420.836,
+   "b": 421.276
+  },
+  {
+   "w": "this",
+   "a": 421.276,
+   "b": 421.656
+  },
+  {
+   "w": "particular",
+   "a": 421.656,
+   "b": 422.116
+  },
+  {
+   "w": "night",
+   "a": 422.116,
+   "b": 422.496
+  },
+  {
+   "w": "we",
+   "a": 422.496,
+   "b": 422.736
+  },
+  {
+   "w": "get",
+   "a": 422.736,
+   "b": 422.916
+  },
+  {
+   "w": "to",
+   "a": 422.916,
+   "b": 423.056
+  },
+  {
+   "w": "see",
+   "a": 423.056,
+   "b": 423.236
+  },
+  {
+   "w": "that",
+   "a": 423.236,
+   "b": 423.476
+  },
+  {
+   "w": "shadow",
+   "a": 423.476,
+   "b": 423.896
+  },
+  {
+   "w": "its",
+   "a": 423.896,
+   "b": 425.076
+  },
+  {
+   "w": "extent",
+   "a": 425.076,
+   "b": 425.456
+  },
+  {
+   "w": "all",
+   "a": 425.456,
+   "b": 425.756
+  },
+  {
+   "w": "the",
+   "a": 425.176,
+   "b": 425.976
+  },
+  {
+   "w": "way",
+   "a": 425.976,
+   "b": 426.016
+  },
+  {
+   "w": "across",
+   "a": 426.016,
+   "b": 426.376
+  },
+  {
+   "w": "space",
+   "a": 426.376,
+   "b": 427.196
+  },
+  {
+   "w": "from",
+   "a": 427.196,
+   "b": 427.596
+  },
+  {
+   "w": "here",
+   "a": 427.596,
+   "b": 427.996
+  },
+  {
+   "w": "to",
+   "a": 427.996,
+   "b": 428.176
+  },
+  {
+   "w": "the",
+   "a": 428.176,
+   "b": 428.336
+  },
+  {
+   "w": "moon",
+   "a": 428.336,
+   "b": 428.536
+  },
+  {
+   "w": "and",
+   "a": 428.536,
+   "b": 428.976
+  },
+  {
+   "w": "so",
+   "a": 428.976,
+   "b": 429.156
+  },
+  {
+   "w": "it's",
+   "a": 429.156,
+   "b": 429.556
+  },
+  {
+   "w": "a",
+   "a": 429.556,
+   "b": 429.616
+  },
+  {
+   "w": "it's",
+   "a": 429.616,
+   "b": 429.956
+  },
+  {
+   "w": "just",
+   "a": 429.956,
+   "b": 430.136
+  },
+  {
+   "w": "a",
+   "a": 430.136,
+   "b": 430.276
+  },
+  {
+   "w": "lovely",
+   "a": 430.276,
+   "b": 430.436
+  },
+  {
+   "w": "thing",
+   "a": 429.956,
+   "b": 430.636
+  },
+  {
+   "w": "to",
+   "a": 430.636,
+   "b": 430.796
+  },
+  {
+   "w": "watch",
+   "a": 430.796,
+   "b": 430.976
+  },
+  {
+   "w": "and",
+   "a": 430.976,
+   "b": 431.176
+  },
+  {
+   "w": "to",
+   "a": 431.176,
+   "b": 431.276
+  },
+  {
+   "w": "think",
+   "a": 431.276,
+   "b": 431.396
+  },
+  {
+   "w": "about",
+   "a": 431.396,
+   "b": 431.596
+  },
+  {
+   "w": "The",
+   "a": 439.116,
+   "b": 439.136
+  },
+  {
+   "w": "moon",
+   "a": 439.136,
+   "b": 439.356
+  },
+  {
+   "w": "remembers",
+   "a": 439.356,
+   "b": 440.036
+  },
+  {
+   "w": "everything.",
+   "a": 440.036,
+   "b": 441.076
+  },
+  {
+   "w": "You",
+   "a": 442.376,
+   "b": 442.536
+  },
+  {
+   "w": "know,",
+   "a": 442.536,
+   "b": 442.776
+  },
+  {
+   "w": "on",
+   "a": 442.776,
+   "b": 442.896
+  },
+  {
+   "w": "the",
+   "a": 442.896,
+   "b": 443.056
+  },
+  {
+   "w": "Earth,",
+   "a": 443.056,
+   "b": 443.256
+  },
+  {
+   "w": "all",
+   "a": 443.256,
+   "b": 443.456
+  },
+  {
+   "w": "of",
+   "a": 443.456,
+   "b": 443.616
+  },
+  {
+   "w": "this",
+   "a": 443.616,
+   "b": 443.736
+  },
+  {
+   "w": "is",
+   "a": 443.736,
+   "b": 443.976
+  },
+  {
+   "w": "erased",
+   "a": 443.976,
+   "b": 444.616
+  },
+  {
+   "w": "by",
+   "a": 444.616,
+   "b": 444.976
+  },
+  {
+   "w": "weather",
+   "a": 444.976,
+   "b": 445.636
+  },
+  {
+   "w": "and",
+   "a": 445.636,
+   "b": 446.196
+  },
+  {
+   "w": "tectonics",
+   "a": 446.196,
+   "b": 447.456
+  },
+  {
+   "w": "and",
+   "a": 447.456,
+   "b": 447.676
+  },
+  {
+   "w": "all",
+   "a": 447.676,
+   "b": 447.936
+  },
+  {
+   "w": "kinds",
+   "a": 447.936,
+   "b": 448.076
+  },
+  {
+   "w": "of",
+   "a": 448.076,
+   "b": 448.196
+  },
+  {
+   "w": "things",
+   "a": 448.196,
+   "b": 448.416
+  },
+  {
+   "w": "that",
+   "a": 448.416,
+   "b": 448.636
+  },
+  {
+   "w": "make",
+   "a": 448.636,
+   "b": 448.976
+  },
+  {
+   "w": "cratering",
+   "a": 448.976,
+   "b": 450.276
+  },
+  {
+   "w": "events",
+   "a": 450.276,
+   "b": 450.456
+  },
+  {
+   "w": "and",
+   "a": 450.456,
+   "b": 450.676
+  },
+  {
+   "w": "other",
+   "a": 450.676,
+   "b": 450.796
+  },
+  {
+   "w": "things",
+   "a": 450.796,
+   "b": 451.096
+  },
+  {
+   "w": "just",
+   "a": 451.096,
+   "b": 451.676
+  },
+  {
+   "w": "go",
+   "a": 451.676,
+   "b": 452.276
+  },
+  {
+   "w": "away.",
+   "a": 452.276,
+   "b": 452.696
+  },
+  {
+   "w": "But",
+   "a": 453.096,
+   "b": 453.176
+  },
+  {
+   "w": "all",
+   "a": 453.176,
+   "b": 453.436
+  },
+  {
+   "w": "of",
+   "a": 453.436,
+   "b": 453.576
+  },
+  {
+   "w": "that's",
+   "a": 453.576,
+   "b": 453.776
+  },
+  {
+   "w": "remembered",
+   "a": 453.776,
+   "b": 454.116
+  },
+  {
+   "w": "on",
+   "a": 454.116,
+   "b": 454.336
+  },
+  {
+   "w": "the",
+   "a": 454.336,
+   "b": 454.456
+  },
+  {
+   "w": "moon.",
+   "a": 454.456,
+   "b": 454.636
+  },
+  {
+   "w": "And",
+   "a": 454.196,
+   "b": 454.896
+  },
+  {
+   "w": "so",
+   "a": 454.896,
+   "b": 455.016
+  },
+  {
+   "w": "we",
+   "a": 455.016,
+   "b": 455.196
+  },
+  {
+   "w": "can",
+   "a": 455.196,
+   "b": 455.336
+  },
+  {
+   "w": "look",
+   "a": 455.336,
+   "b": 455.516
+  },
+  {
+   "w": "at",
+   "a": 455.516,
+   "b": 455.716
+  },
+  {
+   "w": "craters",
+   "a": 455.716,
+   "b": 456.536
+  },
+  {
+   "w": "that",
+   "a": 456.536,
+   "b": 456.796
+  },
+  {
+   "w": "were",
+   "a": 456.796,
+   "b": 456.996
+  },
+  {
+   "w": "formed",
+   "a": 456.996,
+   "b": 457.376
+  },
+  {
+   "w": "three",
+   "a": 457.376,
+   "b": 458.016
+  },
+  {
+   "w": "and",
+   "a": 458.016,
+   "b": 458.296
+  },
+  {
+   "w": "four",
+   "a": 458.296,
+   "b": 458.516
+  },
+  {
+   "w": "billion",
+   "a": 458.516,
+   "b": 458.936
+  },
+  {
+   "w": "years",
+   "a": 458.936,
+   "b": 459.236
+  },
+  {
+   "w": "ago",
+   "a": 459.236,
+   "b": 459.516
+  },
+  {
+   "w": "and",
+   "a": 459.516,
+   "b": 459.916
+  },
+  {
+   "w": "learn",
+   "a": 459.916,
+   "b": 460.316
+  },
+  {
+   "w": "about",
+   "a": 460.316,
+   "b": 460.556
+  },
+  {
+   "w": "what",
+   "a": 460.556,
+   "b": 460.716
+  },
+  {
+   "w": "was",
+   "a": 460.716,
+   "b": 460.816
+  },
+  {
+   "w": "going",
+   "a": 460.816,
+   "b": 460.976
+  },
+  {
+   "w": "on",
+   "a": 460.976,
+   "b": 461.196
+  },
+  {
+   "w": "in",
+   "a": 461.196,
+   "b": 461.376
+  },
+  {
+   "w": "the",
+   "a": 461.376,
+   "b": 461.476
+  },
+  {
+   "w": "early",
+   "a": 461.476,
+   "b": 461.636
+  },
+  {
+   "w": "solar",
+   "a": 461.636,
+   "b": 461.916
+  },
+  {
+   "w": "system",
+   "a": 461.916,
+   "b": 462.276
+  },
+  {
+   "w": "from",
+   "a": 462.276,
+   "b": 462.536
+  },
+  {
+   "w": "that.",
+   "a": 462.536,
+   "b": 462.856
+  },
+  {
+   "w": "I",
+   "a": 462.836,
+   "b": 463.036
+  },
+  {
+   "w": "think",
+   "a": 463.036,
+   "b": 463.536
+  },
+  {
+   "w": "that's",
+   "a": 463.536,
+   "b": 463.756
+  },
+  {
+   "w": "just",
+   "a": 463.756,
+   "b": 463.876
+  },
+  {
+   "w": "very",
+   "a": 463.876,
+   "b": 464.096
+  },
+  {
+   "w": "cool.",
+   "a": 464.096,
+   "b": 464.456
+  },
+  {
+   "w": "To",
+   "a": 471.316,
+   "b": 471.576
+  },
+  {
+   "w": "learn",
+   "a": 471.576,
+   "b": 471.936
+  },
+  {
+   "w": "more",
+   "a": 471.936,
+   "b": 472.136
+  },
+  {
+   "w": "about",
+   "a": 472.136,
+   "b": 472.336
+  },
+  {
+   "w": "the",
+   "a": 472.336,
+   "b": 472.496
+  },
+  {
+   "w": "Moon",
+   "a": 472.496,
+   "b": 472.656
+  },
+  {
+   "w": "and",
+   "a": 472.656,
+   "b": 472.896
+  },
+  {
+   "w": "about",
+   "a": 472.896,
+   "b": 473.036
+  },
+  {
+   "w": "this",
+   "a": 473.036,
+   "b": 473.256
+  },
+  {
+   "w": "eclipse,",
+   "a": 473.256,
+   "b": 473.776
+  },
+  {
+   "w": "go",
+   "a": 473.776,
+   "b": 473.836
+  },
+  {
+   "w": "to",
+   "a": 473.836,
+   "b": 474.076
+  },
+  {
+   "w": "science.nasta.gov",
+   "a": 474.076,
+   "b": 475.376
+  },
+  {
+   "w": "slash",
+   "a": 475.376,
+   "b": 475.676
+  },
+  {
+   "w": "moon.",
+   "a": 475.676,
+   "b": 476.276
+  }
+ ]
+}

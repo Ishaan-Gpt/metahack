@@ -1,0 +1,67 @@
+{
+ "text": " What we're seeing over time is more and more hot years.",
+ "segments": [
+  {
+   "t": 0,
+   "end": 4.56,
+   "text": "What we're seeing over time is more and more hot years."
+  }
+ ],
+ "words": [
+  {
+   "word": "What",
+   "t": 1.02,
+   "end": 1.04
+  },
+  {
+   "word": "we're",
+   "t": 1.04,
+   "end": 1.18
+  },
+  {
+   "word": "seeing",
+   "t": 1.18,
+   "end": 1.44
+  },
+  {
+   "word": "over",
+   "t": 1.44,
+   "end": 1.64
+  },
+  {
+   "word": "time",
+   "t": 1.64,
+   "end": 1.92
+  },
+  {
+   "word": "is",
+   "t": 1.92,
+   "end": 2.14
+  },
+  {
+   "word": "more",
+   "t": 2.14,
+   "end": 2.38
+  },
+  {
+   "word": "and",
+   "t": 2.38,
+   "end": 2.56
+  },
+  {
+   "word": "more",
+   "t": 2.56,
+   "end": 2.84
+  },
+  {
+   "word": "hot",
+   "t": 2.84,
+   "end": 4.08
+  },
+  {
+   "word": "years.",
+   "t": 4.08,
+   "end": 5.02
+  }
+ ]
+}
