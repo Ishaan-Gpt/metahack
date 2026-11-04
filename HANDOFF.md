@@ -19,11 +19,14 @@ window (25 min, 2 rounds), run references in parallel, and turn measurement and 
 | Reference | Where | State |
 |---|---|---|
 | edit-ba1 (BONOMI ad) | `recreate/ba1/`, `docs/recreate/ba1/` | playable; blind judge 6.2 vs reference 8.2 (before the last fixes). Main gap: the Commons footage (NASA, Dr. Kate Calvin, public domain) is a tight landscape shot, so the speaker is 1.5x bigger/higher than the reference's and the punch word can't sit behind her head. Ishaan was asked for a vertical, seated, warm-room raw clip (eyes ~45% of height) and a brand word for the end card (placeholder "D●RAVI"). |
-| edit-ba2 (Tahrima) | `recreate/ba2/`, `docs/recreate/ba2/` | a builder was mid-way (window 00) when this was written; check git log and the folder |
-| edit-ba3 (Daniel, $10 vs $80) | `recreate/ba3/` | a builder was starting; check |
-| edit-ba4 (Mahdi, interview + desk world) | `recreate/ba4/` | a builder was starting; check |
-Previews (run `node serve.mjs 4700` in this folder): `http://127.0.0.1:4700/recreate/ba1/compare.html` (side by side with
-sound), `.../recreate/ba1/index.html` (ours alone).
+| edit-ba2 (Tahrima) | `recreate/ba2/`, `docs/recreate/ba2/` | playable, first 20 s (windows 00-15); host NASA Curious Universe (PD); gaps: different host and words, soft upscaled close-ups, flat eyeballs, no sound design, ref 20-45 s not built; no blind score |
+| edit-ba3 (Daniel, $10 vs $80) | `recreate/ba3/`, `docs/recreate/ba3/` | playable, full 17.9 s; all UI rebuilt in code from measured tables; Kizzi Sim Racing (CC BY 3.0); gaps: sim-racing words, olive room, Inter for SF Pro, no sound design; no blind score |
+| edit-ba4 (Mahdi, interview + desk world) | `recreate/ba4/`, `docs/recreate/ba4/` | playable, full 23.7 s; Burnie Burns / TSTV (CC BY 3.0); camera matched per frame, three.js brain, CC0 desk scans, leak, money behind; gaps: face 1.29x, skin orange, jump cut at 21.6 s, music a stand-in (needs Ishaan's yes); no blind score |
+| **self1** (no reference: the four WHYs applied) | `recreate/self1/`, `docs/self/WHY.md`, `docs/self/EDIT.md` | playable + white showcase; NASA Ernie Wright 'the moon remembers' (PD); blind judge 7.0 vs the references' own 8.0 / 7.3 / 6.3 / 3.5 (one fix round after, not re-judged); weakest: showing (no UI/world sequence) |
+Previews (run `node serve.mjs 4700` in this folder): `/recreate/<ba1|ba2|ba3|ba4>/compare.html` (side by side with sound),
+`/recreate/<id>/index.html` (ours alone), `/recreate/ba1/showcase.html` and `/recreate/self1/showcase.html` (white before/after).
+One MP4 of a showcase: `node tools/export-showcase.mjs url=<showcase url> out=out/<name>.mp4` (only when Ishaan says export;
+`out/*.mp4` is git-ignored; ba1's is `out/ba1-before-after.mp4` with `out/UPLOAD-ba1-before-after.md`).
 Earlier attempts and their scores: engine v0 kinetic captions (Ishaan 1/10, `LOG.md`), the four-references mix on his take 3
 (`player-em/specs/edit-t3-fourwhy.json`, blind 5.2 → 5.8; Ishaan "didn't do any good").
 
