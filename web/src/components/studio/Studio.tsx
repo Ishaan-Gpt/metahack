@@ -29,6 +29,7 @@ type Spec = { engine?: string; captionPreset?: string | null; captionsHidden?: b
 type Health = { meta: 'live' | 'test' | 'claude' | 'missing'; ffmpeg: boolean; queue: number };
 type Msg = { who: 'you' | 'moovi'; text: string; kind?: string };
 type EditRes = { applied: { op: string; said: string }[]; unmatched: string[]; rendering: boolean };
+const ENGINE_NAME: Record<string, string> = { 'card-studio': 'Card Studio', 'creator-mix': 'Creator Mix', polyester: 'Polyester' };
 const TRY = ['zoom out a little', 'make the captions funkier', 'captions a bit bigger and higher', 'add a b-roll of a city at 6s', 'change governate to governorate', 'lower the music', 'no sound effects', 'warmer colour'];
 
 const MIN_S = 5, MAX_S = 75, MAX_MB = 400;
@@ -246,7 +247,8 @@ export function Studio() {
   const shown = st?.outputs?.show && !touched ? st.outputs.show : view === 'edit' ? 'edit.mp4' : 'before-after.mp4';
   const src = cut ? `${file$(shown)}?v=${v}` : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
   const D = spec?.duration ?? st?.duration ?? 0;
-  const label = st?.styleLabel ?? (jobId ? 'Choosing the engine' : 'Card Studio or Creator Mix');
+  // named from the engine id, so jobs made before a rename still show today's name
+  const label = ENGINE_NAME[st?.style ?? ''] ?? st?.styleLabel ?? (jobId ? 'Choosing the engine' : 'Card Studio or Creator Mix');
   const capSpec = useMemo(() => spec ? { duration: spec.duration, captions: spec.captions } : null, [spec]);
   const capDraft = useCaptionDraft(capSpec);
   const busy = editing || phase === 'running' || phase === 'queued';
@@ -334,7 +336,7 @@ export function Studio() {
         <ol className="ed__msgs" ref={el => { el?.scrollTo({ top: el.scrollHeight }); }}>
           {msgs.map((m, i) => <li key={i} className={`is-${m.who} ${m.kind ? `is-${m.kind}` : ''}`}>{m.text}</li>)}
           {phase === 'done' && st && <li className="is-moovi is-card">
-            <b>{st.styleLabel}</b>{st.choice ? ` · ${st.choice.by}: ${st.choice.why}` : ''}
+            <b>{label}</b>{st.choice ? ` · ${st.choice.by}: ${st.choice.why}` : ''}
             {st.plan && <span>{st.plan.segments} beats · {st.plan.captions} captions · {st.plan.photos} photos · made in {Math.round(st.seconds ?? 0)} s</span>}
             {st.meta?.calls?.map(c => <code key={c.call}>{c.model} · {c.call}{c.cache ? ' · cached' : c.seconds ? ` · ${c.seconds}s` : ''}{c.standin ? ' · test' : ''}</code>)}
           </li>}

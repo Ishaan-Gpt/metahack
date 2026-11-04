@@ -32,18 +32,29 @@ export function CaptionLane({ draft, duration, selected, onSelect, onSeek, curre
   currentTime?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [drag, setDrag] = useState<Drag | null>(null);
-  const [wdrag, setWdrag] = useState<WDrag | null>(null);
+  // drag state lives in a ref as well as in state: a quick drag (down, one move, up) can end before React re-renders,
+  // and the handlers must still see the drag that started a moment ago
+  const [drag, setDragS] = useState<Drag | null>(null);
+  const [wdrag, setWdragS] = useState<WDrag | null>(null);
+  const dragR = useRef<Drag | null>(null), wdragR = useRef<WDrag | null>(null);
+  const setDrag = (v: Drag | null) => { dragR.current = v; setDragS(v); };
+  const setWdrag = (v: WDrag | null) => { wdragR.current = v; setWdragS(v); };
   const [renaming, setRenaming] = useState<number | null>(null);
   const [wrename, setWrename] = useState<{ i: number; j: number } | null>(null);
   const [width, setWidth] = useState(0);
   const D = Math.max(0.1, duration);
+  // the lane can mount before its cards arrive (then ref is still empty): watch whichever element is there after every
+  // render, and re-attach when it changes, so the word view switches on as soon as the zoom makes room for words
+  const watched = useRef<{ el: HTMLDivElement | null; ro: ResizeObserver | null }>({ el: null, ro: null });
   useLayoutEffect(() => {
-    const el = ref.current; if (!el) return;
-    const ro = new ResizeObserver(() => setWidth(el.clientWidth));
-    ro.observe(el); setWidth(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
+    const el = ref.current, w = watched.current;
+    if (el === w.el) { if (el && el.clientWidth !== width) setWidth(el.clientWidth); return; }
+    w.ro?.disconnect(); w.el = el; w.ro = null;
+    if (!el) return;
+    w.ro = new ResizeObserver(() => setWidth(el.clientWidth));
+    w.ro.observe(el); setWidth(el.clientWidth);
+  });
+  useEffect(() => () => watched.current.ro?.disconnect(), []);
   const pps = () => (ref.current?.clientWidth ?? 1) / D;   // pixels per second
   const wordView = width / D >= WORD_PPS;
 
@@ -67,7 +78,7 @@ export function CaptionLane({ draft, duration, selected, onSelect, onSeek, curre
   const begin = (e: React.PointerEvent, i: number, kind: Drag['kind']) => {
     if (e.button !== 0 || renaming !== null) return;
     e.stopPropagation();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* no live pointer (synthetic event): the lane still gets the moves */ }
     const c = draft.cards[i]!;
     setDrag({ i, kind, x0: e.clientX, s0: c.t0, e0: c.t1, s: c.t0, e: c.t1, moved: false });
   };
@@ -75,11 +86,12 @@ export function CaptionLane({ draft, duration, selected, onSelect, onSeek, curre
   const beginWord = (e: React.PointerEvent, i: number, j: number, kind: Drag['kind']) => {
     if (e.button !== 0 || wrename) return;
     e.stopPropagation();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* no live pointer (synthetic event): the lane still gets the moves */ }
     const w = draft.cards[i]!.wordViews[j]!, { lo, hi } = draft.wordRoom(i, j);
     setWdrag({ i, j, kind, x0: e.clientX, s0: w.t, e0: w.end, s: w.t, e: w.end, moved: false, lo, hi });
   };
   const move = (e: React.PointerEvent) => {
+    const wdrag = wdragR.current, drag = dragR.current;
     if (wdrag) {
       const px = e.clientX - wdrag.x0;
       if (!wdrag.moved && Math.abs(px) < 3) return;
@@ -110,6 +122,7 @@ export function CaptionLane({ draft, duration, selected, onSelect, onSeek, curre
     setDrag({ ...drag, s, e: en, moved: true });
   };
   const end = (e: React.PointerEvent) => {
+    const wdrag = wdragR.current, drag = dragR.current;
     if (wdrag) {
       e.stopPropagation();
       if (wdrag.moved && (wdrag.s !== wdrag.s0 || wdrag.e !== wdrag.e0)) draft.setWordTime(wdrag.i, wdrag.j, wdrag.s, wdrag.e);

@@ -18,7 +18,8 @@ export const wordEnd = (c, j) => c.words[j]?.e ?? c.words[j + 1]?.t ?? c.t1;
 export function wordRoom(caps, i, j, duration) {
   const c = caps[i];
   const lo = j > 0 ? c.words[j - 1].t + MIN_WORD : (caps[i - 1]?.t1 ?? 0);
-  const hi = j < c.words.length - 1 ? c.words[j + 1].t : (caps[i + 1]?.t0 ?? duration ?? Infinity);
+  // the words beside give way down to MIN_WORD each (the one before ends earlier, the one after starts later)
+  const hi = j < c.words.length - 1 ? wordEnd(c, j + 1) - MIN_WORD : (caps[i + 1]?.t0 ?? duration ?? Infinity);
   return { lo, hi };
 }
 
@@ -46,7 +47,7 @@ export function applyWordOp(caps, op, duration) {
       w.t = t0;
       if (op.j === 0) c.t0 = t0;                                   // a card starts with its first word
       if (op.j === c.words.length - 1) { c.t1 = t1; delete w.e; }  // and ends with its last
-      else if (t1 < c.words[op.j + 1].t) w.e = t1; else delete w.e;
+      else { const next = c.words[op.j + 1], nextEnd = wordEnd(c, op.j + 1); if (t1 > next.t) { next.t = t1; if (next.e === undefined && op.j + 1 < c.words.length - 1) next.e = nextEnd; } if (t1 < next.t) w.e = t1; else delete w.e; }   // the word after gives way
       return `“${w.w}” now runs ${t0.toFixed(2)}–${t1.toFixed(2)} s.`;
     }
     case 'caption.wordText': {
