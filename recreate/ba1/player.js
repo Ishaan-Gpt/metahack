@@ -305,3 +305,18 @@ function synthSand() {
     d[i] = hp * 0.35 * Math.sin(Math.PI * t / 0.45) * (Math.random() < 0.3 ? 1.4 : 0.6); }
   return b;
 }
+
+// ---------- export: the same mix as startAudio(0), rendered offline to a 48 kHz stereo WAV (window.__mixWav → ArrayBuffer) ----------
+window.__mixWav = async () => {
+  const sr = 48000, dur = EDIT.duration + 0.5, oc = new OfflineAudioContext(2, Math.ceil(sr * dur), sr);
+  const v = oc.createBufferSource(); v.buffer = BUF.voice; v.connect(oc.destination); v.start(0);
+  for (const e of EDIT.sfx) { if (!BUF[e.k]) continue; const b = oc.createBufferSource(); b.buffer = BUF[e.k]; b.playbackRate.value = e.rate ?? 1;
+    const g = oc.createGain(); g.gain.value = e.gain ?? 0.5; b.connect(g).connect(oc.destination); b.start(Math.max(0, e.t)); }
+  const r = await oc.startRendering(), n = r.length, out = new DataView(new ArrayBuffer(44 + n * 4));
+  const S = (o, s) => [...s].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)));
+  S(0, 'RIFF'); out.setUint32(4, 36 + n * 4, true); S(8, 'WAVE'); S(12, 'fmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
+  out.setUint32(24, sr, true); out.setUint32(28, sr * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true); S(36, 'data'); out.setUint32(40, n * 4, true);
+  const L = r.getChannelData(0), R = r.getChannelData(1);
+  for (let i = 0; i < n; i++) { out.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i])) * 32767, true); out.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i])) * 32767, true); }
+  return out.buffer;
+};
