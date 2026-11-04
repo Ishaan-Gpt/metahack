@@ -73,7 +73,14 @@ export function buildLayers(spec, T, res, mk) {
     const y = S.y + 18 + i * (ph + 18), x = S.x + 18, w = S.w - 36 - 120; // panels end before the main card covers them
     u.save(); rr(u, x, y, w, ph, 10); u.clip();
     if (thumbs[i]) { u.filter = 'grayscale(1) contrast(1.5) brightness(1.25)'; cover(u, thumbs[i], thumbs[i].width, thumbs[i].height, x, y, w, ph); u.filter = 'none'; u.fillStyle = 'rgba(253,252,250,0.35)'; u.fillRect(x, y, w, ph); }
-    else { u.fillStyle = '#efede9'; u.fillRect(x, y, w, ph); }
+    else { // no picture for this panel: a quick pencil sketch (horizon, a figure, a frame) so the card still reads as a storyboard
+      u.fillStyle = '#f6f4f0'; u.fillRect(x, y, w, ph); u.strokeStyle = '#8a8a8a'; u.lineWidth = 2;
+      u.beginPath(); u.moveTo(x + 10, y + ph * 0.72); u.lineTo(x + w - 10, y + ph * 0.68); u.stroke();
+      const fx = x + w * (0.3 + 0.2 * i), fy = y + ph * 0.38;
+      u.beginPath(); u.arc(fx, fy, ph * 0.1, 0, Math.PI * 2); u.stroke();
+      u.beginPath(); u.moveTo(fx, fy + ph * 0.1); u.lineTo(fx, fy + ph * 0.32); u.moveTo(fx - ph * 0.12, fy + ph * 0.2); u.lineTo(fx + ph * 0.12, fy + ph * 0.2); u.stroke();
+      u.strokeRect(x + w * 0.62, y + ph * 0.2, w * 0.24, ph * 0.3);
+    }
     u.restore(); u.strokeStyle = '#3a3a3a'; u.lineWidth = 2.5; rr(u, x, y, w, ph, 10); u.stroke();
   }
   // storyboard pill
@@ -155,7 +162,47 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     }
     const sp = ease.back((t - seg.t0 - 0.35) / 0.4);
     if (sp > 0) { sparkle(ctx, bx + bw - 30, by - 10, 46 * sp, (t - seg.t0) * 0.8, P.lime); sparkle(ctx, bx + bw - 30, by - 10, 22 * sp, (t - seg.t0) * 0.8, '#ffffff'); }
-  } else if (seg.type === 'bigtext') {
+  } else if (seg.type === 'orbit') {
+    // zoom out: the face card shrinks into a small landscape card, platform icons orbit it, the line as a black title
+    ctx.fillStyle = P.paper; ctx.fillRect(C.x, C.y, C.w, C.h);
+    const glow = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.56, 10, C.x + C.w / 2, C.y + C.h * 0.56, C.w * 0.7);
+    glow.addColorStop(0, 'rgba(203,230,94,0.55)'); glow.addColorStop(1, 'rgba(203,230,94,0)'); ctx.fillStyle = glow; ctx.fillRect(C.x, C.y, C.w, C.h);
+    const z = ease.inOut((t - seg.t0) / 0.45);
+    const sw = C.w * 0.8, sh = sw * 9 / 16, sx = C.x + (C.w - sw) / 2, sy = C.y + C.h * 0.56 - sh / 2;
+    const fx = lerp(C.x, sx, z), fy = lerp(C.y, sy, z), fw = lerp(C.w, sw, z), fh = lerp(C.h, sh, z);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.25)'; ctx.shadowBlur = 30 * z; ctx.shadowOffsetY = 10 * z; ctx.fillStyle = '#000'; rr(ctx, fx, fy, fw, fh, lerp(C.r, 18, z)); ctx.fill(); ctx.restore();
+    ctx.save(); rr(ctx, fx, fy, fw, fh, lerp(C.r, 18, z)); ctx.clip(); drawFace(ctx, res, seg, T, fx, fy, fw, fh, 1.0); ctx.restore();
+    const icons = ['ig', 'yt', 'tt', 'fb', 'x'];
+    icons.forEach((kind, n) => {
+      const pop = ease.back((t - seg.t0 - 0.25 - n * 0.08) / 0.3); if (pop <= 0) return;
+      const ang = -Math.PI / 2 + n * (Math.PI * 2 / icons.length) + (t - seg.t0) * 0.7;
+      const ix = C.x + C.w / 2 + Math.cos(ang) * C.w * 0.4, iy = C.y + C.h * 0.56 + Math.sin(ang) * C.h * 0.27;
+      platformIcon(ctx, kind, ix, iy, 36 * pop);
+    });
+    const ti = ease.out((t - seg.t0 - 0.2) / 0.3); ctx.globalAlpha = ti;
+    titleBlock(ctx, T, (seg.title ?? '').toUpperCase(), C.x + 36, C.y + 64, C.w - 72, 50, P.ink);
+    ctx.globalAlpha = 1;
+  } else if (seg.type === 'topsquare') {
+    // face in a square at the top, pale lower half carries the caption
+    const g = ctx.createLinearGradient(0, C.y, 0, C.y + C.h); g.addColorStop(0, '#f7f7f5'); g.addColorStop(1, '#eef1e4');
+    ctx.fillStyle = g; ctx.fillRect(C.x, C.y, C.w, C.h);
+    const pad = 22, s = C.w - 2 * pad;
+    ctx.save(); rr(ctx, C.x + pad, C.y + pad, s, s, 20); ctx.clip(); drawFace(ctx, res, seg, T, C.x + pad, C.y + pad, s, s, 1.1 + 0.04 * ease.inOut(k)); ctx.restore();
+    res.faceBottom = 0;
+  } else if (seg.type === 'wide') {
+    // the wide white card: face on the left, the words on the right in big black serif italic as they are spoken
+    ctx.fillStyle = P.white; ctx.fillRect(C.x, C.y, C.w, C.h);
+    const pad = 22, fw = C.w * 0.44;
+    ctx.save(); rr(ctx, C.x + pad, C.y + pad, fw, C.h - 2 * pad, 20); ctx.clip(); drawFace(ctx, res, seg, T, C.x + pad, C.y + pad, fw, C.h - 2 * pad, 1.15); ctx.restore();
+    const tx = C.x + pad * 2 + fw + 14, tw = C.x + C.w - pad - tx;
+    const shown = seg.words.filter(w => t >= w.t - 0.05).map(w => w.w.toUpperCase());
+    let size = 92; const lines = [];
+    const wrap = sz => { lines.length = 0; ctx.font = font(T, 'serifItalic', sz); for (const w of shown) { const cur = lines.at(-1); if (cur != null && ctx.measureText(cur + ' ' + w).width <= tw) lines[lines.length - 1] = cur + ' ' + w; else lines.push(w); } };
+    wrap(size); while ((lines.length > 5 || lines.some(l => ctx.measureText(l).width > tw)) && size > 44) { size -= 6; wrap(size); }
+    const all = seg.words.length, lh = size * 1.02, y0 = C.y + C.h / 2 - Math.min(5, Math.ceil(all / 2)) * lh / 2;
+    ctx.fillStyle = P.ink; ctx.textBaseline = 'alphabetic';
+    lines.forEach((ln, i) => { ctx.fillText(ln, tx, y0 + lh * (i + 1)); });
+  } else if (seg.type === 'post') {
     // post card: white card, face on top in a rounded frame, big serif words below, pink button with a cursor tap
     ctx.fillStyle = P.white; ctx.fillRect(C.x, C.y, C.w, C.h);
     const pad = 22, fh = C.h * 0.5;
@@ -183,6 +230,39 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     if (t > seg.t1 - 0.6) cursor(ctx, cx, cy);
   }
 }
+
+function titleBlock(ctx, T, text, x, y, w, size, color) {
+  ctx.font = font(T, 'sans', size, 900); ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
+  const words = text.split(/\s+/), lines = [''];
+  for (const wd of words) { const n = lines.at(-1) ? lines.at(-1) + ' ' + wd : wd; if (ctx.measureText(n).width > w && lines.at(-1)) lines.push(wd); else lines[lines.length - 1] = n; }
+  lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, x, y + size * (i + 1) * 1.02));
+}
+export function platformIcon(ctx, kind, x, y, r) {
+  // simple, recognisable platform glyphs drawn with canvas primitives (no logo files)
+  ctx.save(); ctx.translate(x, y); ctx.shadowColor = 'rgba(0,0,0,0.2)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
+  const sq = (fill) => { ctx.fillStyle = fill; rr(ctx, -r, -r, 2 * r, 2 * r, r * 0.45); ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; };
+  if (kind === 'ig') {
+    const g = ctx.createLinearGradient(-r, r, r, -r); g.addColorStop(0, '#feda75'); g.addColorStop(0.4, '#fa7e1e'); g.addColorStop(0.7, '#d62976'); g.addColorStop(1, '#4f5bd5'); sq(g);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = r * 0.14; rr(ctx, -r * 0.55, -r * 0.55, r * 1.1, r * 1.1, r * 0.32); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.26, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(r * 0.32, -r * 0.32, r * 0.07, 0, Math.PI * 2); ctx.fill();
+  } else if (kind === 'yt') {
+    sq('#ff0033'); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-r * 0.3, -r * 0.38); ctx.lineTo(r * 0.45, 0); ctx.lineTo(-r * 0.3, r * 0.38); ctx.closePath(); ctx.fill();
+  } else if (kind === 'tt') {
+    sq('#111'); ctx.lineCap = 'round'; ctx.lineWidth = r * 0.2;
+    for (const [col, dx] of [['#25f4ee', -r * 0.06], ['#fe2c55', r * 0.06], ['#fff', 0]]) {
+      ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(r * 0.12 + dx, -r * 0.55); ctx.lineTo(r * 0.12 + dx, r * 0.25); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-r * 0.12 + dx, r * 0.25, r * 0.24, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(r * 0.12 + dx, -r * 0.55); ctx.quadraticCurveTo(r * 0.2 + dx, -r * 0.2, r * 0.5 + dx, -r * 0.18); ctx.stroke();
+    }
+  } else if (kind === 'fb') {
+    ctx.fillStyle = '#1877f2'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff'; ctx.font = `bold ${r * 1.5}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('f', r * 0.08, r * 0.12);
+  } else {
+    sq('#111'); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * 0.16; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-r * 0.42, -r * 0.45); ctx.lineTo(r * 0.42, r * 0.45); ctx.moveTo(r * 0.42, -r * 0.45); ctx.lineTo(-r * 0.42, r * 0.45); ctx.stroke();
+  }
+  ctx.restore();
+}
 function cursor(ctx, x, y) {
   ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 46); ctx.lineTo(12, 35); ctx.lineTo(22, 56); ctx.lineTo(30, 52); ctx.lineTo(20, 32); ctx.lineTo(36, 32); ctx.closePath();
   ctx.fillStyle = '#111'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.fill(); ctx.stroke(); ctx.restore();
@@ -199,7 +279,7 @@ function drawList(ctx, t, seg, T, C) {
 }
 
 function drawCaption(ctx, t, spec, T, C, seg, res) {
-  if (seg.type === 'graphic' || seg.type === 'bigtext') return;
+  if (['graphic', 'post', 'wide', 'orbit'].includes(seg.type)) return;
   if ((seg.enter === 'wipe' && t - seg.t0 < T.motion.wipe) || (seg.enter === 'wash' && t - seg.t0 < T.motion.wash)) return; // no caption over a half-revealed card
   const cap = spec.captions.find(c => t >= c.t0 && t < c.t1); if (!cap) return;
   const L = T.layout.caption, P = T.palette, M = T.motion;
@@ -212,11 +292,13 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   // keep the caption off the mouth: below the chin when the face is big, never below the card's lower safe line
   if (seg.type !== 'split' && seg.capY == null && res.faceBottom) cy = clamp(Math.max(cy, res.faceBottom + 110), C.y + C.h * L.yFrac, C.y + C.h * 0.84);
   if (seg.capY != null) cy = C.y + C.h * seg.capY;
+  const pale = seg.type === 'topsquare';
+  if (pale) cy = C.y + 22 + (C.w - 44) + (C.h - (C.w - 44) - 22) / 2;
   const k = ease.out((t - cap.t0) / M.captionIn), hk = ease.back((t - (hi >= 0 ? cap.words[hi].t : cap.t0)) / M.heroPop);
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = k;
   const x = C.x + C.w / 2, dy = (1 - k) * 14;
   const small = (s, y) => { if (!s) return; let fs = L.smallSize; ctx.font = font(T, 'sans', fs, 700); while (ctx.measureText(s).width > maxW && fs > 18) { fs -= 2; ctx.font = font(T, 'sans', fs, 700); }
-    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 14; ctx.fillStyle = '#fff'; ctx.fillText(s, x, y + dy); };
+    ctx.shadowColor = pale ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.55)'; ctx.shadowBlur = pale ? 0 : 14; ctx.fillStyle = pale ? P.ink : '#fff'; ctx.fillText(s, x, y + dy); };
   const heroH = hero ? L.heroSize * 0.9 : 0, sH = L.smallSize + L.lineGap;
   const total = (before ? sH : 0) + heroH + (after ? sH : 0);
   let y = cy - total / 2;
@@ -224,20 +306,33 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   if (hero) {
     let fs = L.heroSize; ctx.font = font(T, 'serifItalic', fs); while (ctx.measureText(hero).width > maxW && fs > 40) { fs -= 4; ctx.font = font(T, 'serifItalic', fs); }
     ctx.save(); ctx.translate(x, y + heroH / 2 + dy); const sc = hero ? lerp(0.82, 1, clamp(hk, 0, 1.2)) : 1; ctx.scale(sc, sc);
-    ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 18; ctx.fillStyle = P.lime; ctx.fillText(hero, 0, 0);
-    ctx.shadowBlur = 0; ctx.lineWidth = 1.6; ctx.strokeStyle = P.lime; ctx.strokeText(hero, 0, 0); ctx.restore();
+    ctx.shadowColor = pale ? 'rgba(60,70,20,0.45)' : 'rgba(0,0,0,0.45)'; ctx.shadowBlur = pale ? 6 : 18; ctx.fillStyle = P.lime; ctx.fillText(hero, 0, 0);
+    ctx.shadowBlur = 0; ctx.lineWidth = pale ? 2.2 : 1.6; ctx.strokeStyle = pale ? '#9bb532' : P.lime; ctx.strokeText(hero, 0, 0); ctx.restore();
     y += heroH;
   }
   if (after) small(after, y + sH / 2);
   ctx.restore();
 }
 
+const WIDE_X = 112;
+function cardRect(spec, T, i, t) {
+  const C = T.layout.card, segs = spec.segments, seg = segs[i], prev = segs[i - 1], next = segs[i + 1];
+  const wide = { ...C, x: WIDE_X, w: C.x + C.w - WIDE_X };
+  const mix = (a, b, k) => ({ ...a, x: lerp(a.x, b.x, k), w: lerp(a.w, b.w, k) });
+  if (seg.type === 'wide') {
+    const kin = ease.out((t - seg.t0) / 0.3), kout = next ? ease.inOut((seg.t1 - t) / 0.25) : 1;
+    return mix(C, wide, Math.min(kin, kout));
+  }
+  return C;
+}
 export function drawFrame(ctx, t, spec, T, res) {
-  const C = T.layout.card, M = T.motion;
+  const C0 = T.layout.card, M = T.motion;
   ctx.drawImage(res.layers.under, 0, 0);
   res.faceBottom = 0;
   const i = segAt(spec, t), seg = spec.segments[i], prev = spec.segments[i - 1];
   const since = t - seg.t0;
+  const C = cardRect(spec, T, i, t);
+  if (C.w !== C0.w) { ctx.save(); ctx.shadowColor = C0.shadowColor; ctx.shadowBlur = C0.shadowBlur; ctx.shadowOffsetY = C0.shadowY; ctx.fillStyle = '#ddd'; rr(ctx, C.x, C.y, C.w, C.h, C.r); ctx.fill(); ctx.restore(); }
   ctx.save(); rr(ctx, C.x, C.y, C.w, C.h, C.r); ctx.clip();
   if (seg.enter === 'wash' && prev && since < M.wash) {
     const a = 0.33 * M.wash;

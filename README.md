@@ -20,7 +20,7 @@ node engine/matte.mjs data/clips/my-clip                         # → matte.web
 ```
 
 ## Themes
-- `kinetic-brand` (default) and `card-studio` (light studio card edit, rules only, MP4 export): see [THEME_README.md](THEME_README.md).
+- `kinetic-brand` (default) and `card-studio` (light studio card edit, rules only, MP4 export): see [docs/themes/THEME_README.md](docs/themes/THEME_README.md); one command: `node engine/card-studio.mjs raw.mp4 --out out.mp4`.
 
 ## Layout
 - `engine/` prep (ingest, hear, clean), read (phrases, roles, hero words), direct (one Muse Spark call + the rule caster),

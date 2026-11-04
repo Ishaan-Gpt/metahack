@@ -42,8 +42,10 @@ async function openverse(q) {
   const u = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(q)}&page_size=16&mature=false&license_type=commercial,modification&extension=jpg,jpeg,png`;
   const j = await getJson(u);
   const words = q.toLowerCase().split(/\s+/);
-  const rank = r => (words.some(w => (r.title ?? '').toLowerCase().includes(w)) ? 2 : 0) + ((r.width ?? 0) >= 900 ? 1 : 0) - ((r.title ?? '').split('#').length > 3 ? 5 : 0);
-  return (j.results ?? []).filter(r => r.url && (r.width ?? 999) >= 500 && (r.title ?? '').split('#').length <= 3).sort((a, b) => rank(b) - rank(a)).map(r => ({
+  const on = r => { const hay = ((r.title ?? '') + ' ' + (r.tags ?? []).map(t => t.name).join(' ')).toLowerCase(); return words.filter(w => w.length > 2 && hay.includes(w.replace(/s$/, ''))).length; };
+  const rank = r => on(r) * 2 + ((r.width ?? 0) >= 900 ? 1 : 0) - ((r.title ?? '').split('#').length > 3 ? 5 : 0);
+  // relevance by plain matching: every query word should be in the title or tags (on-topic), hashtag-spam titles dropped
+  return (j.results ?? []).filter(r => r.url && (r.width ?? 999) >= 500 && (r.title ?? '').split('#').length <= 3 && on(r) >= Math.min(2, words.filter(w => w.length > 2).length)).sort((a, b) => rank(b) - rank(a)).map(r => ({
     url: r.url, w: r.width, h: r.height, page: r.foreign_landing_url, creator: r.creator,
     license: `${(r.license ?? '').toUpperCase()} ${r.license_version ?? ''}`.trim(), source: `openverse/${r.provider ?? r.source ?? ''}`,
     attribution: r.attribution, title: (r.title ?? '').slice(0, 80) }));
@@ -52,7 +54,7 @@ async function openverse(q) {
 // brand and abstract words search badly on open image sites; a small fixed table turns them into picturable queries
 export const QUERY_MAP = { 'social media': 'smartphone social media apps', tool: 'tools workshop', palm: 'hand holding smartphone', hand: 'hand holding smartphone', instagram: 'smartphone social media', tiktok: 'smartphone video', youtube: 'video camera creator', facebook: 'social media phone',
   twitter: 'social media phone', ai: 'robot technology', agentic: 'robot technology', agent: 'robot technology', agents: 'robot technology', app: 'smartphone app',
-  apps: 'smartphone apps', editor: 'video editing computer', editing: 'video editing computer', clips: 'film camera', clip: 'film camera',
+  apps: 'smartphone apps', editor: 'video editing', editing: 'video editing', clips: 'film camera', clip: 'film camera', movie: 'cinema', movies: 'cinema', video: 'video camera', videos: 'video camera',
   animation: 'animation studio', animations: 'animation studio', effects: 'fireworks', results: 'growth chart', views: 'audience crowd',
   followers: 'crowd people', content: 'content creator camera', marketing: 'marketing billboard', business: 'business office', viral: 'crowd phone' };
 

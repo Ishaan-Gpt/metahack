@@ -1,5 +1,5 @@
 // Card Studio director: transcript + face track -> spec.card.json, by plain rules (no model, no credits).
-// usage: node engine/card-studio.mjs <clip dir> [--badge "Meta AI"] [--handle "@me"] [--cta1 ..] [--cta2 ..] [--kw WORD] [--no-stock]
+// usage: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge "Meta AI"] [--handle "@me"] [--cta1 ..] [--cta2 ..] [--kw WORD] [--no-stock] [--no-music]
 // Decides, per sentence: face card (with a jump zoom at sentence boundaries), keyword graphic card (face hidden),
 // split (stock image on top, face below), bullet list over the face, or a big-text post card for numbers.
 import { execFileSync } from 'node:child_process';
@@ -33,7 +33,11 @@ farm shopping delivery package truck ship boat bike bicycle shoes clothes fashio
 startup founder investor investors growth success award trophy job jobs work career interview salary rent bill bills budget savings
 editor editors clip clips animation animations effects film films movie movies cinema creator creators content views followers likes
 subscribers channel post posts reel reels upload uploads agent agents tool tools software keyboard results audience`.split(/\s+/));
-const BIG = /^(\d[\d,.]*|hundreds?|thousands?|millions?|billions?|trillions?|percent|viral|huge|massive|double|triple|tens)$/i;
+const BIG = /^(\d[\d,.]*|hundreds?|thousands?|millions?|billions?|trillions?|percent|tens|double|triple)$/i;
+const POST = /^(post|posts|posting|upload|uploads|uploading|share|sharing|click|tap|subscribe|download|free|app)$/i;
+const ORBIT = /^(market|marketing|business|businesses|brand|audience|followers|everyone|world|reach|platform|platforms|social)$/i;
+const TURN = /^(but|however|also|yet|instead)$/i;
+const GLUE = /^(of|to|the|a|an|and|for|that|with|in|on|at|by|from|or)$/i;
 const clean = w => w.toLowerCase().replace(/[^\p{L}\p{N}%$']/gu, '');
 
 export function heroScore(w) {
@@ -62,7 +66,7 @@ export function sentences(words, D) {
     const nx = words[i + 1];
     const dur = w.end - cur[0].t, gap = nx ? nx.t - w.end : 9;
     // with punctuation: sentence ends; without (some speech-to-text output has none): breaths and a 2.5-4.5 s rhythm
-    const end = /[.?!]/.test(w.p ?? '') || !nx || gap > 0.6 || (/[,;:]/.test(w.p ?? '') && dur > 3) || (dur > 2.5 && gap > 0.18) || (dur > 3.4 && !STOP.has(clean(nx.word)) === false) || dur > 4.5;
+    const end = /[.?!]/.test(w.p ?? '') || !nx || gap > 0.6 || (/[,;:]/.test(w.p ?? '') && dur > 3) || (dur > 2.5 && gap > 0.18 && !GLUE.test(nx.word)) || (dur > 3.6 && !GLUE.test(nx.word)) || dur > 5;
     if (end) { out.push(cur); cur = []; }
   }
   if (cur.length) out.push(cur);
@@ -138,10 +142,34 @@ export async function direct(dir, opts = {}) {
     const commas = ws.filter((w, j) => /,/.test(w.p ?? '') && j < ws.length - 1).length;
     const kws = ws.map((w, j) => ({ j, w, s: stockScore(w, j, ws) })).filter(x => x.s >= 1).sort((a, b) => b.s - a.s);
     if (bigIdx >= 0) {
+      // numbers: the wide card, face left, the words on the right as they are spoken
       const a = Math.max(s.t0, ws[Math.max(0, bigIdx - 1)].t - 0.1);
       const inWin = ws.filter(w => w.t >= a - 0.01).slice(0, 6);
       const b = Math.min(s.t1, a + R.bigtextMax, inWin.at(-1).end + 0.5);
-      cands.push({ type: 'bigtext', s, score: 6, t0: a, t1: b, words: inWin.filter(w => w.t < b).map(w => ({ w: w.word, t: w.t, big: BIG.test(clean(w.word)) || /\d/.test(w.word) })) });
+      cands.push({ type: 'wide', s, score: 6, t0: a, t1: b, words: inWin.filter(w => w.t < b).map(w => ({ w: w.word, t: w.t, big: BIG.test(clean(w.word)) || /\d/.test(w.word) })) });
+    }
+    const postIdx = ws.findIndex(w => POST.test(clean(w.word)));
+    if (postIdx >= 0) {
+      // posting / sharing / apps: the post card, the words below the face, a cursor taps the button
+      const a = Math.max(s.t0, ws[Math.max(0, postIdx - 2)].t - 0.1);
+      const inWin = ws.filter(w => w.t >= a - 0.01).slice(0, 7);
+      const b = Math.min(s.t1, a + R.bigtextMax, inWin.at(-1).end + 0.6);
+      cands.push({ type: 'post', s, score: 5.5, t0: a, t1: b, words: inWin.filter(w => w.t < b).map(w => ({ w: w.word, t: w.t })) });
+    }
+    const orbIdx = ws.findIndex(w => ORBIT.test(clean(w.word)));
+    if (orbIdx >= 0) {
+      // reach / business / social: face shrinks to a small landscape card, platform icons orbit it, the line as a title
+      const a = s.t0, b = Math.min(s.t1, a + R.bigtextMax);
+      const title = ws.filter(w => w.t < b).map(w => w.word).slice(0, 6).join(' ');
+      cands.push({ type: 'orbit', s, score: 5, t0: a, t1: b, title });
+    }
+    const turnIdx = ws.findIndex((w, j) => TURN.test(w.word) && (j === 0 || /,/.test(ws[j - 1].p ?? '') || /^(but|however)$/i.test(w.word)));
+    const notIdx = ws.findIndex((w, j) => /^not$/i.test(w.word) && /^(just|only)$/i.test(ws[j + 1]?.word ?? ''));
+    const ti = turnIdx >= 0 ? turnIdx : notIdx;
+    if (ti >= 0) {
+      // a turn in the argument ("but also", "not just"): face in a top square, the caption on the pale lower half
+      const a = ti === 0 ? s.t0 : Math.max(s.t0, ws[ti].t - 0.1);
+      cands.push({ type: 'topsquare', s, score: 4.8, t0: a, t1: Math.min(s.t1, a + 3.5) });
     }
     // lists: "a magazine, a billboard" / "X, Y and Z": a comma followed by the same determiner, or 2+ commas of short parts
     const DET = /^(a|an|the|your|my|our|their|his|her)$/i;
@@ -173,34 +201,44 @@ export async function direct(dir, opts = {}) {
   let broll = 0, hidden = 0, visualCount = 0;
   const chosen = [];
   const free = (a, b) => a >= R.hookFace && b <= D - R.tailFace && chosen.every(c => b + R.faceBetween <= c.t0 || a >= c.t1 + R.faceBetween);
-  for (const c of cands.sort((x, y) => y.score - x.score || x.s.t0 - y.s.t0)) {
-    if (chosen.some(x => x.s === c.s)) continue;
+  // pick the best candidate, then make every other candidate of the same layout less attractive (variety: each edit type shows up)
+  const used = {};
+  const pool = [...cands];
+  while (pool.length) {
+    pool.sort((x, y) => (y.score - 2.5 * (used[y.type] ?? 0)) - (x.score - 2.5 * (used[x.type] ?? 0)) || x.s.t0 - y.s.t0);
+    const c = pool.shift();
+    const n0 = chosen.length;
+    pick(c);
+    if (chosen.length > n0) used[c.type] = (used[c.type] ?? 0) + 1;
+  }
+  function pick(c) {
+    if (chosen.some(x => x.s === c.s)) return;
     if (c.type === 'visual') {
       // alternate the two visual layouts: graphic card (face hidden, short) and split (face stays, longer)
       const asGraphic = visualCount % 2 === 0 && c.kws[0].w.t + 0.0 < c.s.t1;
       const k0 = c.kws[0];
       if (asGraphic) {
         const a = Math.max(c.s.t0, k0.w.t - 0.25), b = Math.min(c.s.t1, a + R.graphicMax);
-        if (b - a < R.graphicMin || !free(a, b) || hidden + (b - a) > hiddenMax || broll + (b - a) > brollMax) continue;
+        if (b - a < R.graphicMin || !free(a, b) || hidden + (b - a) > hiddenMax || broll + (b - a) > brollMax) return;
         const title = phraseAround(c.s.words, k0.j);
         chosen.push({ type: 'graphic', s: c.s, t0: a, t1: b, query: stockScore(c.s.words[k0.j - 1] ?? { word: '' }, 0, [{}]) >= 1 && title.includes(' ') ? title : k0.w.word, title });
         hidden += b - a; broll += b - a; visualCount++;
       } else {
         const a = c.s.t0, b = Math.min(c.s.t1, a + R.splitMax);
-        if (b - a < R.splitMin || !free(a, b) || broll + (b - a) * 0.5 > brollMax) continue;
+        if (b - a < R.splitMin || !free(a, b) || broll + (b - a) * 0.5 > brollMax) return;
         const ks0 = c.kws.filter(k => k.w.t < b).sort((x, y) => x.j - y.j), ks = [];
         for (const k of ks0) { const last = ks.at(-1); if (last && k.j === last.j2 + 1) { last.q += ' ' + k.w.word; last.j2 = k.j; } else ks.push({ q: k.w.word, j2: k.j, t: k.w.t }); }
         chosen.push({ type: 'split', s: c.s, t0: a, t1: b, shots: ks.slice(0, 3).map((k, n) => ({ query: k.q, t: n === 0 ? a : k.t - 0.1 })) });
         broll += (b - a) * 0.5; visualCount++;
       }
-    } else if (c.type === 'bigtext') {
-      if (c.t1 - c.t0 < R.bigtextMin || !free(c.t0, c.t1) || broll + (c.t1 - c.t0) * 0.5 > brollMax) continue;
+    } else if (['wide', 'post', 'orbit', 'topsquare'].includes(c.type)) {
+      if (c.t1 - c.t0 < R.bigtextMin || !free(c.t0, c.t1) || broll + (c.t1 - c.t0) * 0.5 > brollMax) return;
       chosen.push({ ...c }); broll += (c.t1 - c.t0) * 0.5;
     } else if (c.type === 'list') {
-      if (!free(c.t0, c.t1)) continue;
+      if (!free(c.t0, c.t1)) return;
       chosen.push({ ...c });
     }
-  }
+    }
   chosen.sort((a, b) => a.t0 - b.t0);
 
   // tile the timeline: face segments per sentence between the chosen ones, alternating zoom levels
@@ -221,7 +259,9 @@ export async function direct(dir, opts = {}) {
     if (c.type === 'list') pushFace(c.t0, c.t1, 'list', { items: c.items });
     else if (c.type === 'graphic') segs.push({ type: 'graphic', t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), query: c.query, title: c.title });
     else if (c.type === 'split') segs.push({ type: 'split', t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), shots: c.shots, face: faceAt(c.t0, c.t1) });
-    else if (c.type === 'bigtext') segs.push({ type: 'bigtext', t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), words: c.words, face: faceAt(c.t0, c.t1) });
+    else if (c.type === 'wide' || c.type === 'post') segs.push({ type: c.type, t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), words: c.words, face: faceAt(c.t0, c.t1) });
+    else if (c.type === 'orbit') segs.push({ type: 'orbit', t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), title: c.title, face: faceAt(c.t0, c.t1) });
+    else if (c.type === 'topsquare') segs.push({ type: 'topsquare', t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), face: faceAt(c.t0, c.t1) });
     t = c.t1;
   }
   for (const s of S) { const a = Math.max(t, s.t0), b = s.t1; if (b - a > 0.05) pushFace(a, b); }
@@ -252,7 +292,7 @@ export async function direct(dir, opts = {}) {
   // transitions: wash into a graphic, wipe out of a hidden-face card, pop into a split, cut between face zooms
   segs.forEach((g, i) => {
     const prev = segs[i - 1];
-    g.enter = !prev ? 'none' : g.type === 'graphic' ? 'wash' : (prev.type === 'graphic' || prev.type === 'bigtext' || g.type === 'bigtext') ? 'wipe' : g.type === 'split' ? 'pop' : 'cut';
+    g.enter = !prev ? 'none' : g.type === 'graphic' ? 'wash' : (prev.type === 'graphic' || prev.type === 'post' || g.type === 'post') ? 'wipe' : (g.type === 'split' || prev.type === 'orbit') ? 'pop' : 'cut';
   });
 
   const caps = chunks(words, R);
@@ -263,7 +303,9 @@ export async function direct(dir, opts = {}) {
     if (g.enter === 'wash') sfx.push({ t: Math.max(0, g.t0 - 0.12), k: 'wash' }), g.img && sfx.push({ t: g.t0 + 0.3, k: 'rise' });
     if (g.enter === 'wipe') sfx.push({ t: Math.max(0, g.t0 - 0.08), k: 'wipe' });
     if (g.enter === 'pop') sfx.push({ t: g.t0, k: 'split' });
-    if (g.type === 'bigtext') sfx.push({ t: Math.max(g.t0, g.t1 - 0.55), k: 'click' });
+    if (g.type === 'post') sfx.push({ t: Math.max(g.t0, g.t1 - 0.3), k: 'click' });
+    if (g.type === 'orbit') { sfx.push({ t: g.t0, k: 'wash' }); [0.25, 0.4, 0.55].forEach(o => sfx.push({ t: g.t0 + o, k: 'rise' })); }
+    if (g.type === 'wide' || (segs[segs.indexOf(g) - 1]?.type === 'wide')) sfx.push({ t: g.t0, k: 'wipe' });
   }
   const spec = {
     version: 1, theme: 'card-studio', duration: D, fps: T.canvas.fps, video: 'graded.mp4', src: 'src.mp4',
@@ -275,14 +317,30 @@ export async function direct(dir, opts = {}) {
   };
   writeFileSync(join(dir, 'spec.card.json'), JSON.stringify(spec, null, 1));
   const hiddenT = segs.filter(g => g.type === 'graphic').reduce((a, g) => a + g.t1 - g.t0, 0);
-  const brollT = segs.filter(g => g.type !== 'face' && g.type !== 'list').reduce((a, g) => a + g.t1 - g.t0, 0);
+  const brollT = segs.filter(g => !['face', 'list', 'topsquare'].includes(g.type)).reduce((a, g) => a + g.t1 - g.t0, 0);
   console.log(`spec.card.json: ${segs.length} segments, ${caps.length} captions, face hidden ${(100 * hiddenT / D).toFixed(0)}%, b-roll layouts ${(100 * brollT / D).toFixed(0)}%, ${Object.keys(images).length} stock images`);
-  for (const g of segs) console.log(`${g.t0.toFixed(2).padStart(6)}-${g.t1.toFixed(2).padEnd(6)} ${g.type.padEnd(8)} ${g.enter.padEnd(5)} ${g.zoom ? 'z' + g.zoom[0] : ''} ${g.title ?? g.query ?? ''}${g.shots ? g.shots.map(s => s.query).join(',') : ''}${g.items ? g.items.map(s => s.text).join(' | ') : ''}${g.words ? g.words.map(w => w.w).join(' ') : ''}`);
+  for (const g of segs) console.log(`${g.t0.toFixed(2).padStart(6)}-${g.t1.toFixed(2).padEnd(6)} ${g.type.padEnd(8)} ${g.enter.padEnd(5)} ${g.zoom ? 'z' + g.zoom[0] : ''} ${g.title ?? g.query ?? ''}${g.shots ? g.shots.map(s => s.query).join(',') : ''}${g.items ? g.items.map(s => s.text).join(' | ') : ''}${g.type === 'orbit' ? '' : ''}${g.words ? g.words.map(w => w.w).join(' ') : ''}`);
   return spec;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  // one command, end to end: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge ..] [--handle ..] [--cta1 ..] [--cta2 ..] [--kw ..] [--no-stock] [--no-music]
+  // raw video in: prep (1080x1920, face-aware crop, word timings by Groq or free local Whisper, pauses cut) -> rules director
+  // -> stock fetch (cached) -> MP4 render. Deterministic: no random choices anywhere; stock is cached per query on disk.
   const a = process.argv.slice(2), opt = k => { const i = a.indexOf(k); return i > 0 ? a[i + 1] : undefined; };
-  if (!a[0]) { console.error('usage: node engine/card-studio.mjs <clip dir> [--badge ..] [--handle ..] [--cta1 ..] [--cta2 ..] [--kw ..] [--no-stock]'); process.exit(1); }
-  await direct(a[0], { badge: opt('--badge'), handle: opt('--handle'), cta1: opt('--cta1'), cta2: opt('--cta2'), kw: opt('--kw'), noStock: a.includes('--no-stock') });
+  if (!a[0]) { console.error('usage: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge ..] [--handle ..] [--cta1 ..] [--cta2 ..] [--kw ..] [--no-stock] [--no-music]'); process.exit(1); }
+  const { statSync } = await import('node:fs');
+  const { basename, extname, resolve } = await import('node:path');
+  let dir = a[0];
+  const isFile = existsSync(a[0]) && statSync(a[0]).isFile();
+  if (isFile) {
+    dir = opt('--dir') ?? join(ROOT, 'data/clips', basename(a[0], extname(a[0])).replace(/[^\w.-]+/g, '-'));
+    execFileSync(process.execPath, [join(ROOT, 'engine/prep.mjs'), resolve(a[0]), dir], { stdio: 'inherit', env: { ...process.env, THEME: 'card-studio' } });
+  }
+  await direct(dir, { badge: opt('--badge'), handle: opt('--handle'), cta1: opt('--cta1'), cta2: opt('--cta2'), kw: opt('--kw'), noStock: a.includes('--no-stock') });
+  if (isFile || opt('--out')) {
+    const out = resolve(opt('--out') ?? join(dir, 'card-studio.mp4'));
+    execFileSync(process.execPath, [join(ROOT, 'tools/render-card.mjs'), dir, out, ...(a.includes('--no-music') ? ['--no-music'] : [])], { stdio: 'inherit' });
+    console.log(`done: ${out}`);
+  }
 }

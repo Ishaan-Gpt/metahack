@@ -24,4 +24,4 @@
   Lesson written to ishaan-motion 1.17.87 (lessons.md). Next: match ONE reference beat side by side before anything else.
 
 ## 2026-11-04 Card Studio theme (branch theme-card-studio)
-- New theme from the @edita.visuals reference: rule director, shared canvas drawing, headless MP4 export (no browser), free stock (Pixabay / Openverse / Commons), free local word timings and face boxes. Draw 12 to 13 ms a frame. Breakdown in docs/themes/card-studio.md, how to run in THEME_README.md.
+- New theme from the @edita.visuals reference: rule director, shared canvas drawing, headless MP4 export (no browser), free stock (Pixabay / Openverse / Commons), free local word timings and face boxes. Draw 12 to 13 ms a frame. Breakdown in docs/themes/card-studio.md, how to run in docs/themes/THEME_README.md.

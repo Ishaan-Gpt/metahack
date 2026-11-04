@@ -134,7 +134,7 @@
   "splitMin": 1.6,
   "bigtextMax": 3.0,
   "bigtextMin": 1.2,
-  "faceBetween": 1.6,
+  "faceBetween": 1.2,
   "minSentence": 1.2,
   "stockScoreMin": 4,
   "chunkMaxWords": 3,
