@@ -38,7 +38,7 @@ const mk2d = (w, h) => { const c = document.createElement('canvas'); c.width = w
 const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
 // ---------- prebuilt desk pieces ----------
-const LIT = [236, 224, 207], SHADE = [172, 160, 141];
+const LIT = [238, 227, 211], SHADE = [192, 179, 158];   // ref desk p90 (237,225,208), p50 (208,195,175) at 8.0 s
 function ground(seed, ang) {             // beige desk 1400x2300 with soft window-light (gobo) shadows
   const [c, x] = mk2d(1400, 2300);
   x.fillStyle = `rgb(${SHADE})`; x.fillRect(0, 0, 1400, 2300);
@@ -49,7 +49,7 @@ function ground(seed, ang) {             // beige desk 1400x2300 with soft windo
   x.filter = 'blur(38px)'; x.drawImage(l, 0, 0); x.filter = 'none';
   const g = x.createRadialGradient(500, 700, 100, 700, 1150, 1500); g.addColorStop(0, 'rgba(255,248,236,0.18)'); g.addColorStop(1, 'rgba(90,70,50,0.18)');
   x.fillStyle = g; x.fillRect(0, 0, 1400, 2300);
-  x.globalCompositeOperation = 'multiply'; x.globalAlpha = .55;
+  x.globalCompositeOperation = 'multiply'; x.globalAlpha = .32;
   for (let yy = 0; yy < 2300; yy += 700) for (let xx = 0; xx < 1400; xx += 700) x.drawImage(IM.tex, xx, yy, 700, 700);
   x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
   return c;
