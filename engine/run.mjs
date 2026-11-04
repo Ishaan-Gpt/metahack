@@ -90,15 +90,16 @@ event(`Got your take: ${dur.toFixed(1)} s, ${v.width}x${v.height}`);
 const claude = (process.env.DIRECTOR ?? '').toLowerCase() === 'claude';   // temporary: Claude Sonnet directs until the Meta key is in
 const realMeta = !claude && !!process.env.MODEL_API_KEY?.trim() && !process.env.META_API_BASE;
 const standin = !claude && !!process.env.META_API_BASE;
+const gem = !claude && !standin && !process.env.MODEL_API_KEY?.trim() && !!process.env.GEMINI_API_KEY?.trim();   // free Gemini API, BACKUP only (no Meta key)
 if (claude && !process.env.ANTHROPIC_API_KEY?.trim()) fail(new JobError('NO_DIRECTOR_KEY', 'The studio is missing its director key, so nothing can plan your edit. This is on our side, not yours: we are on it.'));
-if (!claude && !realMeta && !standin) fail(new JobError('NO_META_KEY', 'The studio is missing its Meta Model API key, so Muse Spark cannot direct. This is on our side, not yours: we are on it.'));
-status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : 'muse-spark-1.3' }; save();
+if (!claude && !realMeta && !standin && !gem) fail(new JobError('NO_META_KEY', 'The studio is missing its Meta Model API key, so Muse Spark cannot direct. This is on our side, not yours: we are on it.'));
+status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : gem ? 'gemini' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : gem ? (process.env.GEMINI_MODEL || 'gemini-2.5-flash') : 'muse-spark-1.3' }; save();
 
 // ---- 1 watch ---------------------------------------------------------------------------------------------------------
 stage('watch', 'running');
 try {
   await step(process.execPath, [join(ROOT, 'engine/prep.mjs'), input, CLIP], {
-    env: { HEAR: realMeta ? 'meta' : 'groq', DIALECT: 'card-studio', PREP_GRADE: '0' },   // test runs: Whisper on Groq for the words
+    env: { HEAR: realMeta || gem ? 'meta' : 'groq', DIALECT: 'card-studio', PREP_GRADE: '0' },   // test runs: Whisper on Groq for the words
     onLine: l => { if (/^ingest/.test(l)) { sub(0.35); event('Framed for 9:16 around your face'); } if (/^hear/.test(l)) { sub(0.7); event(realMeta ? 'Muse Voice Transcribe heard every word' : 'Words timed'); } if (/^clean/.test(l)) { sub(0.95); } },
   });
 } catch (e) {
@@ -122,11 +123,12 @@ if (styleId === 'auto') {
   const { metaChooseStyle, chooseStyleByRules } = await import('./meta.mjs');
   const facts = { seconds: +cut.duration.toFixed(1), words: words.length, sourceShape: v.width / v.height > 0.6 ? (v.width > v.height ? '16:9' : '4:5') : '9:16' };
   let pick = { ok: false };
-  try { pick = await metaChooseStyle(CLIP, { transcript, catalogue: listStyles(), facts }); } catch (e) { pick = { ok: false, why: e.message }; }
+  try { pick = await metaChooseStyle(CLIP, { transcript, catalogue: listStyles().filter(s => s.auto), facts }); } catch (e) { pick = { ok: false, why: e.message }; }
   if (pick.ok) { styleId = pick.style; status.choice = { by: pick.standin ? 'stand-in (test)' : claude ? 'Claude Sonnet' : 'Muse Spark', style: styleId, why: pick.why, hero: pick.hero_words }; }
   else { const r = chooseStyleByRules(transcript, facts); styleId = r.style; status.choice = { by: claude ? 'rules (Claude unavailable)' : 'rules (Muse Spark unavailable)', style: styleId, why: r.why }; log(`style pick fallback: ${pick.why}`); }
   event(`${status.choice.by} chose ${loadStyle(styleId).label}: ${status.choice.why}`, 'decision');
 }
+const MIX = styleId === 'creator-mix';   // template 2: Creator Mix (engine/creator-mix.mjs lays its effects on the same Card Studio plan)
 const S = loadStyle(styleId); status.style = styleId; status.styleLabel = job.style === 'auto' ? `Auto: ${S.label} look, every style's layouts` : S.label; save();
 // re-grade the cut with the style's own grade (prep baked Card Studio's)
 const G = S.grade;
@@ -140,7 +142,8 @@ try {
   await direct(CLIP, { style: styleId, mix: job.style === 'auto', badge: job.badge || (realMeta ? 'Muse Spark' : 'Moovi'), handle: job.handle || '@moovi', cta1: job.cta1, cta2: job.cta2, kw: job.kw, noStock: job.noStock });
   clearTimeout(dog); console.log = origLog; console.warn = origWarn;
 } catch (e) { fail(new JobError('DIRECT', 'The director could not plan this take. Try again; if it repeats, try another style.', e.stack)); }
-const spec = JSON.parse(readFileSync(join(CLIP, 'spec.card.json'), 'utf8'));
+if (MIX) { const { buildMix } = await import('./creator-mix.mjs'); await buildMix(CLIP, { handle: job.handle || '@moovi', cta1: job.cta1, cta2: job.cta2 }); }
+const spec = JSON.parse(readFileSync(join(CLIP, MIX ? 'spec.mix.json' : 'spec.card.json'), 'utf8'));
 if (status.stages.find(x => x.id === 'direct').state !== 'done') stage('direct', 'done');
 stage('build', 'done');
 const usage = existsSync(join(CLIP, 'meta-usage.json')) ? JSON.parse(readFileSync(join(CLIP, 'meta-usage.json'), 'utf8')) : null;
@@ -153,7 +156,7 @@ stage('render', 'running');
 const OUT = join(JOB, 'edit.mp4');
 const frames = Math.round(spec.duration * (spec.fps ?? 30));
 try {
-  await step(process.execPath, [join(ROOT, 'tools/render-card.mjs'), CLIP, OUT, ...(job.noMusic ? ['--no-music'] : [])], { limit: 2400,
+  await step(process.execPath, [join(ROOT, MIX ? 'tools/render-mix.mjs' : 'tools/render-card.mjs'), CLIP, OUT, ...(job.noMusic ? ['--no-music'] : [])], { limit: 2400,
     onLine: l => { const m = l.match(/^frame (\d+)/); if (m) sub(+m[1] / frames); if (/^video:/.test(l)) { stage('render', 'done'); stage('mix', 'running'); event('Every frame drawn'); } },
   });
 } catch (e) { fail(new JobError(status.stage === 'mix' ? 'MIX' : 'RENDER', 'Rendering stopped partway. Press Try again; your upload is kept.', (e.tail?.slice(-400) || '') + ' (' + e.message + ')')); }
@@ -165,7 +168,8 @@ stage('mix', 'done'); event('Sound mixed to -14 LUFS');
 stage('share', 'running');
 const BA = join(JOB, 'before-after.mp4');
 try {
-  await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', join(CLIP, 'cut.mp4'), '-i', OUT, '-filter_complex',
+  if (MIX) await step(process.env.PYTHON ?? 'python3', [join(ROOT, 'tools/ba-wrap.py'), OUT, join(CLIP, 'cut.mp4'), BA, '--accent', spec.theme?.accent ?? '#e5333d']);   // portrait Before / After with the visible "Edited by Meta" line
+  else await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', join(CLIP, 'cut.mp4'), '-i', OUT, '-filter_complex',
     "color=c=0xf4f3f1:s=1920x1080:r=30[bg];[0:v]scale=-2:640,setsar=1[raw];[1:v]scale=-2:1000,setsar=1[ed];[bg][raw]overlay=x=470:y=(H-h)/2+40:shortest=1[a];[a][ed]overlay=x=1920-w-560:y=(H-h)/2[v]",
     '-map', '[v]', '-map', '1:a', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-shortest', '-movflags', '+faststart', BA]);
   stage('share', 'done');

@@ -63,6 +63,9 @@ function icon(ctx, kind, x, y, s, col) {
   else { ctx.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? s * .18 : s * .42, a = -Math.PI / 2 + i * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); }
   ctx.restore();
 }
+
+/* ---------- theme (one accent family per video, picked by the director) ---------- */
+const themeCol = (spec, n = 0) => { const th = spec.theme && spec.theme.accent ? spec.theme : null; return th ? (n % 2 ? th.accent : th.accent2) : '#22e6ff'; };
 const ICONSET = ['play', 'heart', 'chat', 'chart', 'bell', 'star'];
 
 function arcText(ctx, s, cx, cy, R, size, fam, fill, hi, hiFill, spread = 1) {   // text along an arc (centre top), hero letters in hiFill
@@ -270,10 +273,68 @@ Object.assign(FX, {
       const pc = personCut(res, t); const fk = clamp(k * 2.5 - 0.3, 0, 1); if (pc) { ctx.save(); ctx.globalAlpha = fk; const dw = W * .72, dh = H * .6, [sx, sy, cw, ch] = crop(res, seg.face, 1.5, 0.35), ar = dw / dh, cc = Math.min(ch, cw / ar); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 30; ctx.drawImage(pc, sx + (cw - cc * ar) / 2, sy, cc * ar, cc, W * .28, H * .4, dw, dh); ctx.restore(); } },
     over(ctx, t, k, fx, spec, T, res) { const n = Math.floor(clamp(k * 1.6, 0, 1) * fx.phrase.length), s = fx.phrase.toUpperCase().slice(0, n) + (Math.floor(t * 4) % 2 ? '|' : ''); ctx.save(); text(ctx, s, W / 2, H * .88, fitSize(ctx, fx.phrase.toUpperCase() + '|', famOf(T, 'ui', 700).replace(/"Inter"/, '"JetBrains Mono"'), W * .9, 70), famOf(T, 'ui', 700).replace(/"Inter"/, '"JetBrains Mono"'), '#111'); ctx.restore(); } },
 });
-for (const i of [1, 4, 5, 8, 9, 10, 12]) FX[i].over ??= () => {};
+
+/* ---------- new in this version: 23 bokeh glow word, 24 highlighter phrase ---------- */
+Object.assign(FX, {
+  23: { pre(ctx, t, k, fx, spec, T, res, seg) {
+      const th = spec.theme ?? {}; base(ctx, res, seg.face, 1.25, 0.42); blurInto(ctx, res, W, H, 14);
+      ctx.fillStyle = (th.dark ?? '#10061c') + 'cc'; ctx.fillRect(0, 0, W, H);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 18; i++) { const x = (W * rnd(i, 7) + Math.sin(t * 0.7 + i) * 90 + W) % W, y = (H * rnd(i, 8) - t * (20 + 30 * rnd(i, 9)) + H * 2) % H, r = 40 + 120 * rnd(i, 10);
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r); const col = i % 3 ? (th.accent ?? '#e5333d') : (th.accent2 ?? '#ff9aa2'); g.addColorStop(0, col + '88'); g.addColorStop(0.7, col + '22'); g.addColorStop(1, col + '00'); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); }
+      ctx.restore();
+      const pc = personCut(res, t); if (pc) { const [sx, sy, cw, ch] = crop(res, seg.face, 1.25, 0.42); ctx.save(); ctx.globalAlpha = 0.9; ctx.drawImage(pc, sx, sy, cw, ch, 0, 0, W, H); ctx.restore(); }
+    },
+    over(ctx, t, k, fx, spec, T, res) {
+      const th = spec.theme ?? {}, a = eo(k * 5) * (1 - eo((k - 0.88) * 8)), s = fx.word.toUpperCase(), z = 0.9 + 0.1 * eb(k * 3), sz = fitSize(ctx, s, famOf(T, 'ui', 800), W * 0.84, 250 * z);
+      ctx.save(); ctx.globalAlpha = a; text(ctx, s, W / 2, H * 0.5, sz, famOf(T, 'ui', 800), '#fff', { glow: th.accent ?? '#e5333d', glowBlur: 90 });
+      text(ctx, s, W / 2, H * 0.5, sz, famOf(T, 'ui', 800), '#fff', { glow: th.accent2 ?? '#fff', glowBlur: 30 });
+      text(ctx, fx.helper.toLowerCase(), W / 2, H * 0.5 - sz * 0.78, 64, famOf(T, 'serifItalic'), 'rgba(255,255,255,0.92)', { glow: 'rgba(0,0,0,0.6)', glowBlur: 14 }); ctx.restore(); } },
+  24: { over(ctx, t, k, fx, spec, T, res) {
+      const th = spec.theme ?? {}, words = (fx.phrase || fx.word).toUpperCase().split(' ').slice(0, 4), a = 1 - eo((k - 0.9) * 10);
+      ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      let y = H * 0.66; words.forEach((wd, i) => { const hero = wd.toLowerCase() === fx.word.toLowerCase(), size = fitSize(ctx, wd, famOf(T, 'ui', 800), W * 0.86 - 64, hero ? 130 : 78), fam = famOf(T, 'ui', 800).replace('SIZE', size);
+        ctx.font = fam; const w = ctx.measureText(wd).width + 64, kk = eo((k * 4 - i * 0.35)), x = W * 0.5 - w / 2 + (i % 2 ? 40 : -40), rot = (i % 2 ? 0.02 : -0.025);
+        ctx.save(); ctx.translate(W / 2 + (i % 2 ? 40 : -40), y); ctx.rotate(rot); ctx.fillStyle = hero ? (th.accent ?? '#e5333d') : '#ffffff'; ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20;
+        ctx.beginPath(); ctx.roundRect(-w / 2, -size * 0.72, w * kk, size * 1.44, 14); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.rect(-w / 2, -size, w * kk, size * 2); ctx.clip(); ctx.fillStyle = hero ? '#fff' : '#101010'; ctx.fillText(wd, -w / 2 + 32, 4); ctx.restore(); y += size * 1.5 + 6; });
+      ctx.restore(); } },
+});
+
+/* ---------- new in this version: 25 number poster (red duotone, giant outlined number), 26 vertical photo strips with a sun ---------- */
+function duo(ctx, im, x, y, w, h, col, amt = 1) {   // grey the photo, then multiply the accent into it (the red-tinted B&W look of the reel)
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  if (im) { const sc = Math.max(w / im.width, h / im.height); ctx.drawImage(im, (im.width - w / sc) / 2, (im.height - h / sc) / 2, w / sc, h / sc, x, y, w, h); } else { ctx.fillStyle = '#777'; ctx.fillRect(x, y, w, h); }
+  ctx.globalCompositeOperation = 'saturation'; ctx.fillStyle = '#808080'; ctx.fillRect(x, y, w, h);
+  ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = amt; ctx.fillStyle = col; ctx.fillRect(x, y, w, h); ctx.restore();
+}
+Object.assign(FX, {
+  25: { pre(ctx, t, k, fx, spec, T, res, seg) {
+      const th = spec.theme ?? {}, e = eo(k * 3), im = imgOf(spec, res, fx, 0);
+      const g = ctx.createLinearGradient(0, 0, W, H); g.addColorStop(0, th.accent ?? '#e5333d'); g.addColorStop(1, th.dark ?? '#14060a'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.save(); ctx.globalAlpha = 0.85 * e; duo(ctx, im, W * 0.08, H * 0.12, W * 0.84, H * 0.62, th.accent ?? '#e5333d', 1); ctx.restore();
+      ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = '#000'; for (let j = 0; j < 30; j++) for (let i = 0; i < 16; i++) { ctx.beginPath(); ctx.arc(i * 72 + (j % 2) * 36 + 20, j * 66 + 20, 8 + 8 * rnd(i, j), 0, 7); ctx.fill(); } ctx.restore();
+      const pc = personCut(res, t); if (pc) { const [sx, sy, cw, ch] = crop(res, seg.face, 1.35, 0.42); ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 40; ctx.drawImage(pc, sx, sy, cw, ch, 0, H * 0.16 * (1 - e), W, H); ctx.restore(); } },
+    over(ctx, t, k, fx, spec, T, res) {
+      const th = spec.theme ?? {}, a = eo(k * 5) * (1 - eo((k - 0.88) * 8)), n = (fx.numStr || fx.word).toUpperCase(), fam = famOf(T, 'anton'), sz = fitSize(ctx, n, fam, W * 0.98, 460);
+      ctx.save(); ctx.globalAlpha = a; ctx.translate(W / 2, H * 0.34); ctx.rotate(-0.07); text(ctx, n, 0, 0, sz * (0.9 + 0.1 * eb(k * 3)), fam, null, { stroke: '#fff', lw: 9 });
+      text(ctx, n, 6, 10, sz * (0.9 + 0.1 * eb(k * 3)), fam, 'rgba(0,0,0,0.0)', {}); ctx.restore();
+      ctx.save(); ctx.globalAlpha = a; text(ctx, fx.helper.toLowerCase(), W * 0.5, H * 0.34 + sz * 0.52, 120, famOf(T, 'serifItalic'), '#fff', { glow: 'rgba(0,0,0,0.5)', glowBlur: 16, rot: -0.05 }); ctx.restore(); } },
+  26: { pre(ctx, t, k, fx, spec, T, res, seg) {
+      const th = spec.theme ?? {}; ctx.fillStyle = th.dark ?? '#14060a'; ctx.fillRect(0, 0, W, H);
+      const cols = 5, gw = W / cols;
+      for (let i = 0; i < cols; i++) { const dir = i % 2 ? 1 : -1, off = dir * (1 - eo(k * 2.2 - i * 0.12)) * H * 0.7, im = imgOf(spec, res, fx, i); ctx.save(); ctx.translate(0, off); duo(ctx, im, i * gw + 6, H * 0.06, gw - 12, H * 0.68, th.accent ?? '#e5333d', 1); ctx.restore(); }
+      ctx.save(); ctx.fillStyle = th.accent2 ?? '#ff8a80'; ctx.shadowColor = th.accent ?? '#e5333d'; ctx.shadowBlur = 80; ctx.beginPath(); ctx.arc(W * 0.5, H * 0.3, 230 * (0.9 + 0.1 * eb(k * 3)), 0, 7); ctx.fill(); ctx.restore();
+      drawPerson(ctx, res, t, seg.face, 1.3, 0.42, 0, true); },
+    over(ctx, t, k, fx, spec, T, res) {
+      const th = spec.theme ?? {}, a = eo(k * 5) * (1 - eo((k - 0.88) * 8)), s = fx.word.toUpperCase(), sz = fitSize(ctx, s, famOf(T, 'ui', 800), W * 0.86, 150);
+      ctx.save(); ctx.globalAlpha = a; ctx.font = famOf(T, 'ui', 800).replace('SIZE', sz); const w = ctx.measureText(s).width + 70; ctx.translate(W / 2, H * 0.84); ctx.rotate(-0.03); ctx.fillStyle = '#fff'; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 24; ctx.beginPath(); ctx.roundRect(-w / 2, -sz * 0.75, w * eo(k * 4), sz * 1.5, 18); ctx.fill();
+      ctx.shadowBlur = 0; ctx.beginPath(); ctx.rect(-w / 2, -sz, w * eo(k * 4), sz * 2); ctx.clip(); ctx.fillStyle = th.accent ?? '#e5333d'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, 0, 4); ctx.restore(); } },
+});
+for (const i of [1, 4, 5, 8, 9, 10, 12, 23, 24, 25, 26]) FX[i].over ??= () => {};
 
 export const EFFECT_IDS = Object.keys(FX).map(Number);
-const OWNS_CAPTION = new Set([18, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21]);
+const OWNS_CAPTION = new Set([25, 26, 23, 24, 18, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21]);
 
 function captions(ctx, t, spec, T, owned) {
   if (owned) return;
@@ -282,7 +343,7 @@ function captions(ctx, t, spec, T, owned) {
   const y = H * 0.80, kk = eo((t - (hero?.t ?? c.t0)) / 0.14);
   ctx.save();
   if (small.length) text(ctx, small.map(w => w.w).join(' ').toUpperCase(), W / 2, y - (hero ? 130 : 0), 54, famOf(T, 'ui', 800), '#fff', { glow: 'rgba(0,0,0,0.85)', glowBlur: 16 });
-  if (hero) { const col = (hero.w.length % 2 ? T.palette.cyan : T.palette.magenta), s = hero.w, sz = fitSize(ctx, s, famOf(T, 'serifItalic'), W * 0.86, 170 * (0.8 + 0.2 * eb(kk)));
+  if (hero) { const col = themeCol(spec, hero.w.length), s = hero.w, sz = fitSize(ctx, s, famOf(T, 'serifItalic'), W * 0.86, 170 * (0.8 + 0.2 * eb(kk)));
     text(ctx, s, W / 2, y, sz, famOf(T, 'serifItalic'), '#fff', { glow: col, glowBlur: 46 }); }
   ctx.restore();
 }
@@ -297,8 +358,26 @@ function cameraDraw(ctx, t, spec, T, res, seg) {
   const punch = c.z0 * (0.8 + 0.2 * eb(kin));                    // snap in with a small overshoot at every cut
   const z = Math.max(1, punch * (1 + c.drift * eio(k)));          // then a slow push
   const anchor = c.anchorY ?? 0.42;
+  if (c.world && res.matteAt?.(t) && personCut(res, t)) { worldDraw(ctx, t, k, c, spec, T, res, c.face ?? face, z, anchor); return c; }
   base(ctx, res, c.face ?? face, z, anchor, 0.5 - c.xo);
   grade(ctx, T); return c;
+}
+
+/* ---------- colour worlds: the background behind the speaker becomes a moving colour scene (like the first reel's wall colours) ---------- */
+function worldDraw(ctx, t, k, c, spec, T, res, face, z, anchor) {
+  const [c1, c2] = c.world, ph = t * 0.35;
+  const g = ctx.createLinearGradient(W * (0.5 + Math.cos(ph) * 0.5), 0, W * (0.5 - Math.cos(ph) * 0.5), H); g.addColorStop(0, c1); g.addColorStop(1, c2);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';                                   // soft moving light blobs
+  for (let i = 0; i < 4; i++) { const x = W * (0.2 + 0.6 * rnd(i, 3)) + Math.sin(t * 0.8 + i * 2) * 120, y = H * (0.2 + 0.6 * rnd(i, 4)) + Math.cos(t * 0.6 + i) * 140, r = 260 + 140 * rnd(i, 5);
+    const rg = ctx.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, 'rgba(255,255,255,0.20)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+  // giant faint word-less stripes for depth
+  ctx.save(); ctx.globalAlpha = 0.10; ctx.fillStyle = '#000'; for (let i = 0; i < 5; i++) ctx.fillRect(((i * 260 + t * 60) % (W + 260)) - 260, 0, 90, H); ctx.restore();
+  const pc = personCut(res, t), [sx, sy, cw, ch] = crop(res, face, z, anchor, 0.5 - c.xo);
+  ctx.save(); ctx.shadowColor = c2; ctx.shadowBlur = 70; ctx.drawImage(pc, sx, sy, cw, ch, 0, 0, W, H);          // coloured rim glow
+  ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 14; ctx.drawImage(pc, sx, sy, cw, ch, 0, 0, W, H); ctx.restore();
+  const v = ctx.createRadialGradient(W / 2, H * 0.45, H * 0.3, W / 2, H * 0.5, H * 0.8); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.45)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
 }
 function captionsOnePart(ctx, t, spec, T, c) {
   const cap = (spec.captions ?? []).find(x => t >= x.t0 && t < x.t1); if (!cap) return;
@@ -309,18 +388,55 @@ function captionsOnePart(ctx, t, spec, T, c) {
   const kk = eo((t - (hero?.t ?? cap.t0)) / 0.14);
   ctx.save();
   if (small.length) text(ctx, small.map(w => w.w).join(' ').toUpperCase(), cx, cy - (hero ? 120 : 0), c?.textSide ? 40 : 52, famOf(T, 'ui', 800), '#fff', { glow: 'rgba(0,0,0,0.85)', glowBlur: 16 });
-  if (hero) { const col = (hero.w.length % 2 ? T.palette.cyan : T.palette.magenta), s = hero.w, sz = fitSize(ctx, s, famOf(T, 'serifItalic'), maxW, 170 * (0.8 + 0.2 * eb(kk)));
+  if (hero) { const col = themeCol(spec, hero.w.length), s = hero.w, sz = fitSize(ctx, s, famOf(T, 'serifItalic'), maxW, 170 * (0.8 + 0.2 * eb(kk)));
     text(ctx, s, cx, cy, sz, famOf(T, 'serifItalic'), '#fff', { glow: col, glowBlur: 46 }); }
   ctx.restore();
 }
 
+
+/* ---------- finishing: handheld drift, whip-blur transition on every cut, light leak, grain ---------- */
+let NOISE = null;
+function noise(res) { if (NOISE) return NOISE; const c = res.make(256, 256), x = c.getContext('2d'), d = x.createImageData(256, 256); for (let i = 0; i < 256 * 256; i++) { const v = 90 + rnd(i, 1) * 120; d.data[i * 4] = d.data[i * 4 + 1] = d.data[i * 4 + 2] = v; d.data[i * 4 + 3] = 255; } x.putImageData(d, 0, 0); NOISE = c; return c; }
+function cutDistance(spec, t) { let best = 9, bt = 0; for (const c of spec.cam ?? []) if (t >= c.t0 && t - c.t0 < best) { best = t - c.t0; bt = c.t0; } for (const f of spec.fx ?? []) if (t >= f.t0 && t - f.t0 < best) { best = t - f.t0; bt = f.t0; } return { d: best, bt }; }
+const TRANS = ['whip', 'radial', 'invert', 'tilt', 'shatter'], TWIN = { whip: 0.16, radial: 0.2, invert: 0.12, tilt: 0.22, shatter: 0.3 };
+function transition(ctx, kind, s, t, th, res, bt) {   // s = 1 at the cut, 0 when settled; works on a copy of the finished frame
+  const snap = getScratch(res, 'whip', W, H), c2 = snap.getContext('2d'); c2.clearRect(0, 0, W, H); c2.drawImage(ctx.canvas, 0, 0);
+  const sgn = rnd(Math.round(bt * 10), 12) > 0.5 ? 1 : -1;
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (kind === 'whip') { ctx.clearRect(0, 0, W, H); const N = 9; for (let i = 0; i < N; i++) { const o = (i - (N - 1) / 2) / N, sc = 1 + 0.07 * s * (i / N); ctx.globalAlpha = 1 / (1 + Math.abs(o) * 2.2) / (N / 3.2); ctx.save(); ctx.translate(W / 2 + o * 160 * s * sgn, H / 2); ctx.scale(sc, sc); ctx.drawImage(snap, -W / 2, -H / 2); ctx.restore(); } }
+  else if (kind === 'radial') { ctx.clearRect(0, 0, W, H); const N = 11; for (let i = 0; i < N; i++) { const sc = 1 + 0.2 * s * (i / N); ctx.globalAlpha = 1 / (N / 2.4) * (1 - i / N * 0.4); ctx.save(); ctx.translate(W / 2, H * 0.42); ctx.scale(sc, sc); ctx.drawImage(snap, -W / 2, -H * 0.42); ctx.restore(); } }
+  else if (kind === 'invert') { ctx.globalCompositeOperation = 'difference'; ctx.globalAlpha = s > 0.45 ? 1 : 0.55 * s * 2; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }
+  else if (kind === 'tilt') { ctx.fillStyle = th.dark ?? '#0b0b10'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 0.35; ctx.save(); ctx.translate(W / 2 - sgn * W * 0.5 * s, H / 2); ctx.rotate(-sgn * 0.12 * s); ctx.drawImage(snap, -W / 2, -H / 2); ctx.restore();
+    ctx.globalAlpha = 1; ctx.save(); ctx.translate(W / 2 + sgn * W * 0.3 * s, H / 2); ctx.rotate(sgn * 0.1 * s); ctx.scale(1 + 0.12 * s, 1 + 0.12 * s); ctx.drawImage(snap, -W / 2, -H / 2); ctx.restore(); }
+  else if (kind === 'shatter') { ctx.fillStyle = th.dark ?? '#0b0b10'; ctx.fillRect(0, 0, W, H); const cols = 5, rows = 8, cw = W / cols, ch = H / rows;
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) for (let h = 0; h < 2; h++) { const id = (j * cols + i) * 2 + h, ang = rnd(id, 13) * 6.283, dist = (60 + 380 * rnd(id, 14)) * s * s, cx = (i + 0.5) * cw, cy = (j + 0.5) * ch;
+        ctx.save(); ctx.translate(cx + Math.cos(ang) * dist, cy + Math.sin(ang) * dist); ctx.rotate((rnd(id, 15) - 0.5) * 1.4 * s); ctx.translate(-cx, -cy); ctx.beginPath();
+        if (h) { ctx.moveTo(i * cw, j * ch); ctx.lineTo((i + 1) * cw, j * ch); ctx.lineTo((i + 1) * cw, (j + 1) * ch); } else { ctx.moveTo(i * cw, j * ch); ctx.lineTo((i + 1) * cw, (j + 1) * ch); ctx.lineTo(i * cw, (j + 1) * ch); }
+        ctx.closePath(); ctx.clip(); ctx.drawImage(snap, 0, 0); ctx.restore(); } }
+  if (kind !== 'invert') { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = th.accent ?? '#e5333d'; ctx.globalAlpha = 0.22 * s; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+function finishing(ctx, t, spec, T, res) {
+  const th = spec.theme ?? {}, { d, bt } = cutDistance(spec, t);
+  const kind = TRANS[Math.floor(rnd(Math.round(bt * 10), 11) * TRANS.length) % TRANS.length], WH = TWIN[kind];
+  if (d < WH && t > 0.2) transition(ctx, kind, 1 - d / WH, t, th, res, bt);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (d < 0.5) { const s2 = Math.pow(1 - d / 0.5, 2), g = ctx.createRadialGradient(W * (0.15 + 0.7 * rnd(Math.floor(t * 3), 2)), H * 0.1, 10, W * 0.5, H * 0.3, H * 0.7); g.addColorStop(0, (th.accent2 ?? '#ffb36b') + 'ff'); g.addColorStop(1, '#00000000'); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.33 * s2; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }   // light leak
+  ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = 0.10; const n = noise(res), ox = Math.floor(rnd(Math.floor(t * 24), 5) * 256), oy = Math.floor(rnd(Math.floor(t * 24), 6) * 256);
+  for (let y = -oy; y < H; y += 256) for (let x = -ox; x < W; x += 256) ctx.drawImage(n, x, y);                                                                                   // film grain
+  ctx.restore();
+}
+
 export function drawFrame(ctx, t, spec, T, res) {
+  if (spec.theme?.accent) { T._base ??= { ...T.palette }; Object.assign(T.palette, T._base, { red: spec.theme.accent, cyan: spec.theme.accent2, magenta: spec.theme.accent, orange: spec.theme.accent2 }); }   // one accent family per video
   const seg = segAt(spec, t), fx = fxAt(spec, t), k = fx ? (t - fx.t0) / (fx.t1 - fx.t0) : 0;
   const fn = fx ? FX[fx.id] : null; let camUsed = null;
   ctx.save(); ctx.clearRect(0, 0, W, H);
+  { const dr = 1.025; ctx.translate(W / 2, H / 2); ctx.rotate(Math.sin(t * 1.7) * 0.0035); ctx.scale(dr, dr); ctx.translate(Math.sin(t * 2.3) * 7 - W / 2, Math.cos(t * 1.9) * 6 - H / 2); }   // handheld drift
   if (fn?.pre) fn.pre(ctx, t, k, fx, spec, T, res, seg);
   else camUsed = cameraDraw(ctx, t, spec, T, res, seg);
   if (fn?.over) fn.over(ctx, t, k, fx, spec, T, res);
   if (!(fx && OWNS_CAPTION.has(fx.id) && fx.id !== 22)) captionsOnePart(ctx, t, spec, T, camUsed ?? camAt(spec, t));
   ctx.restore();
+  finishing(ctx, t, spec, T, res);
 }

@@ -21,7 +21,12 @@ export const SPARK_MODEL = 'muse-spark-1.3';
 // status, studio), cached separately from Muse answers, and never labelled as Meta. Transcription then uses Whisper.
 export const CLAUDE_MODEL = 'claude-sonnet-5-5';
 export const isClaude = () => (process.env.DIRECTOR ?? '').toLowerCase() === 'claude';
-export const directorModel = () => isClaude() ? CLAUDE_MODEL : SPARK_MODEL;
+// Free Gemini API as the BACKUP, never the default: only when there is NO Meta key (MODEL_API_KEY) and GEMINI_API_KEY is set
+// (or DIRECTOR=gemini is asked for). Same two calls, same cache, same usage log, one wait-and-retry on a 429 (free tier).
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+export const geminiBase = () => (process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
+export const isGemini = () => { loadEnv(); if (isClaude()) return false; if ((process.env.DIRECTOR ?? '').toLowerCase() === 'gemini') return true; return !(process.env.MODEL_API_KEY ?? '').trim() && !!(process.env.GEMINI_API_KEY ?? '').trim(); };
+export const directorModel = () => isClaude() ? CLAUDE_MODEL : isGemini() ? GEMINI_MODEL : SPARK_MODEL;
 export const metaBase = () => (process.env.META_API_BASE || 'https://api.meta.ai/v1').replace(/\/+$/, '');
 export const sha256 = b => createHash('sha256').update(b).digest('hex');
 
@@ -32,9 +37,45 @@ export function requireMetaKey() {
     if (!process.env.ANTHROPIC_API_KEY?.trim() && !process.env.ANTHROPIC_AUTH_TOKEN?.trim()) { console.error('DIRECTOR=claude needs ANTHROPIC_API_KEY in .env.local'); process.exit(2); }
     return 'claude';
   }
+  if (isGemini()) {
+    if (!(process.env.GEMINI_API_KEY ?? '').trim()) { console.error('DIRECTOR=gemini needs GEMINI_API_KEY'); process.exit(2); }
+    console.warn('MODEL_API_KEY not set: running the same two-call pipeline on the free Gemini API (backup). Set MODEL_API_KEY to use Meta.');
+    return process.env.GEMINI_API_KEY.trim();
+  }
   const key = process.env.MODEL_API_KEY;
-  if (!key || !key.trim()) { console.error(KEY_ERROR); process.exit(2); }
+  if (!key || !key.trim()) { console.error(KEY_ERROR + ' (or GEMINI_API_KEY as the free backup)'); process.exit(2); }
   return key.trim();
+}
+
+// ---- Gemini backup (free tier): same two calls, same cache, same usage log, one attempt each (a single wait-and-retry on a 429) ----
+const gUpper = s => Array.isArray(s) ? s.map(gUpper) : s && typeof s === 'object' ? Object.fromEntries(Object.entries(s).filter(([k]) => k !== 'additionalProperties').map(([k, v]) => [k, k === 'type' && typeof v === 'string' ? v.toUpperCase() : gUpper(v)])) : s;
+async function geminiCall(key, body, what) {
+  const url = `${geminiBase()}/models/${GEMINI_MODEL}:generateContent`;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const r = await fetch(url, { method: 'POST', headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const text = await r.text();
+    if (r.status === 429 && attempt === 0) { const m = text.match(/"retryDelay":\s*"(\d+)/); const wait = Math.min(45, m ? +m[1] + 1 : 20); console.warn(`Gemini ${what}: rate limit (free tier), waiting ${wait} s once`); await new Promise(res => setTimeout(res, wait * 1000)); continue; }
+    return { r, text };
+  }
+}
+async function geminiTranscribe(key, wav) {
+  const body = { systemInstruction: { parts: [{ text: 'Transcribe the speech exactly as spoken. Return the speaker turns (stretches of speech separated by pauses of about half a second or more) with start and end in milliseconds from the start of the audio. Do not add or drop words.' }] },
+    contents: [{ role: 'user', parts: [{ inlineData: { mimeType: 'audio/wav', data: wav.toString('base64') } }, { text: 'Transcribe this audio.' }] }],
+    generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: gUpper({ type: 'object', required: ['transcript', 'turns'], properties: { transcript: { type: 'string' }, turns: { type: 'array', items: { type: 'object', required: ['transcript', 'startMs', 'endMs'], properties: { transcript: { type: 'string' }, startMs: { type: 'integer' }, endMs: { type: 'integer' } } } } } }) } };
+  const { r, text } = await geminiCall(key, body, 'transcribe'); if (!r.ok) throw new Error(`Gemini transcribe answered ${r.status}: ${text.slice(0, 300)}`);
+  const j = JSON.parse(text), out = JSON.parse(j.candidates?.[0]?.content?.parts?.map(p => p.text ?? '').join('') ?? '{}');
+  if (typeof out.transcript !== 'string' || !Array.isArray(out.turns)) throw new Error('Gemini transcribe answer has no transcript/turns');
+  return { ...out, audioDurationMs: Math.round(((wav.length - 44) / 2 / 16000) * 1000), standin: r.headers.get('x-meta-standin') === '1' };
+}
+async function geminiChat(key, body) {   // body = the Meta chat body; the same system text, user text and JSON schema go to Gemini
+  const sys = body.messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n'), user = body.messages.filter(m => m.role === 'user').map(m => m.content).join('\n\n'), schema = body.response_format.json_schema.schema;
+  const gb = { systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: gUpper(schema), thinkingConfig: { thinkingBudget: 0 } } };
+  const { r, text } = await geminiCall(key, gb, 'plan');
+  const rep = (status, obj, standin = false) => ({ ok: status < 300, status, headers: { get: k => (k === 'x-meta-standin' && standin ? '1' : null) }, text: async () => JSON.stringify(obj) });
+  if (!r.ok) return rep(r.status, { error: { message: text.slice(0, 300) } });
+  const j = JSON.parse(text), content = j.candidates?.[0]?.content?.parts?.map(p => p.text ?? '').join('') ?? '';
+  const u = j.usageMetadata ?? {};
+  return rep(200, { model: GEMINI_MODEL, choices: [{ message: { role: 'assistant', content }, finish_reason: j.candidates?.[0]?.finishReason ?? null }], usage: { prompt_tokens: u.promptTokenCount ?? 0, completion_tokens: u.candidatesTokenCount ?? 0, total_tokens: u.totalTokenCount ?? 0 } }, r.headers.get('x-meta-standin') === '1');
 }
 
 // ---- usage log -------------------------------------------------------------------------------------------------
@@ -72,6 +113,12 @@ export async function metaTranscribe(dir, wavPath, { key = requireMetaKey() } = 
     const c = JSON.parse(readFileSync(cache, 'utf8'));
     recordUsage(dir, { call: 'transcribe', model: TRANSCRIBE_MODEL, cache_hit: true, audio_sha256: h, cache: 'meta/' + cache.split('/').pop(), standin: !!c.standin });
     return c.response;
+  }
+  if (isGemini()) {
+    const t0g = performance.now(), response = await geminiTranscribe(key, wav), standin = !!response.standin; delete response.standin; const seconds = +((performance.now() - t0g) / 1000).toFixed(2);
+    writeFileSync(cache, JSON.stringify({ audio_sha256: h, request: { model: GEMINI_MODEL }, response, standin, provider: 'gemini', at: new Date().toISOString() }, null, 1));
+    recordUsage(dir, { call: 'transcribe', provider: 'gemini', model: GEMINI_MODEL, cache_hit: false, ok: true, seconds, audio_sha256: h, audio_seconds: +((response.audioDurationMs ?? 0) / 1000).toFixed(1), turns: response.turns.length, usage: null, standin });
+    return response;
   }
   const request = { model: TRANSCRIBE_MODEL, audioEncoding: 'WAV', mode: 'ENDPOINTING' };
   const fd = new FormData();
@@ -281,6 +328,7 @@ export function chooseStyleByRules(transcript, facts) {
 /** One director call. Muse Spark: the body as is. Claude: same system + user text, the same JSON schema as structured
  *  output, answered back in the chat/completions shape the callers already read (choices[0].message.content, usage). */
 async function postChat(body, key) {
+  if (isGemini()) return geminiChat(key, body);
   if (!isClaude()) return fetch(`${metaBase()}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });   // a silent endpoint fails in 2 min, never hangs the job
   const { default: Anthropic, APIError } = await import('@anthropic-ai/sdk');
   const client = new Anthropic();
