@@ -52,7 +52,8 @@ V.src = CLIP + (MAP ? 'cut.mp4' : 'hd.mp4');
 /** cut-file clock ↔ the clip's own clock (every word, face and anchor is in the clip's own seconds) */
 const toSrc = o => { if (!MAP) return o; let m = MAP[0]; for (const x of MAP) if (o >= x[2] - 1e-3) m = x; return Math.min(m[1], m[0] + (o - m[2])); };
 const toOut = s => { if (!MAP) return s; for (const x of MAP) { if (s < x[0]) return x[2]; if (s <= x[1]) return x[2] + (s - x[0]); } const l = MAP[MAP.length - 1]; return l[2] + (l[1] - l[0]); };
-const fit = () => { const w = innerWidth, h = innerHeight - 70, k = Math.min(w / 1080, h / 1920) * .96; stage.style.transform = `translate(${(w - 1080 * k) / 2}px,${(h - 1920 * k) / 2}px) scale(${k})`; };
+const EMBED = Q.has('embed'); if (EMBED) document.head.insertAdjacentHTML('beforeend', '<style>#bar{display:none}#stage{border-radius:0}</style>');
+const fit = () => { const w = innerWidth, h = innerHeight - (EMBED ? 0 : 70), k = Math.min(w / 1080, h / 1920) * (EMBED ? 1 : .96); stage.style.transform = `translate(${(w - 1080 * k) / 2}px,${(h - 1920 * k) / 2}px) scale(${k})`; };
 addEventListener('resize', fit); fit();
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x)), lerp = (a, b, k) => a + (b - a) * k;
 const eo = k => 1 - Math.pow(1 - clamp(k), 3), eio = k => { k = clamp(k); return k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; };
@@ -385,7 +386,7 @@ await new Promise(r => V.readyState >= 2 ? r() : V.addEventListener('loadeddata'
 await grab([...need, ...[.2, .4, .6, .8].map(k => START + k * (END - START))]);
 if (!accent) { const c = document.createElement('canvas'); c.width = 64; c.height = 112; const g = c.getContext('2d'), px = []; for (const s of [.2, .4, .6, .8].map(k => START + k * (END - START))) { const im = new Image(); im.src = STILLS[s]; await im.decode(); g.drawImage(im, 0, 0, 64, 112); px.push(...g.getImageData(0, 0, 64, 112).data); } accent = accentFromPixels(new Uint8ClampedArray(px)) || '#ffffff'; }
 document.documentElement.style.setProperty('--accent', accent);
-CAP = premiumCaption1(SPEC.caption?.variant || '1.1', accent); list = cards(words, CAP.maxWords);
+CAP = premiumCaption1(SPEC.caption?.variant || '1.1', accent); list = cards(words, SPEC.caption?.maxWords || CAP.maxWords);
 const quiet = s => BEATS.some(b => b.noCaption && s >= b.t0 && s < b.t1);
 const deskSfx = !SPEC.desk || SPEC.desk.sound === false ? [] : [
   ...(SPEC.desk.items || []).flatMap(it => { const a = at(it.at), land = a + .28 * Math.sqrt(it.drop ?? 1), out = [];

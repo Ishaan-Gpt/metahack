@@ -21,7 +21,7 @@ const tmp = resolve(kv.tmp || ('data/grabs/_shots-' + (kv.out.replace(/[^\w]/g, 
 const times = kv.times.split(',').map(Number), w = +(kv.w || 270);
 for (const [i, t] of times.entries()) {
   await p.evaluate(t => window.__seek(t), t); await p.waitForTimeout(120);
-  await p.locator('#stage').screenshot({ path: join(tmp, `s${String(i).padStart(3, '0')}.png`) });
+  await p.locator(kv.sel || '#stage').screenshot({ path: join(tmp, `s${String(i).padStart(3, '0')}.png`) });
 }
 await b.close();
 const cols = Math.min(8, times.length), rows = Math.ceil(times.length / cols);

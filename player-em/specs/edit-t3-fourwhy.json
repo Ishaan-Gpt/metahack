@@ -34,7 +34,8 @@
  },
  "caption": {
   "variant": "1.1",
-  "accent": "#E2563A"
+  "accent": "#E2563A",
+  "maxWords": 3
  },
  "music": {
   "file": "music/bed.mp3",

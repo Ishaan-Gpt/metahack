@@ -58,7 +58,7 @@ const spec = {
   clip: '/data/clips/t3/', start: w('first'),
   palette: { ...v14.palette, accent: '#E2563A', 'accent-hi': '#FF9A7E', 'accent-glow': 'rgba(226,86,58,.6)', 'mat-ink': PAPER },
   theme: { ...v14.theme, ground: [[0, '#2b1f18'], [1, '#0c0807']], ring: 'rgba(247,236,222,.7)' },
-  caption: { variant: '1.1', accent: '#E2563A' }, music: { ...v14.music, gain: 0.07 }, desk: v14.desk,
+  caption: { variant: '1.1', accent: '#E2563A', maxWords: 3 }, music: { ...v14.music, gain: 0.07 }, desk: v14.desk,
   beats: [
     { from: w('first'), layers: [{ t: 'cam', z: 1.14, Y: 0.4, looks: [{ at: w('first'), f: LOOK }] }, chapter(1, 'no two-way talk')] },
     { from: w('have'), layers: [{ t: 'cam', z: 1.22, Y: 0.38, punch: w('two'), by: 1.07, looks: [{ at: w('have'), f: LOOK }] }] },
