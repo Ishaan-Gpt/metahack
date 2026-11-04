@@ -8,8 +8,10 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { ROOT, loadEnv } from './env.mjs';
-import { fetchStock } from './stock.mjs';
-import { metaPlan, requireMetaKey, resetUsage, usageSummary } from './meta.mjs';
+import { fetchStock, picturable } from './stock.mjs';
+import { directorModel, metaPlan, requireMetaKey, resetUsage, usageSummary } from './meta.mjs';
+import { loadStyle } from './styles.mjs';
+const PY = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3');   // Windows: python3 is the Store stub
 
 // what the model may choose from (the theme's own names; the player draws exactly these)
 export const LAYOUTS = ['face', 'graphic', 'split', 'list', 'post', 'wide', 'orbit', 'topsquare', 'textbehind'];
@@ -139,7 +141,11 @@ function phraseAround(ws, j) {
 export async function direct(dir, opts = {}) {
   loadEnv();
   if (!opts.noModel) requireMetaKey();
-  const T = JSON.parse(readFileSync(join(ROOT, 'engine/templates/card-studio.json'), 'utf8'));
+  const T = loadStyle(opts.style);   // the chosen style: Card Studio's template + its overrides (engine/styles.mjs)
+  // auto mode mixes the styles' fundamentals: the chosen style's look (frame, type, colours, grade, sound) with every
+  // layout any style uses, so each beat gets the device that fits its words best
+  if (opts.mix) delete T.allow;
+  const ALLOW = t => !T.allow || T.allow.includes(t);
   const R = { ...T.rules }, M = T.motion;
   const words = JSON.parse(readFileSync(join(dir, 'words.json'), 'utf8'));
   const cut = JSON.parse(readFileSync(join(dir, 'cut.json'), 'utf8'));
@@ -150,7 +156,7 @@ export async function direct(dir, opts = {}) {
   // face track: OpenCV pass on the edit's picture (or the browser bake's faces.json when it exists)
   const facesPath = join(dir, 'faces.cv.json');
   if (!existsSync(facesPath)) {
-    try { execFileSync(process.env.PYTHON ?? 'python3', [join(ROOT, 'engine/faces.py'), join(dir, 'cut.mp4'), facesPath, '5'], { stdio: 'inherit', timeout: 600000 }); }
+    try { execFileSync(PY, [join(ROOT, 'engine/faces.py'), join(dir, 'cut.mp4'), facesPath, '5'], { stdio: 'inherit', timeout: 600000 }); }
     catch (e) { console.warn('face pass failed, framing on the centre:', e.message); }
   }
   let faces = existsSync(facesPath) ? JSON.parse(readFileSync(facesPath, 'utf8')) : null;
@@ -324,16 +330,20 @@ export async function direct(dir, opts = {}) {
     const hj = Math.max(0, ws.findIndex(w => norm(w.word) === norm(it.hero)));
     const cut = (max) => { const b = Math.min(g.t1, a + max); return [{ b }, g.t1 - b > 0.05 ? asFace(g, b, g.t1) : null]; };
     if (layout === 'face') return { main: asFace(g) };
+    // a photo query that names nothing picturable ("themselves close up photo") is replaced by the stretch's best stock noun
+    const kwBest = () => { const k = ws.map((w, j) => ({ j, s: stockScore(w, j, ws) })).sort((x, y) => y.s - x.s)[0]; return k && k.s > 0 ? phraseAround(ws, k.j) : null; };
+    const q0 = picturable(it.queries[0] ?? '') ? it.queries[0] : (kwBest() ?? it.queries[0]), q1 = it.queries[1] && picturable(it.queries[1]) ? it.queries[1] : null;
     if (layout === 'graphic') {
       if (dur < R.graphicMin) return { why: 'too short for a graphic' };
       const [{ b }, rest] = cut(R.graphicMax);
-      return { main: { type: 'graphic', t0: a, t1: b, query: it.queries[0], title: phraseAround(ws, hj) }, rest };
+      const t0 = phraseAround(ws, hj);   // a card titled with a pronoun ("Themselves.") says nothing: the stretch's best noun instead
+      return { main: { type: 'graphic', t0: a, t1: b, query: q0, title: picturable(t0) ? t0 : (kwBest() ?? t0) }, rest };
     }
     if (layout === 'split') {
       if (dur < R.splitMin) return { why: 'too short for a split' };
       const [{ b }, rest] = cut(R.splitMax);
-      const shots = [{ query: it.queries[0], t: a }];
-      if (it.queries[1] && b - a > 2.4) { const w2 = ws.find(w => w.t > a + 1.1 && w.t < b - 1.0 && (VISUAL.has(norm(w.word)) || stockScore(w, 0, [w]) >= 1)) ?? ws.find(w => w.t >= a + (b - a) / 2); if (w2 && w2.t < b - 0.9) shots.push({ query: it.queries[1], t: +(w2.t - 0.1).toFixed(3) }); }
+      const shots = [{ query: q0, t: a }];
+      if (q1 && b - a > 2.4) { const w2 = ws.find(w => w.t > a + 1.1 && w.t < b - 1.0 && (VISUAL.has(norm(w.word)) || stockScore(w, 0, [w]) >= 1)) ?? ws.find(w => w.t >= a + (b - a) / 2); if (w2 && w2.t < b - 0.9) shots.push({ query: q1, t: +(w2.t - 0.1).toFixed(3) }); }
       return { main: { type: 'split', t0: a, t1: b, shots, face: faceAt(a, b) }, rest };
     }
     if (layout === 'wide' || layout === 'post') {
@@ -359,7 +369,7 @@ export async function direct(dir, opts = {}) {
       if (b2 - a2 < TB_MIN - 1e-6) return { why: 'no room for 1.5 s around the word' };
       const rest = g.t1 - b2 > 0.05 ? asFace(g, b2, g.t1) : null;
       const pre = a2 - a > 0.05 ? asFace(g, a, a2) : null;
-      return { pre, main: { type: 'textbehind', t0: +a2.toFixed(3), t1: +b2.toFixed(3), word, wordT: +wt.toFixed(3), bg: it.background ?? 'blur', zoom: [1, 1.04], face: faceAt(a2, b2) }, rest };
+      return { pre, main: { type: 'textbehind', t0: +a2.toFixed(3), t1: +b2.toFixed(3), word, wordT: +wt.toFixed(3), bg: T.textBehindBg ?? it.background ?? 'blur', zoom: [1, 1.04], face: faceAt(a2, b2) }, rest };
     }
     if (layout === 'list') {
       const items = listItems(ws);
@@ -371,7 +381,7 @@ export async function direct(dir, opts = {}) {
   const segList = segs.map((g, i) => ({ i, t0: g.t0, t1: g.t1, text: wordsIn(g.t0, g.t1).map(w => w.word + (w.p ?? '')).join(' '), rule: g.type }));
   const transcript = words.map(w => w.word + (w.p ?? '')).join(' ');
   const sp = opts.noModel ? { plan: null, valid: new Map(), invalid: [], cache_hit: false, skipped: true }
-    : await metaPlan(dir, { transcript, segments: segList, layouts: LAYOUTS, icons: ICONS, transitions: TRANSITIONS });
+    : await metaPlan(dir, { transcript, segments: segList, layouts: LAYOUTS.filter(ALLOW), icons: ICONS, transitions: TRANSITIONS });   // the director only chooses from this style's layouts
   for (const x of sp.invalid) console.warn(`plan: segment ${x.i} invalid (${x.why}), rule director kept for it`);
   const planLog = [];
   const planOf = new WeakMap();
@@ -450,7 +460,7 @@ export async function direct(dir, opts = {}) {
       if (m === 'list') return (listItems(ws).length >= 2 ? 4 : 0) + Math.min(2, c.filter(x => x && !STOP.has(x)).length * 0.3);
       return Math.max(0, ...ws.map((w, j) => stockScore(w, j, ws)));
     };
-    const FIRST = ['wide', 'post', 'list', 'orbit', 'topsquare', 'split', 'graphic', 'textbehind'];
+    const FIRST = ['wide', 'post', 'list', 'orbit', 'topsquare', 'split', 'graphic', 'textbehind'].filter(ALLOW);
     const maxLen = m => m === 'textbehind' ? TB_MAX : m === 'graphic' ? R.graphicMax : m === 'split' ? Math.min(R.splitMax, 3.2) : m === 'topsquare' ? 3.0 : Math.min(R.bigtextMax, 3.0);
     const minLen = m => m === 'textbehind' ? TB_MIN : m === 'graphic' ? R.graphicMin : m === 'split' ? R.splitMin : MINHOLD;
     const capLong = (maxL, cutAfter) => {
@@ -505,7 +515,7 @@ export async function direct(dir, opts = {}) {
       const ws = wordsIn(best.a, best.b);
       const hw = [...ws].sort((x, y) => best.m === 'textbehind' ? fit('textbehind', [y]) - fit('textbehind', [x]) : heroScore(y) - heroScore(x))[0] ?? ws[0];
       const kwq = [...ws].map((w, j) => ({ j, w, s: stockScore(w, j, ws) })).sort((x, y) => y.s - x.s)[0];
-      const it = { hero: hw?.word ?? '', queries: donorPlan?.queries?.length ? donorPlan.queries : [kwq && kwq.s > 0 ? phraseAround(ws, kwq.j) : (hw?.word ?? 'people')], icons: donorPlan?.icons ?? [], transition: 'cut' };
+      const it = { hero: hw?.word ?? '', queries: donorPlan?.queries?.filter(picturable).length ? donorPlan.queries.filter(picturable) : [kwq && kwq.s > 0 ? phraseAround(ws, kwq.j) : (hw?.word ?? 'people')], icons: donorPlan?.icons ?? [], transition: 'cut' };
       let r = build(best.m, { t0: best.a, t1: best.b, type: 'x' }, it);
       if (r.why && best.m === 'list') {   // no list in the words: bullet the content words of the stretch (code, no model)
         const items = ws.filter(w => !STOP.has(clean(w.word)) && clean(w.word).length > 2).slice(0, 4).map(w => ({ text: w.word.replace(/[.,;:!?]+$/, ''), t: w.t }));
@@ -558,13 +568,14 @@ export async function direct(dir, opts = {}) {
     // ---- text-behind needs a person matte: engine/person_matte.py cuts it for the frames of these segments only (cached per
     // clip). If that fails for any reason the segments fall back to the plain face layout and the fallback is logged;
     // a matte failure never stops the render. ----
-    const tbs = segs.filter(g => g.type === 'textbehind');
+    console.log('build: the plan is final; person matte and stock photos next');
+    const tbs = segs.filter(g => g.type === 'textbehind' && ALLOW('textbehind'));   // a style without text-behind never pays for a matte
     if (tbs.length) {
-      const fps = T.canvas.fps, vid = join(dir, 'graded.mp4');
+      const fps = +(process.env.MATTE_FPS ?? 15), vid = join(dir, 'cut.mp4');   // 15 fps: the renderer holds each mask two frames (half the CPU, no visible step at this speed)   // the ungraded cut: the person's outline is the same in every style's grade, so one matte serves all styles (cached by the cut's hash)
       const ranges = tbs.map(g => `${Math.max(0, g.t0 - 0.1).toFixed(3)}-${Math.min(D, g.t1 + 0.7).toFixed(3)}`).join(',');
       try {
         if (process.env.CARD_FORCE_MATTE_FAIL) throw new Error('forced failure (test)');
-        const out = execFileSync(process.env.PYTHON ?? 'python3', [join(ROOT, 'engine/person_matte.py'), vid, '--out', join(dir, 'matte'), '--ranges', ranges, '--fps', String(fps)], { encoding: 'utf8', timeout: 900000, stdio: ['ignore', 'pipe', 'inherit'] });
+        const out = execFileSync(PY, [join(ROOT, 'engine/person_matte.py'), vid, '--out', join(dir, 'matte'), '--ranges', ranges, '--fps', String(fps)], { encoding: 'utf8', timeout: 900000, stdio: ['ignore', 'pipe', 'inherit'] });
         const info = JSON.parse(out.trim().split('\n').filter(l => l.startsWith('{')).at(-1));
         const idx = JSON.parse(readFileSync(join(info.matte_dir, 'index.json'), 'utf8'));
         if (!idx.frames.length || !idx.frames.every(n => existsSync(join(info.matte_dir, `m${String(n).padStart(5, '0')}.png`)))) throw new Error('matte frames missing');
@@ -583,7 +594,7 @@ export async function direct(dir, opts = {}) {
   // stock images (cached), plus credits
   const images = {}, credits = [];
   const want = new Set();
-  for (const g of segs) { if (g.type === 'graphic') want.add(g.query); if (g.type === 'split') g.shots.forEach(s => want.add(s.query)); }
+  for (const g of segs) { if (g.type === 'graphic' && ALLOW('graphic')) want.add(g.query); if (g.type === 'split' && ALLOW('split')) g.shots.forEach(s => want.add(s.query)); }
   for (const q of want) {
     let it = opts.noStock ? null : await fetchStock(q.toLowerCase()).catch(e => (console.warn('stock', q, e.message), null));
     if (!it && !opts.noStock) console.warn(`no stock image for "${q}"`);
@@ -594,6 +605,10 @@ export async function direct(dir, opts = {}) {
     if (g.type === 'graphic') g.img = images[g.query] ?? null;
     if (g.type === 'split') { g.shots = g.shots.map(s => ({ ...s, img: images[s.query] ?? null })).filter(s => s.img); if (!g.shots.length) { g.type = 'face'; g.zoom = [1, 1.04]; } }
   }
+
+  // the style's own grammar: layouts it never uses become the speaker (Kinetic Brand has no post cards, Clean UI no text-behind)
+  for (const g of segs) if (!ALLOW(g.type)) { const keep = { t0: g.t0, t1: g.t1, enter: g.enter }; for (const k of Object.keys(g)) delete g[k]; Object.assign(g, keep, { type: 'face', zoom: [1, 1.04], face: faceAt(keep.t0, keep.t1) }); }
+  for (let i = segs.length - 1; i > 0; i--) if (segs[i].type === 'face' && segs[i - 1].type === 'face' && segs[i].t1 - segs[i - 1].t0 < 3.2) { segs[i - 1].t1 = segs[i].t1; segs.splice(i, 1); }
 
   // transitions: wash into a graphic, wipe out of a hidden-face card, pop into a split, cut between face zooms
   segs.forEach((g, i) => {
@@ -625,10 +640,10 @@ export async function direct(dir, opts = {}) {
   });
   sfx.sort((a, b) => a.t - b.t);
   const spec = {
-    version: 1, theme: 'card-studio', duration: D, fps: T.canvas.fps, video: 'graded.mp4', src: 'src.mp4',
+    version: 1, theme: 'card-studio', style: T.name, mix: !!opts.mix, duration: D, fps: T.canvas.fps, video: 'graded.mp4', src: 'src.mp4',
     badge: opts.badge ?? D_.badge, handle: opts.handle ?? D_.handle,
     cta: [(opts.cta1 ?? D_.cta1).replace('{KW}', kw), opts.cta2 ?? D_.cta2], ctaWord: kw,
-    director: { model: sp.skipped ? null : 'muse-spark-1.3', plan: sp.skipped ? 'skipped (--no-model, test only)' : sp.valid.size ? `${sp.valid.size} of ${segList.length} segments planned by Muse Spark, ${sp.invalid.length} by rules` : 'rules (plan unusable)', planCache: sp.cache_hit, decisions: planLog, faceRatio: +faceRatio.toFixed(2), coverage: coverageLog, types: [...new Set(segs.map(g => g.type))] },
+    director: { model: sp.skipped ? null : directorModel(), plan: sp.skipped ? 'skipped (--no-model, test only)' : sp.valid.size ? `${sp.valid.size} of ${segList.length} segments planned by ${process.env.META_API_BASE ? 'the test stand-in' : (process.env.DIRECTOR ?? '').toLowerCase() === 'claude' ? 'Claude Sonnet' : 'Muse Spark'}, ${sp.invalid.length} by rules` : 'rules (plan unusable)', planCache: sp.cache_hit, decisions: planLog, faceRatio: +faceRatio.toFixed(2), coverage: coverageLog, types: [...new Set(segs.map(g => g.type))] },
     segments: segs, captions: caps, sfx, images, credits, matte: matteInfo,
     storyboard: Object.values(images).slice(0, 3),
   };
@@ -640,7 +655,7 @@ export async function direct(dir, opts = {}) {
   return spec;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === (await import('node:url')).pathToFileURL(process.argv[1]).href) {
   // one command, end to end: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge ..] [--handle ..] [--cta1 ..] [--cta2 ..] [--kw ..] [--no-stock] [--no-music]
   // raw video in: prep (1080x1920, face-aware crop, word timings by Groq or free local Whisper, pauses cut) -> rules director
   // -> stock fetch (cached) -> MP4 render. Deterministic: no random choices anywhere; stock is cached per query on disk.

@@ -8,13 +8,14 @@ import { readFileSync, mkdirSync, existsSync, rmSync, writeFileSync } from 'node
 import { join, resolve } from 'node:path';
 import { createCanvas, loadImage, GlobalFonts, ImageData } from '@napi-rs/canvas';
 import { buildLayers, drawFrame } from '../player/card-studio.js';
+import { loadStyle } from '../engine/styles.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const a = process.argv.slice(2), opt = (k, d) => { const i = a.indexOf(k); return i > 0 ? a[i + 1] : d; };
 const dir = a[0];
 if (!dir || !existsSync(join(dir, 'spec.card.json'))) { console.error('usage: node tools/render-card.mjs <clip dir> [out.mp4]  (run engine/card-studio.mjs first)'); process.exit(1); }
-const T = JSON.parse(readFileSync(join(ROOT, 'engine/templates/card-studio.json'), 'utf8'));
 const spec = JSON.parse(readFileSync(join(dir, 'spec.card.json'), 'utf8'));
+const T = loadStyle(spec.style);   // the style the director used (engine/styles.mjs)
 for (const f of Object.values(T.fonts)) GlobalFonts.registerFromPath(join(ROOT, 'assets/renderer/fonts', f.file), f.family);
 const W = T.canvas.w, H = T.canvas.h, FPS = +opt('--fps', spec.fps ?? 30);
 const video = join(dir, spec.video);
@@ -56,7 +57,7 @@ const tmpV = outFile.replace(/\.mp4$/, '.video.mp4');
 const t0 = Date.now();
 const dec = spawn('ffmpeg', ['-v', 'error', '-nostdin', '-i', video, '-vf', `fps=${FPS}`, '-f', 'rawvideo', '-pix_fmt', 'rgba', '-'], { stdio: ['ignore', 'pipe', 'inherit'] });
 const enc = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${W}x${H}`, '-r', String(FPS), '-i', '-',
-  '-c:v', 'libx264', '-preset', 'medium', '-crf', opt('--crf', '23'), '-pix_fmt', 'yuv420p', '-g', String(FPS * 2), '-movflags', '+faststart', tmpV], { stdio: ['pipe', 'inherit', 'inherit'] });
+  '-c:v', 'libx264', '-preset', opt('--preset', 'veryfast'), '-crf', opt('--crf', '21'), '-pix_fmt', 'yuv420p', '-g', String(FPS * 2), '-movflags', '+faststart', tmpV], { stdio: ['pipe', 'inherit', 'inherit'] });
 const FB = vw * vh * 4; let acc = Buffer.alloc(0), n = 0, drawMs = 0;
 const write = b => new Promise(r => enc.stdin.write(b) ? r() : enc.stdin.once('drain', r));
 for await (const chunk of dec.stdout) {

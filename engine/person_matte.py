@@ -29,6 +29,7 @@ def weights(name):
     p = os.path.join(d, name + '.onnx')
     if not os.path.exists(p) or os.path.getsize(p) < 1_000_000:
         tmp = p + '.part'
+        import socket; socket.setdefaulttimeout(30)   # a stalled download fails in 30 s and the next model is tried, never a hang
         urllib.request.urlretrieve(URLS[name], tmp)
         os.replace(tmp, p)
     return p
@@ -168,7 +169,8 @@ def main():
     if not frames: raise SystemExit('no frames in --ranges')
     seed = FaceSeed()
     model, errs = load_model(a.model, seed)
-    out = os.path.join(a.out, f'{sha12(a.video)}-{model.name}-v4')
+    # frame numbers are per fps, so the fps is part of the cache key (a 30 fps cache must never answer for 15 fps frames)
+    out = os.path.join(a.out, f'{sha12(a.video)}-{model.name}-v4' + ('' if a.fps == 30 else f'-{a.fps:g}fps'))
     os.makedirs(out, exist_ok=True)
     fn = lambda n: os.path.join(out, f'm{n:05d}.png')
     todo = [n for n in frames if not os.path.exists(fn(n))]

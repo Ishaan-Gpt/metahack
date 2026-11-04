@@ -14,6 +14,7 @@ import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+const PY = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3');   // Windows: python3 is the Store stub
 
 const PORT = +(process.argv[2] ?? process.env.META_STANDIN_PORT ?? 8799);
 const ROOT = join(import.meta.dirname, '..');
@@ -42,7 +43,7 @@ async function transcribe(req, res, url) {
   const dir = mkdtempSync(join(WORK, 'meta-standin-'));
   try {
     writeFileSync(join(dir, 'a.wav'), wav);
-    await new Promise((ok, no) => execFile(process.env.PYTHON ?? 'python3', [join(ROOT, 'engine/hear_local.py'), join(dir, 'a.wav'), join(dir, 'w.json'), process.env.WHISPER_MODEL ?? 'small'], { timeout: 900000 }, (e, so, se) => e ? no(new Error(se || e.message)) : ok()));
+    await new Promise((ok, no) => execFile(PY, [join(ROOT, 'engine/hear_local.py'), join(dir, 'a.wav'), join(dir, 'w.json'), process.env.WHISPER_MODEL ?? 'small'], { timeout: 900000 }, (e, so, se) => e ? no(new Error(se || e.message)) : ok()));
     const words = JSON.parse(readFileSync(join(dir, 'w.json'), 'utf8'));
     // endpointing, imitated: a turn ends at a sentence mark or a pause over 0.45 s
     const turns = []; let cur = [];

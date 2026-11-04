@@ -1,6 +1,24 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "player", "runtimeExecutable": "node", "runtimeArgs": ["serve.mjs", "4700"], "port": 4700 }
+    {
+      "name": "player",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "serve.mjs",
+        "4700"
+      ],
+      "port": 4700
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "web/scripts/dev.mjs",
+        "--prod",
+        "--standin"
+      ],
+      "port": 3000
+    }
   ]
 }

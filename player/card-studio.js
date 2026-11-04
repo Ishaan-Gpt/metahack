@@ -68,7 +68,8 @@ export function buildLayers(spec, T, res, mk) {
   u.fillStyle = g; u.fillRect(0, 0, W, H);
   const rg = u.createRadialGradient(L.blob.cx, L.blob.cy, 0, L.blob.cx, L.blob.cy, L.blob.r * 1.2);
   rg.addColorStop(0, 'rgba(246,225,210,0.55)'); rg.addColorStop(1, 'rgba(246,225,210,0)');
-  u.fillStyle = rg; u.fillRect(0, 0, W, H);
+  if (T.chrome !== false) { u.fillStyle = rg; u.fillRect(0, 0, W, H); }
+  if (T.chrome === false) return { under, over: mk(W, H) };   // full-frame styles: the take is the whole frame, no studio page
   u.globalAlpha = P.blobAlpha; starburst(u, L.blob.cx, L.blob.cy, L.blob.r, L.blob.petals, P.blob); u.globalAlpha = 1;
   // storyboard card: sketch-like greyscale thumbnails of the clip's own stock images
   const S = L.storyboard;
@@ -179,9 +180,10 @@ function drawTextBehind(ctx, t, seg, T, res, C, m) {
     const rg = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.4, 10, C.x + C.w / 2, C.y + C.h * 0.4, C.w * 0.85); rg.addColorStop(0, 'rgba(246,220,200,0.85)'); rg.addColorStop(1, 'rgba(246,220,200,0)');
     ctx.fillStyle = rg; ctx.fillRect(C.x, C.y, C.w, C.h);
   } else if (bg === 'warm') {
-    const g = ctx.createLinearGradient(C.x, C.y, C.x + C.w, C.y + C.h); g.addColorStop(0, '#2a2422'); g.addColorStop(1, '#6a4636');
+    const FF = T.chrome === false;   // full-frame styles: the wall becomes the style's own colour field
+    const g = ctx.createLinearGradient(C.x, C.y, C.x + C.w, C.y + C.h); g.addColorStop(0, FF ? P.bgTop : '#2a2422'); g.addColorStop(1, FF ? P.bgBottom : '#6a4636');
     ctx.fillStyle = g; ctx.fillRect(C.x, C.y, C.w, C.h);
-    const rg = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.38, 10, C.x + C.w / 2, C.y + C.h * 0.38, C.w * 0.8); rg.addColorStop(0, 'rgba(203,230,94,0.28)'); rg.addColorStop(1, 'rgba(203,230,94,0)');
+    const rg = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.38, 10, C.x + C.w / 2, C.y + C.h * 0.38, C.w * 0.8); rg.addColorStop(0, `rgba(${P.glowRgb ?? '203,230,94'},0.28)`); rg.addColorStop(1, `rgba(${P.glowRgb ?? '203,230,94'},0)`);
     ctx.fillStyle = rg; ctx.fillRect(C.x, C.y, C.w, C.h);
   } else {
     ctx.save(); ctx.filter = `blur(${TB.blur}px) brightness(${TB.dim}) saturate(1.15)`;
@@ -197,7 +199,8 @@ function drawTextBehind(ctx, t, seg, T, res, C, m) {
   // (b) the word: fitted to the card width, stretched tall like poster type, behind the head
   const word = String(seg.word ?? '').toUpperCase(), tin = ease.out((t - seg.t0 + 0.02) / 0.4), al = clamp((t - seg.t0 + 0.02) / 0.14, 0, 1);
   ctx.save();
-  ctx.font = font(T, 'sans', 100, 900); const w100 = Math.max(1, ctx.measureText(word).width);
+  const WF = T.chrome === false ? 'hero' : 'sans', WW = T.chrome === false ? (T.caption?.heroWeight ?? 900) : 900;
+  ctx.font = font(T, WF, 100, WW); const w100 = Math.max(1, ctx.measureText(word).width);
   // size: fitted to the card width, then stretched tall; the head top (hair is about half a face box above the box) decides how
   // tall it may be, so that at least ~60% of the letters stay above the head: the word is always readable
   const headTop = faceTop - 0.45 * faceH + dy, capMax = Math.max(90, (headTop - 24 - C.y) / 0.52);
@@ -205,11 +208,12 @@ function drawTextBehind(ctx, t, seg, T, res, C, m) {
   const capTarget = Math.min(TB.capFrac * C.h, capMax);
   if (capTarget < 0.727 * fs) fs = capTarget / 0.727; else stretch = clamp(capTarget / (0.727 * fs), 1, TB.maxStretch);
   const capVis = 0.727 * fs * stretch;
-  ctx.font = font(T, 'sans', fs, 900);
+  ctx.font = font(T, WF, fs, WW);
   const cy = Math.max(headTop - 0.02 * capVis, C.y + 24 + capVis / 2), drift = lerp(-TB.drift, TB.drift, ease.inOut(k)), sc = lerp(TB.slam, 1, tin);
   ctx.translate(C.x + C.w / 2 + drift, cy); ctx.scale(sc, sc * stretch); ctx.globalAlpha = al;
   ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = bg === 'pale' ? P.ink : bg === 'warm' ? P.lime : '#ffffff';
+  ctx.fillStyle = bg === 'pale' ? P.ink : bg === 'warm' ? (T.chrome === false ? (P.hero ?? '#ffffff') : P.lime) : '#ffffff';
+  if (T.chrome === false && T.caption?.heroGlow) { ctx.shadowColor = `rgba(${P.glowRgb ?? '255,255,255'},0.7)`; ctx.shadowBlur = T.caption.heroGlow * 1.5; }
   ctx.fillText(word, 0, 0.5 * 0.727 * fs);   // cap height centred on the anchor
   ctx.restore();
   // (c) the person on top; a soft contact shadow keeps the word from looking pasted
@@ -241,15 +245,15 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     if (seg.type === 'list') drawList(ctx, t, seg, T, C);
   } else if (seg.type === 'split') {
     const S = L.split, b = S.border;
-    ctx.fillStyle = P.white; ctx.fillRect(C.x, C.y, C.w, C.h);
-    const ih = (C.h - 2 * b - S.gap) * S.topFrac, x = C.x + b, w = C.w - 2 * b;
+    ctx.fillStyle = T.chrome === false ? P.paper : P.white; ctx.fillRect(C.x, C.y, C.w, C.h);
+    const ih = (C.h - 2 * b - S.gap) * S.topFrac, x = C.x + b, w = C.w - 2 * b, sr = Math.max(T.chrome === false ? 22 : 0, C.r - 8);   // full-frame styles have a square card (r 0)
     let shot = seg.shots[0]; for (const s of seg.shots) if (t >= s.t) shot = s;
     const img = res.images[shot.img];
-    ctx.save(); rr(ctx, x, C.y + b, w, ih, C.r - 8); ctx.clip();
+    ctx.save(); rr(ctx, x, C.y + b, w, ih, sr); ctx.clip();
     if (img) { const kb = 1 + M.kenBurns * ease.inOut((t - shot.t) / 3); cover(ctx, img, img.width, img.height, x, C.y + b, w, ih, 0.5, 0.5, kb); }
     ctx.restore();
     const fy = C.y + b + ih + S.gap, fh = C.h - 2 * b - S.gap - ih;
-    ctx.save(); rr(ctx, x, fy, w, fh, C.r - 8); ctx.clip();
+    ctx.save(); rr(ctx, x, fy, w, fh, sr); ctx.clip();
     drawFace(ctx, res, seg, T, x, fy, w, fh, 1.25 + 0.04 * ease.inOut(k));
     ctx.restore();
   } else if (seg.type === 'graphic') {
@@ -257,8 +261,10 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     // title, top left, black heavy sans with a full stop, like a slide
     const G = L.graphic, title = seg.title.charAt(0).toUpperCase() + seg.title.slice(1) + '.';
     const ti = ease.out((t - seg.t0 - 0.1) / 0.3);
-    ctx.globalAlpha = ti; let fs = G.titleSize; ctx.font = font(T, 'sans', fs, 800);
-    while (ctx.measureText(title).width > C.w - 80 && fs > 30) { fs -= 2; ctx.font = font(T, 'sans', fs, 800); }
+    // full-frame styles: the title card speaks in the style's display face, poster-sized
+    const TF = T.chrome === false ? 'hero' : 'sans', TW = T.chrome === false ? (T.caption?.heroWeight ?? 800) : 800;
+    ctx.globalAlpha = ti; let fs = T.chrome === false ? Math.round(G.titleSize * 1.9) : G.titleSize; ctx.font = font(T, TF, fs, TW);
+    while (ctx.measureText(title).width > C.w - 80 && fs > 30) { fs -= 2; ctx.font = font(T, TF, fs, TW); }
     ctx.fillStyle = P.ink; ctx.textBaseline = 'alphabetic'; ctx.fillText(title, C.x + 40, C.y + 70 + fs + (1 - ti) * 20); ctx.globalAlpha = 1;
     // lime block rising from the bottom, the stock picture inside it
     const top = C.y + C.h * G.blockTopFrac, rise = ease.back((t - seg.t0 - 0.15) / M.imageRise);
@@ -269,7 +275,8 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
       ctx.save(); rr(ctx, bx + 18, by + 18, bw - 36, bh - 36, 18); ctx.clip();
       cover(ctx, img, img.width, img.height, bx + 18, by + 18, bw - 36, bh - 36, 0.5, 0.5, 1 + 0.06 * ease.inOut(k)); ctx.restore();
     } else {
-      ctx.font = font(T, 'serifItalic', 120); ctx.fillStyle = P.ink; ctx.textAlign = 'center'; ctx.fillText(seg.title.toUpperCase(), bx + bw / 2, by + bh / 2, bw - 40); ctx.textAlign = 'left';
+      const ff = T.chrome === false ? 'hero' : 'serifItalic', fw = T.chrome === false ? (T.caption?.heroWeight ?? 800) : 400;
+      ctx.font = font(T, ff, 120, fw); ctx.fillStyle = T.chrome === false ? P.paper : P.ink; ctx.textAlign = 'center'; ctx.fillText(T.chrome === false && T.caption?.heroUpper === false ? seg.title : seg.title.toUpperCase(), bx + bw / 2, by + bh / 2, bw - 40); ctx.textAlign = 'left';
     }
     const sp = ease.back((t - seg.t0 - 0.35) / 0.4);
     if (sp > 0) { sparkle(ctx, bx + bw - 30, by - 10, 46 * sp, (t - seg.t0) * 0.8, P.lime); sparkle(ctx, bx + bw - 30, by - 10, 22 * sp, (t - seg.t0) * 0.8, '#ffffff'); }
@@ -277,7 +284,7 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     // zoom out: the face card shrinks into a small landscape card, platform icons orbit it, the line as a black title
     ctx.fillStyle = P.paper; ctx.fillRect(C.x, C.y, C.w, C.h);
     const glow = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.56, 10, C.x + C.w / 2, C.y + C.h * 0.56, C.w * 0.7);
-    glow.addColorStop(0, 'rgba(203,230,94,0.55)'); glow.addColorStop(1, 'rgba(203,230,94,0)'); ctx.fillStyle = glow; ctx.fillRect(C.x, C.y, C.w, C.h);
+    glow.addColorStop(0, `rgba(${P.glowRgb ?? '203,230,94'},0.55)`); glow.addColorStop(1, `rgba(${P.glowRgb ?? '203,230,94'},0)`); ctx.fillStyle = glow; ctx.fillRect(C.x, C.y, C.w, C.h);
     const z = ease.inOut((t - seg.t0) / 0.45);
     const sw = C.w * 0.8, sh = sw * 9 / 16, sx = C.x + (C.w - sw) / 2, sy = C.y + C.h * 0.56 - sh / 2;
     const fx = lerp(C.x, sx, z), fy = lerp(C.y, sy, z), fw = lerp(C.w, sw, z), fh = lerp(C.h, sh, z);
@@ -291,11 +298,11 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
       platformIcon(ctx, kind, ix, iy, 36 * pop);
     });
     const ti = ease.out((t - seg.t0 - 0.2) / 0.3); ctx.globalAlpha = ti;
-    titleBlock(ctx, T, (seg.title ?? '').toUpperCase(), C.x + 36, C.y + 64, C.w - 72, 50, P.ink);
+    titleBlock(ctx, T, (seg.title ?? '').toUpperCase(), C.x + 36, C.y + 64, C.w - 72, T.chrome === false ? 76 : 50, P.ink, T.chrome === false ? 'hero' : 'sans');
     ctx.globalAlpha = 1;
   } else if (seg.type === 'topsquare') {
     // face in a square at the top, pale lower half carries the caption
-    const g = ctx.createLinearGradient(0, C.y, 0, C.y + C.h); g.addColorStop(0, '#f7f7f5'); g.addColorStop(1, '#eef1e4');
+    const g = ctx.createLinearGradient(0, C.y, 0, C.y + C.h); g.addColorStop(0, T.chrome === false ? P.bgTop : '#f7f7f5'); g.addColorStop(1, T.chrome === false ? P.bgBottom : '#eef1e4');   // full-frame: the style's own page, not the studio's lime tint
     ctx.fillStyle = g; ctx.fillRect(C.x, C.y, C.w, C.h);
     const pad = 22, s = C.w - 2 * pad;
     ctx.save(); rr(ctx, C.x + pad, C.y + pad, s, s, 20); ctx.clip(); drawFace(ctx, res, seg, T, C.x + pad, C.y + pad, s, s, 1.1 + 0.04 * ease.inOut(k)); ctx.restore();
@@ -308,7 +315,8 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     const tx = C.x + pad * 2 + fw + 14, tw = C.x + C.w - pad - tx;
     const shown = seg.words.filter(w => t >= w.t - 0.05).map(w => w.w.toUpperCase());
     let size = 92; const lines = [];
-    const wrap = sz => { lines.length = 0; ctx.font = font(T, 'serifItalic', sz); for (const w of shown) { const cur = lines.at(-1); if (cur != null && ctx.measureText(cur + ' ' + w).width <= tw) lines[lines.length - 1] = cur + ' ' + w; else lines.push(w); } };
+    const WF = T.chrome === false ? 'hero' : 'serifItalic', WW = T.chrome === false ? (T.caption?.heroWeight ?? 800) : 400;   // full-frame: the style's own display face
+    const wrap = sz => { lines.length = 0; ctx.font = font(T, WF, sz, WW); for (const w of shown) { const cur = lines.at(-1); if (cur != null && ctx.measureText(cur + ' ' + w).width <= tw) lines[lines.length - 1] = cur + ' ' + w; else lines.push(w); } };
     wrap(size); while ((lines.length > 5 || lines.some(l => ctx.measureText(l).width > tw)) && size > 44) { size -= 6; wrap(size); }
     const all = seg.words.length, lh = size * 1.02, y0 = C.y + C.h / 2 - Math.min(5, Math.ceil(all / 2)) * lh / 2;
     ctx.fillStyle = P.ink; ctx.textBaseline = 'alphabetic';
@@ -327,7 +335,8 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
     const shown = seg.words.filter(w => t >= w.t - 0.05);
     const txt = shown.map(w => w.w.toUpperCase());
     let size = 84; const maxW = C.w - 2 * pad - 20; const lines = [];
-    const wrap = s => { lines.length = 0; ctx.font = font(T, 'serifItalic', s); let cur = ''; for (const w of txt) { const n = cur ? cur + ' ' + w : w; if (ctx.measureText(n).width > maxW && cur) { lines.push(cur); cur = w; } else cur = n; } if (cur) lines.push(cur); };
+    const PF = T.chrome === false ? 'hero' : 'serifItalic', PW = T.chrome === false ? (T.caption?.heroWeight ?? 800) : 400;
+    const wrap = s => { lines.length = 0; ctx.font = font(T, PF, s, PW); let cur = ''; for (const w of txt) { const n = cur ? cur + ' ' + w : w; if (ctx.measureText(n).width > maxW && cur) { lines.push(cur); cur = w; } else cur = n; } if (cur) lines.push(cur); };
     wrap(size); while (lines.length > 3 && size > 48) { size -= 6; wrap(size); }
     ctx.fillStyle = P.ink; ctx.textBaseline = 'alphabetic';
     lines.forEach((ln, i) => ctx.fillText(ln, C.x + pad + 8, uy + 50 + size * (i + 1) * 0.98));
@@ -342,8 +351,8 @@ function drawInterior(ctx, t, seg, spec, T, res, C) {
   }
 }
 
-function titleBlock(ctx, T, text, x, y, w, size, color) {
-  ctx.font = font(T, 'sans', size, 900); ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
+function titleBlock(ctx, T, text, x, y, w, size, color, face = 'sans') {
+  ctx.font = font(T, face, size, face === 'sans' ? 900 : (T.caption?.heroWeight ?? 900)); ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
   const words = text.split(/\s+/), lines = [''];
   for (const wd of words) { const n = lines.at(-1) ? lines.at(-1) + ' ' + wd : wd; if (ctx.measureText(n).width > w && lines.at(-1)) lines.push(wd); else lines[lines.length - 1] = n; }
   lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, x, y + size * (i + 1) * 1.02));
@@ -399,11 +408,12 @@ function cursor(ctx, x, y) {
 function drawList(ctx, t, seg, T, C) {
   const P = T.palette; let y = C.y + C.h * 0.24;
   for (const it of seg.items) {
-    const k = ease.out((t - it.t + 0.05) / 0.22); if (k <= 0) { y += 66; continue; }
+    const k = ease.out((t - it.t + 0.05) / 0.22); if (k <= 0) { y += T.chrome === false ? 92 : 66; continue; }
     ctx.globalAlpha = k; const x = C.x + 40 - (1 - k) * 30;
-    ctx.fillStyle = P.lime; ctx.beginPath(); ctx.arc(x + 12, y - 12, 12, 0, Math.PI * 2); ctx.fill();
-    ctx.font = font(T, 'sans', 38, 800); ctx.fillStyle = '#fff'; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 14;
-    ctx.fillText(it.text.toUpperCase(), x + 38, y, C.w - 110); ctx.shadowBlur = 0; ctx.globalAlpha = 1; y += 66;
+    const FF = T.chrome === false, ls = FF ? 60 : 38, dot = FF ? 16 : 12;   // full-frame: list items readable on a phone
+    ctx.fillStyle = P.lime; ctx.beginPath(); ctx.arc(x + dot, y - (FF ? ls * 0.34 : 12), dot, 0, Math.PI * 2); ctx.fill();
+    ctx.font = font(T, FF ? 'hero' : 'sans', ls, FF ? (T.caption?.heroWeight ?? 800) : 800); ctx.fillStyle = '#fff'; ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 16;
+    ctx.fillText(FF && T.caption?.heroUpper === false ? it.text : it.text.toUpperCase(), FF ? x + dot * 2 + 22 : x + 38, y, C.w - 110); ctx.shadowBlur = 0; ctx.globalAlpha = 1; y += FF ? 92 : 66;
   }
 }
 
@@ -415,7 +425,8 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   const hi = cap.words.findIndex(w => w.hero);
   const before = (hi < 0 ? cap.words : cap.words.slice(0, hi)).map(w => w.w).join(' ').toUpperCase();
   const after = hi < 0 ? '' : cap.words.slice(hi + 1).map(w => w.w).join(' ').toUpperCase();
-  const hero = hi < 0 ? '' : cap.words[hi].w.toUpperCase();
+  const CS = T.caption ?? {}, HF = CS.heroFont ?? 'serifItalic', HW = CS.heroWeight ?? 400;
+  const hero = hi < 0 ? '' : (CS.heroUpper === false ? cap.words[hi].w : cap.words[hi].w.toUpperCase());
   const maxW = C.w * L.maxWFrac;
   let cy = seg.type === 'split' ? C.y + T.layout.split.border + (C.h - 2 * T.layout.split.border - T.layout.split.gap) * T.layout.split.topFrac + T.layout.split.gap / 2 : C.y + C.h * L.yFrac;
   const heroH0 = hero ? L.heroSize * 0.9 : 0, sH0 = L.smallSize + L.lineGap;
@@ -435,16 +446,18 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = k;
   const x = C.x + C.w / 2, dy = (1 - k) * 14;
   const small = (s, y) => { if (!s) return; let fs = L.smallSize; ctx.font = font(T, 'sans', fs, 700); while (ctx.measureText(s).width > maxW && fs > 18) { fs -= 2; ctx.font = font(T, 'sans', fs, 700); }
-    ctx.shadowColor = pale ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.55)'; ctx.shadowBlur = pale ? 0 : 14; ctx.fillStyle = pale ? P.ink : '#fff'; ctx.fillText(s, x, y + dy); };
+    ctx.shadowColor = pale ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.55)'; ctx.shadowBlur = pale ? 0 : 14; ctx.fillStyle = pale ? P.ink : (P.small ?? '#fff'); ctx.fillText(s, x, y + dy); };
   const heroH = heroH0, sH = sH0;
   const total = total0;
   let y = cy - total / 2;
   if (before && !heroOnly) { small(before, y + sH / 2); y += sH; }
   if (hero) {
-    let fs = L.heroSize; ctx.font = font(T, 'serifItalic', fs); while (ctx.measureText(hero).width > maxW && fs > 40) { fs -= 4; ctx.font = font(T, 'serifItalic', fs); }
+    let fs = L.heroSize; ctx.font = font(T, HF, fs, HW); while (ctx.measureText(hero).width > maxW && fs > 40) { fs -= 4; ctx.font = font(T, HF, fs, HW); }
     ctx.save(); ctx.translate(x, y + heroH / 2 + dy); const sc = hero ? lerp(0.82, 1, clamp(hk, 0, 1.2)) : 1; ctx.scale(sc, sc);
-    ctx.shadowColor = pale ? 'rgba(60,70,20,0.45)' : 'rgba(0,0,0,0.45)'; ctx.shadowBlur = pale ? 6 : 18; ctx.fillStyle = P.lime; ctx.fillText(hero, 0, 0);
-    ctx.shadowBlur = 0; ctx.lineWidth = pale ? 2.2 : 1.6; ctx.strokeStyle = pale ? '#9bb532' : P.lime; ctx.strokeText(hero, 0, 0); ctx.restore();
+    const HC = pale && T.chrome === false ? (P.heroStroke ?? P.hero) : (P.hero ?? P.lime);   // on a pale panel the pale hero colour vanishes: use its deeper stroke colour
+    if (CS.heroGlow) { ctx.shadowColor = `rgba(${P.glowRgb ?? '255,255,255'},0.85)`; ctx.shadowBlur = CS.heroGlow; ctx.fillStyle = HC; ctx.fillText(hero, 0, 0); }
+    ctx.shadowColor = pale ? 'rgba(60,70,20,0.45)' : 'rgba(0,0,0,0.45)'; ctx.shadowBlur = pale ? 6 : 18; ctx.fillStyle = HC; ctx.fillText(hero, 0, 0);
+    ctx.shadowBlur = 0; ctx.lineWidth = pale ? 2.2 : 1.6; ctx.strokeStyle = pale ? (T.chrome === false ? HC : '#9bb532') : (P.heroStroke ?? HC); ctx.strokeText(hero, 0, 0); ctx.restore();
     y += heroH;
   }
   if (after && !heroOnly) small(after, y + sH / 2);
@@ -481,7 +494,7 @@ export function drawFrame(ctx, t, spec, T, res) {
     } else { // lime wash fading off the new card, from the bottom up
       drawInterior(ctx, t, seg, spec, T, res, C);
       const p = (since - a) / (M.wash - a);
-      const g = ctx.createLinearGradient(0, C.y + C.h, 0, C.y); g.addColorStop(0, `rgba(203,230,94,${0.9 * (1 - p)})`); g.addColorStop(1, `rgba(203,230,94,${0.5 * (1 - p) * (1 - p)})`);
+      const g = ctx.createLinearGradient(0, C.y + C.h, 0, C.y); const wr = T.palette.washRgb ?? '203,230,94'; g.addColorStop(0, `rgba(${wr},${0.9 * (1 - p)})`); g.addColorStop(1, `rgba(${wr},${0.5 * (1 - p) * (1 - p)})`);
       ctx.fillStyle = g; ctx.fillRect(C.x, C.y, C.w, C.h);
     }
   } else if (seg.enter === 'wipe' && prev && since < M.wipe) { // new picture revealed top-down behind a soft light edge

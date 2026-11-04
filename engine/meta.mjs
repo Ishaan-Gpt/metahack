@@ -16,12 +16,22 @@ import { loadEnv } from './env.mjs';
 export const KEY_ERROR = 'MODEL_API_KEY is required for the Card Studio theme (Meta Model API)';
 export const TRANSCRIBE_MODEL = 'muse-voice-transcribe-1.0';
 export const SPARK_MODEL = 'muse-spark-1.3';
+// TEMPORARY, until the Meta key is in: DIRECTOR=claude routes the two director calls (style pick, beat plan) to Claude
+// Sonnet with the same prompts and the same strict JSON schema. Recorded as claude-sonnet-5-5 everywhere (usage log,
+// status, studio), cached separately from Muse answers, and never labelled as Meta. Transcription then uses Whisper.
+export const CLAUDE_MODEL = 'claude-sonnet-5-5';
+export const isClaude = () => (process.env.DIRECTOR ?? '').toLowerCase() === 'claude';
+export const directorModel = () => isClaude() ? CLAUDE_MODEL : SPARK_MODEL;
 export const metaBase = () => (process.env.META_API_BASE || 'https://api.meta.ai/v1').replace(/\/+$/, '');
 export const sha256 = b => createHash('sha256').update(b).digest('hex');
 
 /** Exit before any work when the Meta key is missing (read the way engine/env.mjs reads it: env, then .env.local). */
 export function requireMetaKey() {
   loadEnv();
+  if (isClaude()) {
+    if (!process.env.ANTHROPIC_API_KEY?.trim() && !process.env.ANTHROPIC_AUTH_TOKEN?.trim()) { console.error('DIRECTOR=claude needs ANTHROPIC_API_KEY in .env.local'); process.exit(2); }
+    return 'claude';
+  }
   const key = process.env.MODEL_API_KEY;
   if (!key || !key.trim()) { console.error(KEY_ERROR); process.exit(2); }
   return key.trim();
@@ -68,7 +78,7 @@ export async function metaTranscribe(dir, wavPath, { key = requireMetaKey() } = 
   fd.append('request', new Blob([JSON.stringify(request)], { type: 'application/json' }));
   fd.append('audio', new Blob([wav], { type: 'audio/wav' }), 'voice.wav');
   const t0 = performance.now();
-  const r = await fetch(`${metaBase()}/asr/transcribe?sessionId=card-studio-${h.slice(0, 12)}`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' }, body: fd });
+  const r = await fetch(`${metaBase()}/asr/transcribe?sessionId=card-studio-${h.slice(0, 12)}`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' }, body: fd, signal: AbortSignal.timeout(+(process.env.META_ASR_TIMEOUT_MS ?? 300000)) });
   const text = await r.text();
   const seconds = +((performance.now() - t0) / 1000).toFixed(2);
   if (!r.ok) {
@@ -161,24 +171,24 @@ Answer only with the JSON object.`;
 export async function metaPlan(dir, { transcript, segments, layouts, icons, transitions }, { key = requireMetaKey() } = {}) {
   const user = JSON.stringify({ transcript, segments });
   const schema = planSchema({ layouts, icons, transitions });
-  const h = sha256(JSON.stringify({ user, schema, model: SPARK_MODEL, system: SYSTEM({ layouts, icons, transitions }) }));
+  const h = sha256(JSON.stringify({ user, schema, model: directorModel(), system: SYSTEM({ layouts, icons, transitions }) }));
   const cdir = join(dir, 'meta'); mkdirSync(cdir, { recursive: true });
   const cache = join(cdir, `plan.${h.slice(0, 16)}.json`);
   let response, cacheHit = false, standin = false, seconds = 0, status = 200;
   // output budget: about 70 tokens of JSON per segment + the wrapper, plus headroom for the minimal reasoning pass
   // (Meta counts reasoning tokens inside max_tokens)
   const maxTokens = Math.min(8192, 1024 + 160 + 70 * segments.length);
-  const body = { model: SPARK_MODEL, messages: [{ role: 'system', content: SYSTEM({ layouts, icons, transitions }) }, { role: 'user', content: user }],
+  const body = { model: directorModel(), messages: [{ role: 'system', content: SYSTEM({ layouts, icons, transitions }) }, { role: 'user', content: user }],
     response_format: { type: 'json_schema', json_schema: { name: 'card_studio_plan', strict: true, schema } }, temperature: 0, reasoning_effort: 'minimal', max_tokens: maxTokens };
   if (existsSync(cache)) {
     const c = JSON.parse(readFileSync(cache, 'utf8')); response = c.response; cacheHit = true; standin = !!c.standin;
   } else {
     const t0 = performance.now();
-    const r = await fetch(`${metaBase()}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const r = await postChat(body, key);
     seconds = +((performance.now() - t0) / 1000).toFixed(2); status = r.status; standin = r.headers.get('x-meta-standin') === '1';
     const text = await r.text();
     if (!r.ok) {
-      recordUsage(dir, { call: 'plan', model: SPARK_MODEL, cache_hit: false, ok: false, status, seconds, max_tokens: maxTokens });
+      recordUsage(dir, { call: 'plan', model: directorModel(), cache_hit: false, ok: false, status, seconds, max_tokens: maxTokens });
       console.warn(`Muse Spark answered ${status}: ${text.slice(0, 200)} (one attempt only; the rule director plans every segment)`);
       return { plan: null, valid: new Map(), invalid: segments.map(s => ({ i: s.i, why: `call failed ${status}` })), cache_hit: false };
     }
@@ -187,7 +197,7 @@ export async function metaPlan(dir, { transcript, segments, layouts, icons, tran
     writeFileSync(join(cdir, 'plan.request.json'), JSON.stringify(body, null, 1));
   }
   const usage = response.usage ?? null;
-  recordUsage(dir, { call: 'plan', model: SPARK_MODEL, cache_hit: cacheHit, ok: true, seconds, max_tokens: maxTokens, usage, finish_reason: response.choices?.[0]?.finish_reason ?? null, cache: 'meta/' + cache.split('/').pop(), standin });
+  recordUsage(dir, { call: 'plan', model: directorModel(), cache_hit: cacheHit, ok: true, seconds, max_tokens: maxTokens, usage, finish_reason: response.choices?.[0]?.finish_reason ?? null, cache: 'meta/' + cache.split('/').pop(), standin });
   let plan = null; const invalid = [], valid = new Map();
   try { const txt = response.choices?.[0]?.message?.content ?? ''; plan = JSON.parse(txt); } catch (e) { plan = null; }
   if (!plan || !Array.isArray(plan.segments)) {
@@ -214,4 +224,91 @@ export function validateItem(it, seg, { layouts, icons, transitions }) {
   const norm = w => String(w).toLowerCase().replace(/[^\p{L}\p{N}%$']/gu, '');
   if (typeof it.hero !== 'string' || !seg.text.split(/\s+/).some(w => norm(w) === norm(it.hero) && norm(w))) return `hero "${it.hero}" is not a word of the segment`;
   return null;
+}
+
+// ---- call 0 (auto mode only): Muse Spark picks the style for this take ------------------------------------------
+// One short call (cached by transcript + catalogue): the transcript, what the camera sees (face share, source shape) and
+// the style catalogue with each style's fundamentals in; { style, why, hero_words } out. The rest of the edit is the
+// chosen style's rules plus the usual plan call. On any failure the caller falls back to plain rules (chooseStyleByRules).
+export async function metaChooseStyle(dir, { transcript, catalogue, facts }, { key = requireMetaKey() } = {}) {
+  const ids = catalogue.map(s => s.id);
+  const schema = { type: 'object', additionalProperties: false, required: ['style', 'why', 'hero_words'], properties: {
+    style: { type: 'string', enum: ids }, why: { type: 'string', maxLength: 180 },
+    hero_words: { type: 'array', maxItems: 6, items: { type: 'string', maxLength: 24 } } } };
+  const system = `You are the director of a short-form video editing studio. A creator sent one raw talking-head take. Pick the ONE edit style from the catalogue that will make this take look like a hired pro editor made it, judging by what is said (topic, numbers, products, story, tone) and what the camera sees. Each style lists its fundamentals. Answer with the style id, why in one plain sentence a creator understands (under 25 words, no jargon), and up to 6 hero words copied exactly from the transcript that the edit should make big. Answer only with the JSON object.`;
+  const user = JSON.stringify({ transcript, facts, catalogue: catalogue.map(s => ({ id: s.id, name: s.label, fundamentals: s.fundamentals })) });
+  const body = { model: directorModel(), messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+    response_format: { type: 'json_schema', json_schema: { name: 'style_pick', strict: true, schema } }, temperature: 0, reasoning_effort: 'minimal', max_tokens: 1024 };
+  const h = sha256(JSON.stringify(body)), cdir = join(dir, 'meta'); mkdirSync(cdir, { recursive: true });
+  const cache = join(cdir, `style.${h.slice(0, 16)}.json`);
+  let response, cacheHit = false, standin = false, seconds = 0;
+  if (existsSync(cache)) { const c = JSON.parse(readFileSync(cache, 'utf8')); response = c.response; cacheHit = true; standin = !!c.standin; }
+  else {
+    const t0 = performance.now();
+    const r = await postChat(body, key);
+    seconds = +((performance.now() - t0) / 1000).toFixed(2); standin = r.headers.get('x-meta-standin') === '1';
+    const text = await r.text();
+    if (!r.ok) { recordUsage(dir, { call: 'style', model: directorModel(), cache_hit: false, ok: false, status: r.status, seconds }); return { ok: false, why: `Muse Spark answered ${r.status}` }; }
+    response = JSON.parse(text);
+    writeFileSync(cache, JSON.stringify({ key_sha256: h, response, standin, at: new Date().toISOString() }, null, 1));
+  }
+  recordUsage(dir, { call: 'style', model: directorModel(), cache_hit: cacheHit, ok: true, seconds, usage: response.usage ?? null, standin });
+  let pick = null; try { pick = JSON.parse(response.choices?.[0]?.message?.content ?? ''); } catch { pick = null; }
+  if (!pick || !ids.includes(pick.style) || typeof pick.why !== 'string') return { ok: false, why: 'answer is not the schema object', standin };
+  return { ok: true, style: pick.style, why: pick.why.trim(), hero_words: Array.isArray(pick.hero_words) ? pick.hero_words.filter(w => typeof w === 'string') : [], standin, cache_hit: cacheHit };
+}
+
+/** the rule fallback for auto mode when Spark is unreachable: plain keyword counts, stated as rules in the job log */
+export function chooseStyleByRules(transcript, facts) {
+  const t = transcript.toLowerCase(), n = re => (t.match(re) ?? []).length;
+  const score = {
+    'desk-doc': n(/\b(\d[\d,.]*|hundred|thousand|million|billion|percent|years?|months?|dollars?)\b/g) * 1.2 + n(/\b(story|journey|started|process|before|after)\b/g),
+    'clean-ui': n(/\b(app|apps|tool|tools|software|click|post|upload|website|ai|feature|product|price|subscribe)\b/g) * 1.3,
+    'kinetic-brand': n(/\b(brand|launch|new|never|power|future|change|world|climate|heat)\b/g) * 1.1,
+    'creator-studio': n(/\b(first|second|third|tips?|steps?|ways|mistakes?|reasons?|chapter)\b/g) * 1.4,
+    'card-studio': 2 + (facts.sourceShape !== '9:16' ? 1.5 : 0) + n(/\b(social|media|marketing|business|viral|views|followers|guide)\b/g),
+  };
+  const [style] = Object.entries(score).sort((a, b) => b[1] - a[1])[0];
+  const WHY = { 'desk-doc': 'your take is full of numbers and steps, so photos and big numbers prove each point',
+    'clean-ui': 'you talk about tools and products, so clean interface cards act them out',
+    'kinetic-brand': 'your take sounds like a launch, so the words go big and behind you',
+    'creator-studio': 'your take is a list of points, so chapter cards and a colour field carry it',
+    'card-studio': facts.sourceShape !== '9:16' ? 'your take was not shot vertical, so it sits best framed in a clean studio card' : 'a calm talking take reads best framed in a clean studio card' };
+  return { style, why: WHY[style], scores: score };
+}
+
+// ---- the director's wire: Muse Spark (OpenAI-style chat/completions) or, temporarily, Claude Sonnet -------------------
+/** One director call. Muse Spark: the body as is. Claude: same system + user text, the same JSON schema as structured
+ *  output, answered back in the chat/completions shape the callers already read (choices[0].message.content, usage). */
+async function postChat(body, key) {
+  if (!isClaude()) return fetch(`${metaBase()}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });   // a silent endpoint fails in 2 min, never hangs the job
+  const { default: Anthropic, APIError } = await import('@anthropic-ai/sdk');
+  const client = new Anthropic();
+  const system = body.messages.filter(m => m.role === 'system').map(m => m.content).join(String.fromCharCode(10, 10));
+  const user = body.messages.filter(m => m.role === 'user').map(m => m.content).join(String.fromCharCode(10, 10));
+  const schema = stripUnsupported(body.response_format?.json_schema?.schema ?? {});
+  const reply = (status, obj) => ({ ok: status < 300, status, headers: { get: () => null }, text: async () => JSON.stringify(obj) });
+  try {
+    const r = await client.messages.create({
+      model: CLAUDE_MODEL, max_tokens: 16000, system,
+      messages: [{ role: 'user', content: user }],
+      output_config: { effort: 'low', format: { type: 'json_schema', schema } },
+    });
+    if (r.stop_reason === 'refusal') return reply(422, { error: { message: 'the director declined this take' } });
+    const text = r.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    return reply(200, { model: r.model, choices: [{ message: { role: 'assistant', content: text }, finish_reason: r.stop_reason }],
+      usage: { prompt_tokens: r.usage.input_tokens, completion_tokens: r.usage.output_tokens, total_tokens: r.usage.input_tokens + r.usage.output_tokens } });
+  } catch (e) {
+    if (e instanceof APIError) return reply(e.status ?? 500, { error: { message: e.message } });
+    return reply(503, { error: { message: `director unreachable: ${e.message}` } });
+  }
+}
+/** structured outputs take a subset of JSON Schema: drop length and count limits (the code validates them anyway) */
+function stripUnsupported(x) {
+  if (Array.isArray(x)) return x.map(stripUnsupported);
+  if (!x || typeof x !== 'object') return x;
+  const out = {};
+  for (const [k, v] of Object.entries(x)) if (!['maxLength', 'minLength', 'maxItems', 'minItems', 'pattern', 'format'].includes(k)) out[k] = stripUnsupported(v);
+  if (out.type === 'object' && out.additionalProperties === undefined) out.additionalProperties = false;
+  return out;
 }

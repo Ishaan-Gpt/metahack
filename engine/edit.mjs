@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { loadEnv, ROOT } from './env.mjs';
 import { readClip } from './read.mjs';
 import { askSpark, cast } from './direct.mjs';
+const PY = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3');   // Windows: python3 is the Store stub
 
 loadEnv();
 const args = process.argv.slice(2), dir = args[0];
@@ -27,7 +28,7 @@ function autoTheme(d) {
     const t = JSON.parse(readFileSync(join(ROOT, 'engine/templates/card-studio.json'), 'utf8')).auto;
     const prep = existsSync(join(d, 'prep.json')) ? JSON.parse(readFileSync(join(d, 'prep.json'), 'utf8')) : {};
     const facesPath = join(d, 'faces.cv.json');
-    if (!existsSync(facesPath)) execFileSync(process.env.PYTHON ?? 'python3', [join(ROOT, 'engine/faces.py'), join(d, 'cut.mp4'), facesPath, '2'], { stdio: 'inherit' });
+    if (!existsSync(facesPath)) execFileSync(PY, [join(ROOT, 'engine/faces.py'), join(d, 'cut.mp4'), facesPath, '2'], { stdio: 'inherit' });
     const f = JSON.parse(readFileSync(facesPath, 'utf8'));
     const ratio = f.found / Math.max(1, f.n), not916 = prep.sourceAspect ? Math.abs(prep.sourceAspect - 9 / 16) > 0.02 : false;
     const pick = ratio >= t.minFaceRatio && (!t.whenSourceNot916 || not916) ? 'card-studio' : 'kinetic-brand';

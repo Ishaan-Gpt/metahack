@@ -1,0 +1,18 @@
+{
+  "order": 5,
+  "label": "Desk Doc",
+  "line": "Warm documentary: yellow glowing hero words, photos that prove the point, numbers made huge.",
+  "ref": "Mahdi (interview), instagram.com/p/DdM89KRMPBJ",
+  "swatch": ["#2b2622", "#f6d846", "#f7f5f0"],
+  "fundamentals": "full frame, warm sunlit grade and a soft fall-off; serif hero words in warm yellow with a glow; photos above the speaker for every noun that can be shown; a numbered list; big numbers on dark cards; light leaks; a soft bed",
+  "chrome": false,
+  "grade": { "contrast": 1.06, "saturate": 1.04, "brightness": 1.02, "warm": 0.08 },
+  "palette": { "bgTop": "#2b2622", "bgBottom": "#1c1815", "hero": "#f6d846", "heroStroke": "#f6d846", "small": "#ffffff", "lime": "#f6d846", "accent": "#f6d846", "ink": "#f7f5f0", "paper": "#2b2622", "washRgb": "246,216,70", "glowRgb": "246,216,70" },
+  "fonts": { "hero": { "family": "Fraunces", "file": "fraunces-latin-wght-italic.woff2", "style": "italic" } },
+  "layout": {
+    "card": { "x": 0, "y": 0, "w": 1080, "h": 1920, "r": 0, "shadowBlur": 0, "shadowY": 0, "shadowColor": "rgba(0,0,0,0)" },
+    "caption": { "yFrac": 0.63, "smallSize": 50, "heroSize": 150, "lineGap": 8, "maxWFrac": 0.86 }
+  },
+  "caption": { "heroFont": "hero", "heroWeight": 700, "heroUpper": false, "heroGlow": 26 },
+  "allow": ["face", "split", "list", "graphic", "textbehind"]
+}

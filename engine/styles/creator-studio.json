@@ -1,0 +1,19 @@
+{
+  "order": 3,
+  "label": "Creator Studio",
+  "line": "A colour-field studio: your wall becomes a violet ground, chapter cards and glowing hero words.",
+  "ref": "Tahrima, instagram.com/p/DaFaIEGIFvx",
+  "swatch": ["#2a1f5c", "#b9a6ff", "#ffffff"],
+  "fundamentals": "full frame; the room replaced by a colour field behind the speaker (matte); glowing white hero words behind the mic; numbered chapter cards; a list that builds item by item; colour of the ground changes with meaning; soft pops",
+  "chrome": false,
+  "grade": { "contrast": 1.08, "saturate": 1.02, "brightness": 1.0, "warm": 0.0 },
+  "palette": { "bgTop": "#2a1f5c", "bgBottom": "#160f33", "hero": "#ffffff", "heroStroke": "#d9cfff", "small": "#ffffff", "lime": "#b9a6ff", "accent": "#b9a6ff", "ink": "#f6f4ff", "paper": "#241a4f", "washRgb": "42,31,92", "glowRgb": "185,166,255" },
+  "fonts": { "hero": { "family": "Bricolage Grotesque", "file": "bricolage-grotesque-latin-wght-normal.woff2", "style": "normal" } },
+  "layout": {
+    "card": { "x": 0, "y": 0, "w": 1080, "h": 1920, "r": 0, "shadowBlur": 0, "shadowY": 0, "shadowColor": "rgba(0,0,0,0)" },
+    "caption": { "yFrac": 0.64, "smallSize": 50, "heroSize": 150, "lineGap": 10, "maxWFrac": 0.86 }
+  },
+  "caption": { "heroFont": "hero", "heroWeight": 800, "heroUpper": true, "heroGlow": 34 },
+  "textBehindBg": "warm",
+  "allow": ["face", "textbehind", "list", "graphic", "orbit"]
+}

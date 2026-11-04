@@ -18,3 +18,15 @@ data/**/*.webm
 !data/**/matte*.webm
 data/**/*.mkv
 data/clips/ba5c/
+# studio runtime (2026-11-05): uploads are visitors' footage, never committed; stock photos keep their own licences
+# (credited per edit in spec.card.json) and are re-fetched; demo recordings are large intermediates
+data/jobs/
+data/stock/
+data/clips/raw/
+data/demo/rec*/
+data/demo/parts/
+data/demo/*.jpg
+recreate/ba1/data/
+
+# build output
+.next/
