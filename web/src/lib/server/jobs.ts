@@ -10,16 +10,13 @@ import { randomBytes } from 'node:crypto';
  */
 export const ROOT = resolve(process.env.MOOVI_ROOT ?? join(process.cwd(), '..'));
 export const JOBS = join(ROOT, 'data', 'jobs');
-const STYLES = join(ROOT, 'engine', 'styles');
-mkdirSync(JOBS, { recursive: true });
-
 export type Style = { id: string; label: string; line: string; ref: string; fundamentals: string; swatch: string[]; order: number };
-export function styles(): Style[] {
-  return readdirSync(STYLES).filter(f => f.endsWith('.json')).map(f => {
-    const s = JSON.parse(readFileSync(join(STYLES, f), 'utf8'));
-    return { id: f.replace(/\.json$/, ''), label: s.label, line: s.line, ref: s.ref, fundamentals: s.fundamentals, swatch: s.swatch ?? [], order: s.order ?? 99 };
-  }).sort((a, b) => a.order - b.order);
-}
+/** the two render engines (Vignesh's templates). Uploads take turns between them (engine/run.mjs); prompts edit after */
+const ENGINES: Style[] = [
+  { id: 'card-studio', label: 'Studio Card', line: 'Your take in a clean studio card, a storyboard beside it, serif hero words.', ref: 'engine/templates/card-studio.json', fundamentals: 'cards, photo beats, list, post card, word behind', swatch: ['#efefee', '#cbe65e', '#de7e59'], order: 1 },
+  { id: 'creator-mix', label: 'Creator Mix', line: 'Twenty-two effects from two real reels: glowing words, colour fields, a picture window, a film strip.', ref: 'engine/templates/creator-mix.json', fundamentals: '22 effects, kinetic words, colour fields', swatch: ['#4b1fa8', '#e5333d', '#f1ece2'], order: 2 },
+];
+export function styles(): Style[] { return ENGINES; }
 
 const ID = /^[a-z0-9]{10}$/;
 export const validId = (id: string) => ID.test(id);
@@ -28,7 +25,7 @@ export const newId = () => randomBytes(8).toString('base64url').replace(/[^a-z0-
 
 export type JobOpts = { style: string; handle?: string; badge?: string; split?: boolean; sample?: boolean };
 export function writeJob(id: string, input: string, o: JobOpts) {
-  const job = { id, style: o.style, input, handle: (o.handle ?? '').slice(0, 30) || '@moovi', badge: (o.badge ?? '').slice(0, 24), split: !!o.split, sample: !!o.sample, created: new Date().toISOString() };
+  const job = { id, style: o.style, input, handle: (o.handle ?? '').slice(0, 30) || '@editeasy', badge: (o.badge ?? '').slice(0, 24), split: !!o.split, sample: !!o.sample, created: new Date().toISOString() };
   writeFileSync(join(jobDir(id), 'job.json'), JSON.stringify(job, null, 1));
   writeFileSync(join(jobDir(id), 'status.json'), JSON.stringify({ id, state: 'queued', pct: 0, style: o.style, stages: [], events: [] }, null, 1));
 }
@@ -121,4 +118,11 @@ if (process.env.NEXT_PHASE !== 'phase-production-build' && !(globalThis as { __m
     const s = readStatus(id);
     if (s && (s.state === 'queued' || (s.state === 'running' && !alive(s.pid)))) enqueue(id);
   }
+}
+
+/** queue a re-render after a prompt edit; the old status stays readable (plan, Meta calls, events) until the new run starts */
+export function requeueEdit(id: string) {
+  const s = readStatus(id) ?? { id };
+  writeFileSync(join(jobDir(id), 'status.json'), JSON.stringify({ ...s, state: 'queued', pct: 0, error: undefined }, null, 1));
+  enqueue(id);
 }

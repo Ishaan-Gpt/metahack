@@ -21,7 +21,8 @@ function merge(a, b) {
 /** the merged template for a style id; unknown ids throw so a job fails loudly, not silently in the wrong look */
 export function loadStyle(id = DEFAULT_STYLE) {
   const base = JSON.parse(readFileSync(BASE, 'utf8'));
-  const f = join(DIR, `${id}.json`);
+  // retired skins (engine/styles/retired) still load, so an old edit made in one can be changed by prompt
+  const f = [join(DIR, `${id}.json`), join(DIR, 'retired', `${id}.json`)].find(x => existsSync(x)) ?? join(DIR, `${id}.json`);
   if (!existsSync(f)) throw new Error(`unknown style "${id}" (have: ${listStyles().map(s => s.id).join(', ')})`);
   const o = JSON.parse(readFileSync(f, 'utf8'));
   return { ...merge(base, o), name: id };

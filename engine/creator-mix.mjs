@@ -53,7 +53,7 @@ export async function buildMix(dir, o = {}) {
   // person matte for the cutout effects (cached per clip; a failure turns those effects into plain-face fallbacks, logged)
   const MATTE = new Set([4, 5, 8, 10, 12]); let matte;
   const ranges = fxs.filter(f => MATTE.has(f.id)).map(f => `${Math.max(0, f.t0 - 0.1).toFixed(3)}-${Math.min(D, f.t1 + 0.2).toFixed(3)}`).join(',');
-  if (ranges) { try { const vid = join(dir, 'graded.mp4'); const out = execFileSync(process.env.PYTHON ?? 'python3', [join(ROOT, 'engine/person_matte.py'), vid, '--out', join(dir, 'matte'), '--ranges', ranges, '--fps', String(spec.fps ?? 30)], { encoding: 'utf8', timeout: 900000, stdio: ['ignore', 'pipe', 'inherit'] });
+  if (ranges) { try { const vid = join(dir, 'graded.mp4'); const out = execFileSync(process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3'), [join(ROOT, 'engine/person_matte.py'), vid, '--out', join(dir, 'matte'), '--ranges', ranges, '--fps', String(spec.fps ?? 30)], { encoding: 'utf8', timeout: 900000, stdio: ['ignore', 'pipe', 'inherit'] });
       const info = JSON.parse(out.trim().split('\n').filter(l => l.startsWith('{')).at(-1)); matte = { dir: relative(dir, info.matte_dir), fps: spec.fps ?? 30, model: info.model }; console.log(`matte: ${info.model}, ${info.frames} frames (${info.computed} computed) in ${info.seconds} s`);
     } catch (e) { console.warn('matte failed, cutout effects fall back to the plain picture:', String(e.message).split('\n')[0].slice(0, 160)); } }
   // camera shots over the whole timeline: wide / medium / tight, the face off-centre in tight shots and the words in the other half

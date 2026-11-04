@@ -82,7 +82,7 @@ export function Intro() {
         </div>
         <div className="intro__meta t-mono">
           <span className="intro__tc">00:00:00:00</span>
-          <span className="intro__statusbox"><span className="intro__status"><span>Moovi is getting ready</span><span>Action.</span></span></span>
+          <span className="intro__statusbox"><span className="intro__status"><span>Edit Easy is getting ready</span><span>Action.</span></span></span>
         </div>
       </div>
     </div>

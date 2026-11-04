@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import '@/styles/studio.css';
+import '@/styles/captions.css';
 
 export const metadata: Metadata = {
-  title: 'Moovi Studio · drop a take, get the cut',
-  description: 'Upload a raw talking-head take. Muse Spark directs, Moovi renders the edit and a before/after.',
+  title: 'Edit Easy Studio · drop a take, get the cut',
+  description: 'Upload a raw talking-head take. Muse Spark directs, Edit Easy renders the edit and a before/after, then you change it by asking.',
 };
 
 /** The studio's shell: no intro film, no smooth scroll; a calm work surface in the same ice language as the landing. */

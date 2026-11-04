@@ -112,3 +112,17 @@
     grid-template-areas: "top" "bin" "stage" "chat" "tl"; }
   .ed__tl { min-height: 220px; }
 }
+
+/* prompt edits: the Captions tab inside the chat column, and tap-to-try prompts above the ask box */
+.ed__chat-h .ed__seg { margin-left: auto; }
+.ed__seg button:disabled { opacity: .45; cursor: not-allowed; }
+.ed__capx { flex: 1; min-height: 0; overflow: auto; padding: 12px; }
+.ed__try { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px; }
+.ed__try button { border: 1px solid var(--line); background: var(--canvas); color: var(--ink-2); font-size: 12px; padding: 5px 10px; border-radius: 99px; cursor: pointer; transition: border-color .2s var(--ease), color .2s var(--ease); }
+.ed__try button:hover { border-color: var(--accent); color: var(--ink); }
+.ed__lane--cap { position: relative; }
+
+/* the timeline scrolls sideways when zoomed in (Captions Easy: up to 40x for word work) */
+.ed__scroll { position: relative; min-width: 0; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+.ed__scroll > .ed__lanes { flex: none; width: 100%; }
+.ed__tl-h { flex-wrap: wrap; row-gap: 6px; }

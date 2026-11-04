@@ -7,8 +7,8 @@ import { splitMasked } from '@/lib/gsap';
 import { StyleShelf } from '@/components/sections/StyleShelf';
 
 /**
- * The crew melts back into Moovi; the camera rises; his halo swells into a ring of glowing memory nodes and the
- * whole world turns ice blue. The style shelf (five real editors' looks, or let Muse Spark pick) sits inside the ring.
+ * The crew melts back into the mascot; the camera rises; his halo swells into a ring of glowing memory nodes and the
+ * whole world turns ice blue. The engine shelf (Studio Card and Creator Mix, and the way in) sits inside the ring.
  */
 export function Memory() {
   const build: Build = useCallback(({ tl, stage, q }) => {

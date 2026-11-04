@@ -19,6 +19,18 @@
         "--standin"
       ],
       "port": 3000
+    },
+    {
+      "name": "studio-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "web/scripts/dev.mjs",
+        "--standin"
+      ],
+      "env": {
+        "PORT": "3012"
+      },
+      "port": 3012
     }
   ]
 }

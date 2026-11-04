@@ -13,8 +13,10 @@ const ROOT = resolve(import.meta.dirname, '..');
 const a = process.argv.slice(2), opt = (k, d) => { const i = a.indexOf(k); return i > 0 ? a[i + 1] : d; };
 const dir = a[0];
 if (!dir || !existsSync(join(dir, 'spec.mix.json'))) { console.error('usage: node tools/render-card.mjs <clip dir> [out.mp4]  (run engine/card-studio.mjs first)'); process.exit(1); }
-const T = JSON.parse(readFileSync(join(ROOT, 'engine/templates/creator-mix.json'), 'utf8'));
+const isObj_ = v => v && typeof v === 'object' && !Array.isArray(v), merge_ = (a, b) => { const o = { ...a }; for (const [k, v] of Object.entries(b ?? {})) o[k] = isObj_(v) && isObj_(a?.[k]) ? merge_(a[k], v) : v; return o; };
+const T0 = JSON.parse(readFileSync(join(ROOT, 'engine/templates/creator-mix.json'), 'utf8'));
 const spec = JSON.parse(readFileSync(join(dir, 'spec.mix.json'), 'utf8'));
+const T = merge_(T0, spec.overrides);   // changes asked for after the first render (engine/edits.mjs)
 for (const f of Object.values(T.fonts)) GlobalFonts.registerFromPath(join(ROOT, 'assets/renderer/fonts', f.file), f.family);
 const W = T.canvas.w, H = T.canvas.h, FPS = +opt('--fps', spec.fps ?? 30);
 const video = join(dir, spec.video);
@@ -77,7 +79,7 @@ console.log(`video: ${n} frames in ${((Date.now() - t0) / 1000).toFixed(1)} s ($
 // audio: voice + SFX at the transitions + quiet music bed, then loudnorm to the theme's target
 const ins = ['-i', tmpV, '-i', video], parts = ['[1:a]aresample=48000,aformat=channel_layouts=stereo[voice]'], mix = ['[voice]'];
 let k = 2;
-const g = T.sfx.gainDb;
+const g = T.sfx.gainDb; if (g < -60) spec.sfx = [];   // sound effects off
 for (const s of spec.sfx ?? []) {
   const f = join(ROOT, 'assets', T.sfx[s.k] ?? ''); if (!T.sfx[s.k] || !existsSync(f)) continue;
   ins.push('-i', f); const ms = Math.max(0, Math.round(s.t * 1000));

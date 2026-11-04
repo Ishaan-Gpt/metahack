@@ -11,7 +11,7 @@ import { onWorld } from '@/lib/world';
  * Opening shot, and nothing else: an icy sky, Moovi holding out the brief box, and behind him "moovi" in his own
  * jelly: after he says hello, it streams out of his back and sets into letters (the world renders it; see
  * `scene.word`). Scrolling, he lets the box drop, the letters flow back into him and he swells, then the camera
- * walks up to his face: "Hi. I’m Moovi. I edit your takes."
+ * walks up to his face: "Hi. I’m Edit Easy. I edit your takes."
  */
 export function Hero() {
   // one-off entrance once the intro has opened
@@ -27,7 +27,9 @@ export function Hero() {
         w.shapeReady('word').then(() => {
           if (gone) return;
           const delay = still ? 0 : Math.max(.2, 1.3 - (performance.now() - from) / 1000);
-          tween = gsap.to(w, { wordOut: 1, duration: still ? 0 : 2.8, delay, ease: 'power1.inOut' });
+          // the jelly word still spells the old name (its SDF glyphs are built for 5 letters), so it stays in until
+          // it is rebuilt for Edit Easy
+          void tween; void delay;
         });
       });
       // the fallback wordmark (no WebGL)
@@ -60,9 +62,10 @@ export function Hero() {
       back={<>
         <div className="hero2__sky" aria-hidden="true" />
         <GooDefs />
-        <h1 className="sr-only">Moovi. {hero.tagline}</h1>
+        <h1 className="sr-only">Edit Easy. {hero.tagline}</h1>
         {/* the world draws the jelly letters; this flat copy only shows where WebGL is missing */}
-        <div className="hero2__word" aria-hidden="true">
+        {/* the flat jelly word is hidden with the 3D one until its glyphs spell Edit Easy */}
+        <div className="hero2__word" aria-hidden="true" hidden>
           {Array.from({ length: 5 }, (_, i) => <span key={i} className="hero2__char"><span className="hero2__in"><GooGlyph i={i} /></span></span>)}
         </div>
       </>}

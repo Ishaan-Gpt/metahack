@@ -1,0 +1,643 @@
+{
+  "generatedBy": "tools/build-caption-library.mjs",
+  "source": "C:/Ishaan GPT/hackthons/CaptionsEasy",
+  "extractedBy": "runtime",
+  "counts": {
+    "looks": 157,
+    "inGallery": 105,
+    "premium": 16,
+    "animations": 49,
+    "filesCopied": 102
+  },
+  "animations": [
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.fade",
+      "name": "fade",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.rise",
+      "name": "rise",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.drop",
+      "name": "drop",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.pop",
+      "name": "pop",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.zoom",
+      "name": "zoom",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.slide-left",
+      "name": "slide-left",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.slide-right",
+      "name": "slide-right",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.blur-in",
+      "name": "blur-in",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": null,
+      "id": "in.typewriter",
+      "name": "typewriter",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": "not drawn by entranceStyle; the layout handles it (e.g. typewriter)"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.wave",
+      "name": "wave",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.flip",
+      "name": "flip",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.elastic",
+      "name": "elastic",
+      "kind": "in",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "damping": 7,
+          "stiffness": 170,
+          "mass": 0.6
+        }
+      },
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.glitch",
+      "name": "glitch",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "in.mask-reveal",
+      "name": "mask-reveal",
+      "kind": "in",
+      "durationMs": "style.entrance.durationMs",
+      "ease": "style.entrance.easing (linear|outQuad|outCubic|outExpo|inOutCubic; spring = outExpo)",
+      "note": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "out.fade",
+      "name": "fade",
+      "kind": "out",
+      "durationMs": "style.exit.durationMs (schema default 120)",
+      "ease": "in-cubic (Easing.in(Easing.cubic))"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "out.fall",
+      "name": "fall",
+      "kind": "out",
+      "durationMs": "style.exit.durationMs (schema default 120)",
+      "ease": "in-cubic (Easing.in(Easing.cubic))"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "out.zoom-out",
+      "name": "zoom-out",
+      "kind": "out",
+      "durationMs": "style.exit.durationMs (schema default 120)",
+      "ease": "in-cubic (Easing.in(Easing.cubic))"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "out.blur-out",
+      "name": "blur-out",
+      "kind": "out",
+      "durationMs": "style.exit.durationMs (schema default 120)",
+      "ease": "in-cubic (Easing.in(Easing.cubic))"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "out.slide-up",
+      "name": "slide-up",
+      "kind": "out",
+      "durationMs": "style.exit.durationMs (schema default 120)",
+      "ease": "in-cubic (Easing.in(Easing.cubic))"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.color",
+      "name": "color",
+      "kind": "emphasis",
+      "durationMs": null,
+      "ease": null,
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.pop",
+      "name": "pop",
+      "kind": "emphasis",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "preset": "snappy",
+          "damping": 14,
+          "stiffness": 220,
+          "mass": 0.5
+        }
+      },
+      "scale": "style.active.scale"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.box",
+      "name": "box",
+      "kind": "emphasis",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "preset": "snappy",
+          "damping": 14,
+          "stiffness": 220,
+          "mass": 0.5
+        }
+      },
+      "scale": "style.active.scale"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.underline",
+      "name": "underline",
+      "kind": "emphasis",
+      "durationMs": 180,
+      "ease": "outExpo",
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.marker",
+      "name": "marker",
+      "kind": "emphasis",
+      "durationMs": 200,
+      "ease": "outExpo",
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.glow",
+      "name": "glow",
+      "kind": "emphasis",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "preset": "snappy",
+          "damping": 14,
+          "stiffness": 220,
+          "mass": 0.5
+        }
+      },
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.bounce",
+      "name": "bounce",
+      "kind": "emphasis",
+      "durationMs": 260,
+      "ease": "outExpo",
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.shake",
+      "name": "shake",
+      "kind": "emphasis",
+      "durationMs": null,
+      "ease": null,
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.fill-sweep",
+      "name": "fill-sweep",
+      "kind": "emphasis",
+      "durationMs": "the spoken word's own length",
+      "ease": null,
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.scale-up",
+      "name": "scale-up",
+      "kind": "emphasis",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "preset": "snappy",
+          "damping": 14,
+          "stiffness": 220,
+          "mass": 0.5
+        }
+      },
+      "scale": "style.active.scale"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "emphasis.outline-fill",
+      "name": "outline-fill",
+      "kind": "emphasis",
+      "durationMs": null,
+      "ease": null,
+      "scale": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "letter.letter-spin",
+      "name": "letter-spin",
+      "kind": "letter",
+      "durationMs": {
+        "aeMs": 660,
+        "defaultMs": 300
+      },
+      "ease": {
+        "aeExpression": {},
+        "trackEm": 0.58
+      },
+      "alsoOut": true,
+      "note": "After Effects text animator (scale/rotation 30deg/tracking); also plays backwards as an exit"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "letter.letter-elastic",
+      "name": "letter-elastic",
+      "kind": "letter",
+      "durationMs": {
+        "aeMs": 660,
+        "defaultMs": 300
+      },
+      "ease": {
+        "aeExpression": {},
+        "trackEm": 0.58
+      },
+      "alsoOut": true,
+      "note": "After Effects text animator (scale/rotation 30deg/tracking); also plays backwards as an exit"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "letter.letter-snap",
+      "name": "letter-snap",
+      "kind": "letter",
+      "durationMs": {
+        "aeMs": 660,
+        "defaultMs": 300
+      },
+      "ease": {
+        "aeExpression": {
+          "duration": 0.25
+        },
+        "trackEm": 0.58
+      },
+      "alsoOut": true,
+      "note": "After Effects text animator (scale/rotation 30deg/tracking); also plays backwards as an exit"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "letter.letter-burst",
+      "name": "letter-burst",
+      "kind": "letter",
+      "durationMs": {
+        "aeMs": 660,
+        "defaultMs": 300
+      },
+      "ease": {
+        "aeExpression": {},
+        "trackEm": 0.58
+      },
+      "alsoOut": true,
+      "note": "After Effects text animator (scale/rotation 30deg/tracking); also plays backwards as an exit"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "letter.letter-stretch",
+      "name": "letter-stretch",
+      "kind": "letter",
+      "durationMs": {
+        "aeMs": 660,
+        "defaultMs": 300
+      },
+      "ease": {
+        "aeExpression": {
+          "duration": 0.15,
+          "frequency": 2,
+          "damping": 9,
+          "curve": "AE decaying bounce"
+        },
+        "trackEm": 0.58
+      },
+      "alsoOut": true,
+      "note": "After Effects text animator (scale/rotation 30deg/tracking); also plays backwards as an exit"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "word.pop",
+      "name": "pop",
+      "kind": "word",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "preset": "bouncy",
+          "damping": 9,
+          "stiffness": 180,
+          "mass": 0.5
+        }
+      },
+      "note": "a word's own entrance on top of its card's (Word.entry)"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "word.slam",
+      "name": "slam",
+      "kind": "word",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "preset": "punch",
+          "damping": 11,
+          "stiffness": 240,
+          "mass": 0.5
+        }
+      },
+      "note": "a word's own entrance on top of its card's (Word.entry)"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "word.rise",
+      "name": "rise",
+      "kind": "word",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "preset": "smooth",
+          "damping": 26,
+          "stiffness": 120,
+          "mass": 0.6
+        }
+      },
+      "note": "a word's own entrance on top of its card's (Word.entry)"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "word.progressive-reveal",
+      "name": "progressive reveal",
+      "kind": "word",
+      "durationMs": 130,
+      "ease": "outExpo"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "word.stagger",
+      "name": "stagger",
+      "kind": "word",
+      "durationMs": {
+        "perWordMs": 70,
+        "perLetterMs": 28,
+        "scaledBy": "entrance.durationMs / 220 (min 0.4)"
+      },
+      "ease": null
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "spring.snappy",
+      "name": "snappy spring",
+      "kind": "spring",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "damping": 14,
+          "stiffness": 220,
+          "mass": 0.5
+        }
+      },
+      "note": "shared spring preset that the motions above use"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "spring.bouncy",
+      "name": "bouncy spring",
+      "kind": "spring",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "damping": 9,
+          "stiffness": 180,
+          "mass": 0.5
+        }
+      },
+      "note": "shared spring preset that the motions above use"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "spring.smooth",
+      "name": "smooth spring",
+      "kind": "spring",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "damping": 26,
+          "stiffness": 120,
+          "mass": 0.6
+        }
+      },
+      "note": "shared spring preset that the motions above use"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/motion.ts",
+      "id": "spring.punch",
+      "name": "punch spring",
+      "kind": "spring",
+      "durationMs": null,
+      "ease": {
+        "spring": {
+          "damping": 11,
+          "stiffness": 240,
+          "mass": 0.5
+        }
+      },
+      "note": "shared spring preset that the motions above use"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/pack/moovi/presets.ts",
+      "id": "moovi.2.enter",
+      "name": "Premium Caption 2 entrance",
+      "kind": "in",
+      "durationMs": {
+        "fadeS": 0.2,
+        "blurS": 0.24,
+        "flashS": 0.3,
+        "writeS": null
+      },
+      "ease": {
+        "scaleFrom": 1.04,
+        "decay": 14,
+        "freq": 0,
+        "blur": 0.022,
+        "flash": 0,
+        "drift": -0.01,
+        "rise": null,
+        "stagger": null
+      },
+      "note": "drawn by pack/moovi/draw.ts on a canvas"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/pack/moovi/presets.ts",
+      "id": "moovi.3.enter",
+      "name": "Premium Caption 3 entrance",
+      "kind": "in",
+      "durationMs": {
+        "fadeS": 0.1,
+        "blurS": 0.28,
+        "flashS": 0.3,
+        "writeS": null
+      },
+      "ease": {
+        "scaleFrom": 1,
+        "decay": 0,
+        "freq": 0,
+        "blur": 0.02,
+        "flash": 0,
+        "drift": -0.012,
+        "rise": 0.05,
+        "stagger": null
+      },
+      "note": "drawn by pack/moovi/draw.ts on a canvas"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/pack/moovi/presets.ts",
+      "id": "moovi.4.enter",
+      "name": "Premium Caption 4 entrance",
+      "kind": "letter",
+      "durationMs": {
+        "fadeS": 0.06,
+        "blurS": 0.22,
+        "flashS": 0.3,
+        "writeS": 0.45
+      },
+      "ease": {
+        "scaleFrom": 1,
+        "decay": 0,
+        "freq": 0,
+        "blur": 0,
+        "flash": 0,
+        "drift": -0.01,
+        "rise": 0.6,
+        "stagger": 0.035
+      },
+      "note": "drawn by pack/moovi/draw.ts on a canvas"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/pack/moovi/presets.ts",
+      "id": "moovi.1_1.enter",
+      "name": "Premium Caption 1.1 entrance",
+      "kind": "in",
+      "durationMs": {
+        "fadeS": 0.06,
+        "blurS": 0.16,
+        "flashS": 0.3,
+        "writeS": null
+      },
+      "ease": {
+        "scaleFrom": 1.22,
+        "decay": 11,
+        "freq": 15,
+        "blur": 0.01,
+        "flash": 0.8,
+        "drift": -0.025,
+        "rise": null,
+        "stagger": null
+      },
+      "note": "drawn by pack/moovi/draw.ts on a canvas"
+    },
+    {
+      "sourceFile": "src/packages/templates/src/pack/moovi/presets.ts",
+      "id": "moovi.1_2.enter",
+      "name": "Premium Caption 1.2 entrance",
+      "kind": "in",
+      "durationMs": {
+        "fadeS": 0.06,
+        "blurS": 0.16,
+        "flashS": 0.3,
+        "writeS": null
+      },
+      "ease": {
+        "scaleFrom": 1.22,
+        "decay": 11,
+        "freq": 15,
+        "blur": 0.01,
+        "flash": 0.8,
+        "drift": -0.025,
+        "rise": null,
+        "stagger": null
+      },
+      "note": "drawn by pack/moovi/draw.ts on a canvas"
+    }
+  ]
+}

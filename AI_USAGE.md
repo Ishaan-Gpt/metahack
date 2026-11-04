@@ -10,3 +10,9 @@
   `player/card-studio.js`, `tools/render-card.mjs`, `engine/person_matte.py`, `engine/stock.mjs`,
   `tools/meta-standin.mjs`) by Vignesh B S, with AI coding help (docs/themes/THEME_README.md documents the theme; six of
   the theme branch's commits are authored by an agent identity, `Tab <tab@tab.bot>`). [[Vignesh: name the tool(s) you used.]]
+- 2026-11-05: Claude Code (Claude Opus 5.5) renamed the product to Edit Easy, cut the styles to the two render engines
+  (uploads alternate between them), and built prompt editing after the render: `engine/edits.mjs` matches a prompt's
+  keywords to a stored dictionary of edit functions (fuzzy spelling, no model call) and re-renders only. It ported
+  Captions Easy (Ishaan's own repo) into the studio: the caption editor, the word-level timeline and its ops
+  (`engine/word-ops.mjs`), and a stored library of its looks and animations (`library/captions-easy/`). It also put the
+  reference recreations on /styles beside their raw takes. Ishaan set what to build; nothing was submitted or posted by the AI.

@@ -1,11 +1,16 @@
-# Moovi for the Meta hackathon: the winning plan
+# Edit Easy for the Meta hackathon: the winning plan
+
+> Update, 5 Nov: the product is now called **Edit Easy** (it grew out of Moovi, built before the hackathon). The five
+> styles and the auto style pick below were replaced by two render engines, Studio Card and Creator Mix, given to uploads
+> in a shuffled turn, and editing by prompt after the render through a keyword edit dictionary (docs/EDIT-API.md).
+> The rows below are the plan as it stood on 4 Nov.
 
 Written 2026-11-04, 23:30 IST. Deadline **Thu 5 Nov 06:30 IST** (Wed 4 Nov 9:00 PM ET). Our hand-off target: **01:30 IST**.
 Sources: hackathon/RULES.md (official rules, quoted), the public event page (re-read today), usevyra.com, the repo.
 
 ## 1. The bet in one line
 **Raw take in, a pro editor's cut out.** A creator drops the talking-head clip they already shot; Meta's Muse models
-make the editor's decisions; Moovi's engine draws every frame. Their real face and voice, edited like the best
+make the editor's decisions; Edit Easy's engine draws every frame. Their real face and voice, edited like the best
 short-form editors on Instagram, in minutes.
 
 Why this wins against the field: most entries will be chatbots or agents that *generate*. Ours *edits real footage*,
@@ -30,8 +35,8 @@ plain code everywhere else, which is the "beyond a basic integration" the 25% Me
 ## 4. Deliverables and status
 | Deliverable | Where | Status |
 |---|---|---|
-| Landing page, repositioned (Moovi's brand, Muse at the centre, Vyra-style story) | `web/` → `/` | Done, build passes, desktop + phone checked |
-| Studio (Vyra-style editor: footage + styles, preview, Moovi chat, timeline) | `web/` → `/studio` | Done; full edit verified in the browser |
+| Landing page, repositioned (Edit Easy's brand, the mascot, Muse at the centre, Vyra-style story) | `web/` → `/` | Done, build passes, desktop + phone checked |
+| Studio (Vyra-style editor: footage + styles, preview, chat, timeline) | `web/` → `/studio` | Done; full edit verified in the browser |
 | Backend API (upload with progress, queue, status, files with byte ranges, retry in another style, sample, health) | `web/src/app/api`, `web/src/lib/server/jobs.ts` | Done; error paths tested |
 | Engine: 5 styles + auto pick + job runner | `engine/styles/`, `engine/run.mjs`, `engine/meta.mjs` | Done; 2 styles verified, 3 rendering now |
 | Meta layer (Transcribe, Spark style pick, Spark plan, cache, usage log) | `engine/meta.mjs` | Built; **untested against real Meta: no key yet** |

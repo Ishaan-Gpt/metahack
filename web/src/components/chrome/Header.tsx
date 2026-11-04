@@ -71,7 +71,7 @@ export function Header() {
 
   return (
     <header className={`header ${scrolled ? 'is-scrolled' : ''} ${menu ? 'is-menu' : ''}`}>
-      <Link href="/" className="header__logo goo-glass" aria-label="Moovi home" data-label="Home" onClick={home ? go('intro') : undefined}>
+      <Link href="/" className="header__logo goo-glass" aria-label="Edit Easy home" data-label="Home" onClick={home ? go('intro') : undefined}>
         <Logo />
       </Link>
       <nav className="header__nav goo-glass" aria-label="Sections">

@@ -5,12 +5,12 @@ import { styles } from '@/lib/content';
 import { IconCheck } from '@/components/brand/icons';
 import { splitMasked } from '@/lib/gsap';
 
-/** Each style holds while Moovi is that shape (matches lib/script.ts → styles). */
+/** Each window holds while the mascot is that shape (matches lib/script.ts → styles). */
 const WINDOWS = [[.16, .4], [.4, .64], [.64, .88], [.88, 1]] as const;
 
 /**
- * "One director, every kind of video." Moovi becomes each style's shape (play → film frame → waveform → himself)
- * while the giant word behind him changes and the brief for that style slides in.
+ * "One director, ..." The mascot becomes four shapes (play → film frame → waveform → himself) while the giant word
+ * behind him changes and a brief slides in: the two engines (Studio Card, Creator Mix), then two kinds of edit by prompt.
  */
 export function Styles() {
   const section = useRef<HTMLElement | null>(null);
@@ -60,7 +60,7 @@ export function Styles() {
             <ul>{o.specs.map(s => <li key={s}><span className="st__ring"><IconCheck width={15} height={15} /></span><span className="t-sub2">{s}</span></li>)}</ul>
           </article>
         ))}
-        <div className="st__pills" role="group" aria-label="Styles">
+        <div className="st__pills" role="group" aria-label="Engines and edits">
           {styles.options.map((o, i) => <button key={o.id} className="st__pill" onClick={() => jump(i)}>{o.title}</button>)}
         </div>
       </>}

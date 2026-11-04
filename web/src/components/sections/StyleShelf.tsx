@@ -5,9 +5,9 @@ import { STYLES, studioHref } from '@/lib/styles';
 import { IconArrow, IconOrb } from '@/components/brand/icons';
 
 /**
- * The style library inside Moovi's halo: five small cards on the ring (one per real editor's reel, each with its
- * three measured colours and its one line), and "let Muse Spark pick" at the centre. The ring box is 1000 units,
- * centred and scaled to the halo every frame by WorldStage; the side panel carries the body and the links.
+ * The two engines inside the mascot's halo: one card on each side of the ring (each with three colours from its
+ * template and its one line), and the way into the studio at the centre. The ring box is 1000 units, centred and
+ * scaled to the halo every frame by WorldStage; the side panel carries the body and the links.
  */
 export function StyleShelf({ ringRef }: { ringRef?: Ref<HTMLDivElement> }) {
   return (
@@ -15,8 +15,8 @@ export function StyleShelf({ ringRef }: { ringRef?: Ref<HTMLDivElement> }) {
       <div className="memory__ring" ref={ringRef}>
         <div className="memory__ring-in shelf">
           {STYLES.map((s, i) => {
-            // five seats around the ring, the first at the top
-            const a = (-90 + i * 72) * Math.PI / 180;
+            // seats spread evenly around the ring; with two engines, one on each side
+            const a = (180 + i * 360 / STYLES.length) * Math.PI / 180;
             return (
               <a key={s.id} href={studioHref(s.id)} className="shelf__card" title={s.ref}
                 style={{ '--x': `${Math.round(Math.cos(a) * 340)}px`, '--y': `${Math.round(Math.sin(a) * 340)}px` } as CSSProperties}>
@@ -26,7 +26,7 @@ export function StyleShelf({ ringRef }: { ringRef?: Ref<HTMLDivElement> }) {
               </a>
             );
           })}
-          <a href={studioHref('auto')} className="shelf__auto"><IconOrb width={40} height={40} /><span>Let Muse Spark pick</span></a>
+          <a href={studioHref('auto')} className="shelf__auto"><IconOrb width={40} height={40} /><span>Give your video</span></a>
         </div>
       </div>
 
@@ -44,7 +44,7 @@ export function StyleShelf({ ringRef }: { ringRef?: Ref<HTMLDivElement> }) {
             </li>
           ))}
         </ul>
-        <a href={studioHref('auto')} className="btn btn--ghost shelf__pick"><IconOrb width={18} height={18} />Let Muse Spark pick</a>
+        <a href={studioHref('auto')} className="btn btn--ghost shelf__pick"><IconOrb width={18} height={18} />Give your video</a>
       </div>
     </>
   );

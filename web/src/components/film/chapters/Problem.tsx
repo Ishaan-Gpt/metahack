@@ -55,7 +55,7 @@ export function Problem() {
   return (
     <Chapter name="problem" vh={340}
       front={<>
-        <div className="pbv" ref={screen} aria-label="A generic video tool, playing on Moovi">
+        <div className="pbv" ref={screen} aria-label="A generic video tool, playing on Edit Easy">
           <div className="pbv__tool">
             <div className="pbv__app" aria-hidden="true"><i /><i /><i /><span>{problem.tool}</span></div>
             <p className="pbv__field"><span className="pbv__typed">{problem.prompt}</span></p>

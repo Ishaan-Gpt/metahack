@@ -84,7 +84,7 @@ const content = mk(`<div class="L" style="width:1080px;height:1920px;transform-o
 const video = document.createElement('video');
 Object.assign(video, { id: 'v', src: '/data/clips/ba5c/aroll.mp4', preload: 'auto', playsInline: true, crossOrigin: 'anonymous' });
 video.muted = Q.has('mute');
-css(video, { position: 'absolute', left: '0', top: '0', width: '1080px', height: '1920px', transformOrigin: '0 0', filter: 'contrast(1.05) saturate(.68) brightness(1.03) hue-rotate(-8deg)'   // cooler, greyer wall (ref: neutral grey) });
+css(video, { position: 'absolute', left: '0', top: '0', width: '1080px', height: '1920px', transformOrigin: '0 0', filter: 'contrast(1.05) saturate(.68) brightness(1.03) hue-rotate(-8deg)' });   // cooler, greyer wall (ref: neutral grey)
 content.appendChild(video);
 const tint = mk(`<div class="L" style="width:1080px;height:1920px;background:#c4ec46;mix-blend-mode:multiply;opacity:0"></div>`, content);
 

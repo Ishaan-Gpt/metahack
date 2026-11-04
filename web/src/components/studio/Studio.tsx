@@ -3,28 +3,33 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { HaloMark, Wordmark } from '@/components/ui/Logo';
 import { IconArrow, IconClose, IconSend, IconUpload } from '@/components/ui/icons';
+import { CaptionEditor, useCaptionDraft, type Op } from './CaptionEditor';
+import { CaptionLane, WordTools, useTimelineShortcuts } from './TimelineTools';
 
 /**
- * The studio as an editor: footage bin on the left, the preview in the middle, Moovi's chat on the right where you ask
- * for changes in words, and a timeline at the bottom that shows the cut Muse Spark planned (beats by layout, caption
- * cards, effects, your voice). The job id lives in the URL (?job=) so a reload or a shared link reopens the same edit.
+ * The studio as an editor: footage bin on the left, the preview in the middle, Edit Easy's chat on the right where you
+ * change the finished edit in words ("zoom out", "funkier captions", "change governate to governorate"), a Captions tab
+ * to fix words and timing by hand, and a timeline at the bottom with the cut (beats, caption cards you can drag,
+ * effects, voice). Prompts are matched to the edit dictionary on the server (engine/edits.mjs): no model call, so a
+ * change costs nothing but the re-render. The job id lives in the URL (?job=) so a reload reopens the same edit.
  */
 
-type Style = { id: string; label: string; line: string; ref: string; swatch: string[] };
 type Stage = { id: string; label: string; detail: string; state: 'pending' | 'running' | 'done' | 'error' | 'skipped'; seconds?: number };
 type Ev = { t: number; kind: string; text: string };
 type JobErr = { code: string; human: string; detail?: string };
 type Status = {
-  id: string; state: 'queued' | 'running' | 'done' | 'error'; pct: number; stage?: string; stages: Stage[]; events: Ev[];
+  id: string; finished?: string; state: 'queued' | 'running' | 'done' | 'error'; pct: number; stage?: string; stages: Stage[]; events: Ev[];
   style?: string; styleLabel?: string; ahead?: number; error?: JobErr; seconds?: number; duration?: number; raw?: string;
   choice?: { by: string; style: string; why: string };
   plan?: { segments: number; layouts: string[]; planner?: string; captions: number; photos: number };
   meta?: { calls?: { call: string; model: string; cache: boolean; seconds: number | null; tokens: number | null; standin: boolean }[] };
   outputs?: { edit: string; beforeAfter: string | null; raw: string };
 };
-type Spec = { duration: number; segments: { type: string; t0: number; t1: number; label: string | null }[]; captions: { t0: number; t1: number; text: string; hero: string | null }[]; sfx: { t: number; k: string }[] };
+type Spec = { engine?: string; captionPreset?: string | null; captionsHidden?: boolean; edits?: number; duration: number; segments: { type: string; t0: number; t1: number; label: string | null }[]; captions: { t0: number; t1: number; text: string; hero: string | null; words?: { w: string; t: number; e?: number; hero: boolean }[] }[]; sfx: { t: number; k: string }[] };
 type Health = { meta: 'live' | 'test' | 'claude' | 'missing'; ffmpeg: boolean; queue: number };
 type Msg = { who: 'you' | 'moovi'; text: string; kind?: string };
+type EditRes = { applied: { op: string; said: string }[]; unmatched: string[]; rendering: boolean };
+const TRY = ['zoom out a little', 'make the captions funkier', 'captions a bit bigger and higher', 'add a b-roll of a city at 6s', 'change governate to governorate', 'lower the music', 'no sound effects', 'warmer colour'];
 
 const MIN_S = 5, MAX_S = 75, MAX_MB = 400;
 const LAYOUT: Record<string, { name: string; c: string }> = {
@@ -91,27 +96,14 @@ function upload(f: File, style: string, onPct: (p: number) => void): Promise<{ i
   });
 }
 
-/** read a prompt into one of the edits the engine can make today; anything else gets an honest answer */
-function intent(text: string, styles: Style[]): { style?: string; music?: boolean; handle?: string; reply: string } | null {
-  const t = text.toLowerCase();
-  const st = styles.find(s => t.includes(s.label.toLowerCase()) || t.includes(s.id.replace('-', ' ')));
-  const handle = text.match(/@[\w.]{2,30}/)?.[0];
-  const music = /\b(no|without|remove|kill|drop|mute)\b.{0,12}\bmusic\b|\bmusic off\b/.test(t) ? false : /\b(add|with|bring back|put)\b.{0,12}\bmusic\b|\bmusic on\b/.test(t) ? true : undefined;
-  const auto = /\b(you pick|auto|surprise|whatever fits|choose for me)\b/.test(t);
-  if (!st && !auto && music === undefined && !handle) return null;
-  const parts = [st ? `switching to ${st.label}` : auto ? 'letting Muse Spark pick the style again' : null, music === false ? 'taking the music out' : music ? 'putting the music back' : null, handle ? `putting ${handle} on it` : null].filter(Boolean);
-  return { style: st?.id ?? (auto ? 'auto' : undefined), music, handle, reply: `On it: ${parts.join(', ')}. Same take, so the words are already heard.` };
-}
-
 type Sample = { id: string; name: string; line: string; seconds: number; shape: string; credit: string; licence: string };
 
 export function Studio() {
   const params = useSearchParams(), router = useRouter();
-  const [styles, setStyles] = useState<Style[]>([]);
   const [samples, setSamples] = useState<Sample[]>([]);
   const [health, setHealth] = useState<Health | null>(null);
-  // no style picker: every edit starts in Auto (the director picks the look); prompts change it afterwards
-  const [style, setStyle] = useState<string>('auto');
+  // no style picker: uploads take turns between the two engines; prompts change the edit afterwards
+  const style = 'auto';
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [upPct, setUpPct] = useState<number | null>(null);
@@ -121,7 +113,16 @@ export function Studio() {
   const [conn, setConn] = useState<'ok' | 'retrying'>('ok');
   const [drag, setDrag] = useState(false);
   const [view, setView] = useState<'edit' | 'split'>('edit');
-  const [msgs, setMsgs] = useState<Msg[]>([{ who: 'moovi', text: 'Drop your video, or pick a sample on the left. I edit it, then you tell me what to change: "make it Clean UI", "no music", "put @you on it".' }]);
+  const [msgs, setMsgs] = useState<Msg[]>([{ who: 'moovi', text: 'Drop your video, or pick a sample on the left. I edit it, then you tell me what to change in plain words: "zoom out", "funkier captions", "add a b-roll of a city", or fix a word: "change governate to governorate".' }]);
+  const [tab, setTab] = useState<'chat' | 'captions'>('chat');
+  const [selected, setSelected] = useState<number | null>(null);
+  /** timeline zoom (Captions Easy: 1 = the whole video fits, up to 40x); words show from about 2-3x */
+  const [zoom, setZoom] = useState(1);
+  const scroller = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
+  const [pollKey, setPollKey] = useState(0);
+  // a prompt typed before the first cut is done is kept and applied the moment the edit is ready
+  const pending = useRef<string | null>(null);
   const [draft, setDraft] = useState('');
   const [t, setT] = useState(0);
   const vid = useRef<HTMLVideoElement>(null);
@@ -129,7 +130,6 @@ export function Studio() {
   const say = useCallback((m: Msg) => setMsgs(x => [...x, m]), []);
 
   useEffect(() => {
-    api<{ styles: Style[] }>('/api/styles').then(r => setStyles(r.styles)).catch(() => setStyles([]));
     api<{ samples: Sample[] }>('/api/samples').then(r => setSamples(r.samples)).catch(() => setSamples([]));
     api<Health>('/api/health').then(setHealth).catch(() => setHealth(null));
   }, []);
@@ -139,7 +139,7 @@ export function Studio() {
     takeHandoff().then(h => {
       if (!h) return;
       void pick(h.file);
-      if (h.note) { say({ who: 'you', text: h.note }); const i = intent(h.note, styles); if (i?.style) { setStyle(i.style); say({ who: 'moovi', text: i.reply }); } }
+      if (h.note) { say({ who: 'you', text: h.note }); pending.current = h.note; say({ who: 'moovi', text: 'Noted. I will make that change as soon as the first cut is ready.' }); }
     });
     if (params.get('sample')) void startSample(params.get('sample') === '1' ? undefined : params.get('sample')!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -150,7 +150,7 @@ export function Studio() {
     router.replace(`/studio${id ? `?job=${id}` : ''}`, { scroll: false });
   }, [router]);
 
-  // poll the job; turn its new events into Moovi's chat lines
+  // poll the job; turn its new events into chat lines
   useEffect(() => {
     if (!jobId) return;
     let stop = false, wait = 900, timer: ReturnType<typeof setTimeout>;
@@ -162,7 +162,11 @@ export function Studio() {
         const fresh = s.events.slice(seen.current); seen.current = s.events.length;
         for (const e of fresh) if (e.kind !== 'info' || /chose|heard|beats|Done/i.test(e.text)) say({ who: 'moovi', text: e.text, kind: e.kind });
         if (s.plan && !spec) api<Spec>(`/api/jobs/${jobId}/spec`).then(setSpec).catch(() => {});
-        if (s.state === 'done') { api<Spec>(`/api/jobs/${jobId}/spec`).then(setSpec).catch(() => {}); return; }
+        if (s.state === 'done') {
+          api<Spec>(`/api/jobs/${jobId}/spec`).then(setSpec).catch(() => {});
+          const p = pending.current; if (p) { pending.current = null; void edit({ prompt: p }); }
+          return;
+        }
         if (s.state === 'error') { say({ who: 'moovi', text: s.error?.human ?? 'That edit stopped.', kind: 'error' }); return; }
       } catch (e) {
         const err = e as JobErr;
@@ -174,7 +178,7 @@ export function Studio() {
     void tick();
     return () => { stop = true; clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobId]);
+  }, [jobId, pollKey]);
 
   async function pick(f: File) {
     const r = await checkFile(f);
@@ -194,37 +198,68 @@ export function Studio() {
     try { const { id } = await api<{ id: string }>(`/api/sample?style=auto${sid ? `&id=${encodeURIComponent(sid)}` : ''}`, { method: 'POST' }); go(id); say({ who: 'moovi', text: smp ? `Editing ${smp.name}'s take (${smp.credit}, ${smp.licence}).` : 'Editing a sample take.' }); }
     catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
   }
-  async function reedit(o: { style?: string; music?: boolean; handle?: string }) {
+  /** start over from the same upload (after an error) */
+  async function again() {
     if (!jobId) return;
-    const q = new URLSearchParams(); if (o.style) q.set('style', o.style); if (o.music !== undefined) q.set('music', o.music ? '1' : '0'); if (o.handle) q.set('handle', o.handle);
-    try { await api(`/api/jobs/${jobId}/retry?${q}`, { method: 'POST' }); const id = jobId; setJobId(null); setSt(null); setSpec(null); seen.current = 0; setTimeout(() => setJobId(id), 0); }
+    try { await api(`/api/jobs/${jobId}/retry`, { method: 'POST' }); seen.current = 0; setSt(null); setSpec(null); setPollKey(k => k + 1); }
     catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
+  }
+  /** change the finished edit: a prompt is matched to the edit dictionary on the server; ops come from the Captions tab */
+  async function edit(body: { prompt: string } | { ops: Op[] }) {
+    if (!jobId) return;
+    setEditing(true);
+    try {
+      const r = await api<EditRes>(`/api/jobs/${jobId}/edit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (r.applied.length) say({ who: 'moovi', text: `${r.applied.map(a => a.said.replace(/\.+$/, '')).join('. ')}.${r.rendering ? ' Re-rendering now; the last cut keeps playing until the new one is in.' : ''}` });
+      if (r.unmatched.length) say({ who: 'moovi', kind: r.applied.length ? 'info' : 'error', text: `I could not match "${r.unmatched.join('", "')}" to an edit I know. Try one like "${TRY[msgs.length % TRY.length]}".` });
+      if (!r.applied.length && !r.unmatched.length) say({ who: 'moovi', text: 'That is already how the edit looks, so nothing changed.' });
+      if (r.rendering) { setSt(x => x ? { ...x, state: 'queued', pct: 0 } : x); setPollKey(k => k + 1); }
+    } catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
+    finally { setEditing(false); }
+  }
+  function applyOps(ops: Op[], said: string) {
+    if (!ops.length) return;
+    say({ who: 'you', text: said || 'Apply my caption changes' });
+    void edit({ ops });
   }
   function send() {
     const text = draft.trim(); if (!text) return;
     setDraft(''); say({ who: 'you', text });
     if (!jobId) {
-      const i = intent(text, styles);
-      if (i?.style) { setStyle(i.style); say({ who: 'moovi', text: `Set to ${i.style === 'auto' ? 'Auto' : styles.find(s => s.id === i.style)?.label}. ${file ? 'Press Edit when ready.' : 'Now drop your take.'}` }); }
-      else say({ who: 'moovi', text: file ? 'Press Edit and I will start. You can ask for another style or no music after.' : 'Drop a take on the left first.' });
+      pending.current = text;
+      say({ who: 'moovi', text: file ? 'Noted. Press Edit my video; I will make that change as soon as the first cut is ready.' : 'Noted. Drop a take or pick a sample, and I will make that change once it is edited.' });
       return;
     }
-    if (st && (st.state === 'running' || st.state === 'queued')) { say({ who: 'moovi', text: 'Still cutting this one. Ask again when it is done and I will redo it.' }); return; }
-    const i = intent(text, styles);
-    if (!i) { say({ who: 'moovi', text: `Today I can change the style (${styles.map(s => s.label).join(', ')}, or Auto), take the music out or put it back, and put your @handle on it. Try "make it Clean UI, no music".` }); return; }
-    say({ who: 'moovi', text: i.reply }); void reedit(i);
+    if (st && (st.state === 'running' || st.state === 'queued')) { pending.current = text; say({ who: 'moovi', text: 'Still cutting. I will make that change the moment this cut is done.' }); return; }
+    if (st?.state === 'error') { say({ who: 'moovi', text: 'This edit stopped, so there is nothing to change yet. Press Try again first.', kind: 'error' }); return; }
+    void edit({ prompt: text });
   }
 
   const phase = !jobId ? 'pick' : !st ? 'loading' : st.state;
   const file$ = (n: string, dl = false) => `/api/jobs/${jobId}/file/${n}${dl ? '?dl=1' : ''}`;
-  const src = phase === 'done' ? (view === 'edit' ? file$('edit.mp4') : file$('before-after.mp4')) : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
+  // while a prompt edit re-renders, the last cut keeps playing; ?v= changes when a new cut lands so the player reloads it
+  const cut = phase === 'done' || (!!st?.outputs?.edit && phase !== 'error');
+  const v = encodeURIComponent(st?.finished ?? '');
+  const src = cut ? `${view === 'edit' ? file$('edit.mp4') : file$('before-after.mp4')}?v=${v}` : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
   const D = spec?.duration ?? st?.duration ?? 0;
-  const label = useMemo(() => styles.find(s => s.id === (st?.style ?? style))?.label ?? (style === 'auto' ? 'Auto' : style), [styles, st?.style, style]);
+  const label = st?.styleLabel ?? (jobId ? 'Choosing the engine' : 'Studio Card or Creator Mix');
+  const capSpec = useMemo(() => spec ? { duration: spec.duration, captions: spec.captions } : null, [spec]);
+  const capDraft = useCaptionDraft(capSpec);
+  const busy = editing || phase === 'running' || phase === 'queued';
+  useTimelineShortcuts({ video: vid, draft: capDraft, selected, onSelect: setSelected, onApply: () => applyOps(capDraft.ops, capDraft.said), zoom, onZoom: setZoom, enabled: phase === 'done' && !busy });
+  const seek = (x: number) => { if (vid.current) vid.current.currentTime = x; };
+  // zoomed in, the timeline follows the playhead so the words being said stay in view (Captions Easy)
+  useEffect(() => {
+    const el = scroller.current; if (!el || zoom <= 1 || !D) return;
+    const x = t / D * el.scrollWidth, pad = el.clientWidth * 0.15;
+    if (x < el.scrollLeft + pad || x > el.scrollLeft + el.clientWidth - pad) el.scrollLeft = Math.max(0, x - el.clientWidth * 0.3);
+  }, [t, zoom, D]);
+  const ruleStep = zoom >= 8 ? 0.5 : zoom >= 3 ? 1 : 2;
 
   return (
     <div className="ed">
       <header className="ed__top">
-        <a href="/" className="ed__brand" aria-label="Moovi home"><Wordmark /></a>
+        <a href="/" className="ed__brand" aria-label="Edit Easy home"><Wordmark /></a>
         <span className="ed__proj">{file?.name ?? (jobId ? `Edit ${jobId}` : 'Untitled edit')}<i>{label}</i></span>
         <span className="ed__sp" />
         {conn === 'retrying' && <span className="ed__conn">Reconnecting…</span>}
@@ -262,7 +297,7 @@ export function Studio() {
           {phase === 'done' && st?.outputs?.beforeAfter && <span className="ed__seg"><button aria-pressed={view === 'edit'} onClick={() => setView('edit')}>Edit</button><button aria-pressed={view === 'split'} onClick={() => setView('split')}>Before / after</button></span>}
         </div>
         <div className={`ed__screen ${view === 'split' && phase === 'done' ? 'is-wide' : ''}`}>
-          {src ? <video key={src} ref={vid} src={src} controls={phase === 'done'} autoPlay={phase === 'done'} muted={phase !== 'done'} loop={phase !== 'done'} playsInline onTimeUpdate={e => setT(e.currentTarget.currentTime)} />
+          {src ? <video key={src} ref={vid} src={src} controls={cut} autoPlay={phase === 'done'} muted={phase !== 'done'} loop={phase !== 'done'} playsInline onTimeUpdate={e => setT(e.currentTarget.currentTime)} />
             : <div className="ed__empty"><HaloMark size={54} /><p>Your edit plays here.</p></div>}
           {(phase === 'running' || phase === 'queued' || phase === 'loading') && st && (
             <div className="ed__busy">
@@ -276,7 +311,7 @@ export function Studio() {
             <div className="ed__busy ed__busy--err" role="alert">
               <b>That edit stopped.</b><span>{st.error.human}</span>
               <span className="ed__row">
-                {!['NOT_VIDEO', 'NO_PICTURE', 'NO_SOUND', 'TOO_SHORT', 'TOO_LONG', 'NO_SPEECH', 'NOT_FOUND', 'BAD_ID'].includes(st.error.code) && <button className="ed__go" onClick={() => reedit({})}>Try again</button>}
+                {!['NOT_VIDEO', 'NO_PICTURE', 'NO_SOUND', 'TOO_SHORT', 'TOO_LONG', 'NO_SPEECH', 'NOT_FOUND', 'BAD_ID'].includes(st.error.code) && <button className="ed__go" onClick={again}>Try again</button>}
                 <button className="ed__textbtn" onClick={() => { setFile(null); setPreview(null); go(null); }}>Use another take</button>
               </span>
               <code>{st.error.code} · {st.id}</code>
@@ -286,7 +321,12 @@ export function Studio() {
       </section>
 
       <aside className="ed__chat">
-        <div className="ed__chat-h"><HaloMark size={20} spin={phase === 'running'} /><b>Moovi</b><span>directed by Muse Spark</span></div>
+        <div className="ed__chat-h"><HaloMark size={20} spin={busy} /><b>Edit Easy</b>
+          <span className="ed__seg" role="tablist" aria-label="Chat or captions"><button role="tab" aria-pressed={tab === 'chat'} onClick={() => setTab('chat')}>Chat</button><button role="tab" aria-pressed={tab === 'captions'} onClick={() => setTab('captions')} disabled={!spec}>Captions</button></span>
+        </div>
+        {tab === 'captions' && jobId && spec ? (
+          <div className="ed__capx"><CaptionEditor jobId={jobId} spec={capSpec} draft={capDraft} onApply={applyOps} busy={busy || phase !== 'done'} selected={selected} onSelect={setSelected} currentTime={t} onSeek={seek} /></div>
+        ) : <>
         <ol className="ed__msgs" ref={el => { el?.scrollTo({ top: el.scrollHeight }); }}>
           {msgs.map((m, i) => <li key={i} className={`is-${m.who} ${m.kind ? `is-${m.kind}` : ''}`}>{m.text}</li>)}
           {phase === 'done' && st && <li className="is-moovi is-card">
@@ -295,23 +335,27 @@ export function Studio() {
             {st.meta?.calls?.map(c => <code key={c.call}>{c.model} · {c.call}{c.cache ? ' · cached' : c.seconds ? ` · ${c.seconds}s` : ''}{c.standin ? ' · test' : ''}</code>)}
           </li>}
         </ol>
+        {phase === 'done' && !busy && <div className="ed__try" aria-label="Try saying">{TRY.slice(0, 4).map(x => <button key={x} onClick={() => setDraft(x)}>{x}</button>)}</div>}
         <form className="ed__ask" onSubmit={e => { e.preventDefault(); send(); }}>
-          <textarea value={draft} rows={2} placeholder={phase === 'done' ? 'Make it Clean UI, no music…' : 'Ask anything…'} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
-          <button aria-label="Send" disabled={!draft.trim()}><IconSend width={18} height={18} /></button>
+          <textarea value={draft} rows={2} placeholder={phase === 'done' ? 'Zoom out, funkier captions, fix a word…' : 'Tell me what you want changed…'} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
+          <button aria-label="Send" disabled={!draft.trim() || editing}><IconSend width={18} height={18} /></button>
         </form>
+        </>}
       </aside>
 
       <section className="ed__tl" aria-label="Timeline">
-        <div className="ed__tl-h"><span className="ed__lab">Timeline</span><span className="ed__time">{fmt(t)} / {fmt(D)}</span>{spec && <span className="ed__legend">{[...new Set(spec.segments.map(s => s.type))].map(k => <i key={k} style={{ ['--c' as string]: LAYOUT[k]?.c }}>{LAYOUT[k]?.name ?? k}</i>)}</span>}</div>
+        <div className="ed__tl-h"><span className="ed__lab">Timeline</span><span className="ed__time">{fmt(t)} / {fmt(D)}</span>{spec && <span className="ed__legend">{[...new Set(spec.segments.map(s => s.type))].map(k => <i key={k} style={{ ['--c' as string]: LAYOUT[k]?.c }}>{LAYOUT[k]?.name ?? k}</i>)}</span>}{spec && phase === 'done' && <WordTools draft={capDraft} zoom={zoom} onZoom={setZoom} />}</div>
         <div className="ed__tracks" onClick={e => { if (!D || !vid.current || phase !== 'done') return; const r = (e.currentTarget.querySelector('.ed__lanes') as HTMLElement).getBoundingClientRect(); const k = (e.clientX - r.left) / r.width; if (k >= 0 && k <= 1) vid.current.currentTime = k * D; }}>
           <div className="ed__names"><span>Ruler</span><span>V1 · Beats</span><span>T1 · Captions</span><span>FX</span><span>A1 · Voice</span></div>
-          <div className="ed__lanes">
-            <div className="ed__ruler">{D ? Array.from({ length: Math.floor(D / 2) + 1 }, (_, i) => <i key={i} style={{ left: `${(i * 2 / D) * 100}%` }}>{i * 2}s</i>) : null}</div>
-            <div className="ed__lane">{spec ? spec.segments.map((s, i) => <b key={i} title={`${LAYOUT[s.type]?.name ?? s.type}${s.label ? `: ${s.label}` : ''}`} style={{ left: `${s.t0 / D * 100}%`, width: `${(s.t1 - s.t0) / D * 100}%`, ['--c' as string]: LAYOUT[s.type]?.c }}>{LAYOUT[s.type]?.name ?? s.type}</b>) : <em className="ed__ph">{jobId ? 'Muse Spark is planning the beats…' : 'Beats appear when Muse Spark plans your edit'}</em>}</div>
-            <div className="ed__lane ed__lane--cap">{spec?.captions.map((c, i) => <b key={i} title={c.text} style={{ left: `${c.t0 / D * 100}%`, width: `${(c.t1 - c.t0) / D * 100}%` }}>{c.hero ? <u>{c.hero}</u> : c.text}</b>)}</div>
+          <div className="ed__scroll" ref={scroller}>
+          <div className="ed__lanes" style={zoom > 1 ? { width: `${zoom * 100}%` } : undefined}>
+            <div className="ed__ruler">{D ? Array.from({ length: Math.floor(D / ruleStep) + 1 }, (_, i) => <i key={i} style={{ left: `${(i * ruleStep / D) * 100}%` }}>{+(i * ruleStep).toFixed(1)}s</i>) : null}</div>
+            <div className="ed__lane">{spec ? spec.segments.map((s, i) => <b key={i} title={`${LAYOUT[s.type]?.name ?? s.type}${s.label ? `: ${s.label}` : ''}`} style={{ left: `${s.t0 / D * 100}%`, width: `${(s.t1 - s.t0) / D * 100}%`, ['--c' as string]: LAYOUT[s.type]?.c }}>{LAYOUT[s.type]?.name ?? s.type}</b>) : <em className="ed__ph">{jobId ? 'Planning the beats…' : 'Beats appear when your edit is planned'}</em>}</div>
+            <div className="ed__lane ed__lane--cap" onClick={e => e.stopPropagation()}>{spec && D > 0 ? <CaptionLane draft={capDraft} duration={D} selected={selected} onSelect={i => { setSelected(i); if (i !== null) setTab('captions'); }} onSeek={seek} currentTime={t} /> : null}</div>
             <div className="ed__lane ed__lane--fx">{spec?.sfx.map((x, i) => <i key={i} title={x.k} style={{ left: `${x.t / D * 100}%` }} />)}</div>
             <div className="ed__lane ed__lane--a">{D ? <span className="ed__wave" /> : null}</div>
             {D > 0 && <span className="ed__head" style={{ left: `${Math.min(1, t / D) * 100}%` }} />}
+          </div>
           </div>
         </div>
       </section>

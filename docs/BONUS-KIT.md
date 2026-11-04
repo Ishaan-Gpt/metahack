@@ -20,29 +20,29 @@ want to try it on their own.
 
 | Time | Picture | On-screen text |
 |---|---|---|
-| 0:00-0:02 | The edit's strongest beat (the big word behind his head) full frame, the raw take in a small inset beside his shoulder, both playing | `my raw take` (on the inset) · `Moovi's edit` |
+| 0:00-0:02 | The edit's strongest beat (the big word behind his head) full frame, the raw take in a small inset beside his shoulder, both playing | `my raw take` (on the inset) · `Edit Easy's edit` |
 | 0:02-0:12 | The take flips raw → edit on every sentence: about 0.6 s of the flat raw, then the edited beat, so the gap between them is felt, not explained | none |
-| 0:12-0:24 | One sentence in all five styles, about 2.4 s each, hard cuts on the beat | the style's name, small, under the chin |
-| 0:24-0:34 | The studio, cropped to 9:16: the take dropped in, the line "Muse Spark chose [[STYLE]]: [[WHY]]", the stage clocks, then "made in [[RUN_SECONDS]] s" | `directed by Meta's Muse Spark` |
-| 0:34-0:40 | Raw on top, edit below, in step, then the end card | `Moovi · [[LIVE_URL]]` |
+| 0:12-0:24 | One sentence through both engines (Studio Card, then Creator Mix), then the studio chat taking "bigger captions, no music" and the cut changing | the engine's name, small, under the chin; then the typed request |
+| 0:24-0:34 | The studio, cropped to 9:16: the take dropped in, the engine it drew ([[ENGINE]]), the stage clocks, then "made in [[RUN_SECONDS]] s" | `directed by Meta's Muse Spark` |
+| 0:34-0:40 | Raw on top, edit below, in step, then the end card | `Edit Easy · [[LIVE_URL]]` |
 
-Made in code from the studio's real outputs (`edit.mp4`, `before-after.mp4`, the five style runs) and one screen capture.
+Made in code from the studio's real outputs (`edit.mp4`, `before-after.mp4`, one run through each engine) and one screen capture.
 One export, after Ishaan has watched the live preview and said export.
 
 ## Three captions
 
 **X** (under 280 characters)
-> I talked to my phone for [[TAKE_SECONDS]] seconds, and Moovi handed back the edit I'd normally pay someone for, still my face and my voice, with Meta's Muse Spark deciding every cut. You can try it on your own take: [[LIVE_URL]]
+> I talked to my phone for [[TAKE_SECONDS]] seconds, and Edit Easy handed back the edit I'd normally pay someone for, still my face and my voice, with Meta's Muse Spark deciding every cut. You can try it on your own take: [[LIVE_URL]]
 
 **LinkedIn**
 > For two days Vignesh and I built one thing for the Meta Global AI Developer Hackathon: you drop in the raw take you filmed on your phone, and you get back the edit a short-form editor would have made, with your own face and voice still in it.
 >
-> Moovi hears the take with Meta's Muse Voice Transcribe, and then Muse Spark reads all of it, picks one of five styles we measured frame by frame from real editors' reels and plans every beat, while plain code draws every frame. The take in the video is one of mine, and it took [[RUN_SECONDS]] seconds and [[META_CALLS]] model calls to edit.
+> Edit Easy hears the take with Meta's Muse Voice Transcribe, then Muse Spark reads all of it and plans every beat, and one of two engines, Studio Card or Creator Mix, draws every frame in plain code. If you want it different you ask in plain words and the change is matched by a dictionary of edits, so it costs next to nothing. The take in the video is one of mine, and it took [[RUN_SECONDS]] seconds and [[META_CALLS]] model calls to edit.
 >
-> Moovi started life before this hackathon as an AI video director, and the editor you see here is what we built during it. If you make videos for a living I'd like to hear where it falls short, so try it on a take of your own: [[LIVE_URL]]
+> Edit Easy grew out of Moovi, an AI video director built before this hackathon, and the editor you see here is what we built during it. If you make videos for a living I'd like to hear where it falls short, so try it on a take of your own: [[LIVE_URL]]
 
 **Instagram**
-> What my phone recorded is on the left, and what Moovi made of it in [[RUN_SECONDS]] seconds is on the right, still my face and my voice, with Meta's Muse Spark deciding every cut. The link in my bio opens the studio if you want to try it on your own take.
+> What my phone recorded is on the left, and what Edit Easy made of it in [[RUN_SECONDS]] seconds is on the right, still my face and my voice, with Meta's Muse Spark deciding every cut. The link in my bio opens the studio if you want to try it on your own take.
 >
 > Music: "Funkorama" by Kevin MacLeod (incompetech.com), CC BY 4.0
 
@@ -50,7 +50,7 @@ At most one tag a post, and only if Ishaan wants it: the hackathon's official ta
 
 ## The vote ask (one paragraph, only once a public vote is confirmed)
 
-> We built Moovi for the Meta Global AI Developer Hackathon so that anyone who talks to a camera can post the edit they'd
+> We built Edit Easy for the Meta Global AI Developer Hackathon so that anyone who talks to a camera can post the edit they'd
 > normally pay for, made from their own take in a few minutes, and the community vote is open until [[VOTE_CLOSES]]. If the
 > before and after made you want to try it on a take of your own, we'd be grateful for your vote at [[VOTE_URL]], and even
 > more for telling us where the edit still falls short.

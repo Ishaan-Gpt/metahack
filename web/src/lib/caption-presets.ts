@@ -1,0 +1,340 @@
+/** Caption presets for the caption editor: a generated copy of engine/caption-presets.json (the engine reads that
+ *  file; the web app cannot import it because Turbopack resolves from web/). Do not edit here: edit the JSON, then run
+ *  node tools/sync-caption-presets.mjs */
+export type CaptionPreset = {
+  label: string;
+  line: string;
+  /** the Captions Easy look it was ported from */
+  from: string;
+  overrides: {
+    fonts?: { hero?: { family: string; file: string; style: string } };
+    palette?: { hero?: string; heroStroke?: string; small?: string; glowRgb?: string };
+    caption?: { heroFont?: string; heroWeight?: number; heroUpper?: boolean; heroGlow?: number };
+    layout?: { caption?: { heroSize?: number; smallSize?: number; yFrac?: number; lineGap?: number } };
+  };
+};
+
+export const CAPTION_PRESETS: Record<string, CaptionPreset> = {
+  "hormozi": {
+    "label": "Hormozi Caps",
+    "line": "Heavy Montserrat caps, the key word in fresh green.",
+    "from": "hormozi_box",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Montserrat",
+          "file": "montserrat-latin-wght-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#8BE36B",
+        "heroStroke": "#1F4D1A",
+        "small": "#FFFFFF",
+        "glowRgb": "139,227,107"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 900,
+        "heroUpper": true,
+        "heroGlow": 0
+      }
+    }
+  },
+  "beast": {
+    "label": "Beast",
+    "line": "Tall Anton caps, the key word in loud yellow.",
+    "from": "beast_bounce",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Anton",
+          "file": "anton-latin-400-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#FFE24A",
+        "heroStroke": "#241B00",
+        "small": "#FFFFFF",
+        "glowRgb": "255,226,74"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 400,
+        "heroUpper": true,
+        "heroGlow": 0
+      }
+    }
+  },
+  "karaoke": {
+    "label": "Karaoke Gold",
+    "line": "Rounded caps, the key word lit gold as it lands.",
+    "from": "karaoke_fill",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Plus Jakarta Sans",
+          "file": "plus-jakarta-sans-latin-wght-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#FFD23F",
+        "heroStroke": "#FFD23F",
+        "small": "#FFFFFF",
+        "glowRgb": "255,210,63"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 800,
+        "heroUpper": true,
+        "heroGlow": 14
+      }
+    }
+  },
+  "scribble": {
+    "label": "Scribble",
+    "line": "A marker-pen key word in coral, as if written on the video.",
+    "from": "scribble",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Permanent Marker",
+          "file": "permanent-marker-latin-400-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#FF7A5C",
+        "heroStroke": "#3B1208",
+        "small": "#FFFFFF",
+        "glowRgb": "255,122,92"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 400,
+        "heroUpper": false,
+        "heroGlow": 0
+      }
+    }
+  },
+  "sunny-script": {
+    "label": "Sunny Script",
+    "line": "A pink Pacifico key word with a soft glow, playful and light.",
+    "from": "storytime",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Pacifico",
+          "file": "pacifico-latin-400-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#FFB8DA",
+        "heroStroke": "#5A1F3D",
+        "small": "#FFFFFF",
+        "glowRgb": "255,150,200"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 400,
+        "heroUpper": false,
+        "heroGlow": 14
+      },
+      "layout": {
+        "caption": {
+          "lineGap": 12
+        }
+      }
+    }
+  },
+  "clean": {
+    "label": "Clean",
+    "line": "Plain Inter in white, nothing shouting.",
+    "from": "netflix_sub",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Inter",
+          "file": "inter-latin-wght-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#FFFFFF",
+        "heroStroke": "#FFFFFF",
+        "small": "#EEF1F4",
+        "glowRgb": "255,255,255"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 700,
+        "heroUpper": false,
+        "heroGlow": 0
+      }
+    }
+  },
+  "minimal": {
+    "label": "Minimal",
+    "line": "Light Inter Tight in warm white, close-set and quiet.",
+    "from": "minimal_pro",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Inter Tight",
+          "file": "inter-tight-latin-wght-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#F3F0E8",
+        "heroStroke": "#F3F0E8",
+        "small": "#D8D4CB",
+        "glowRgb": "243,240,232"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 500,
+        "heroUpper": false,
+        "heroGlow": 0
+      },
+      "layout": {
+        "caption": {
+          "lineGap": 4
+        }
+      }
+    }
+  },
+  "bold": {
+    "label": "Bold",
+    "line": "Black-weight Archivo caps in white with a dark edge.",
+    "from": "motivational",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Archivo",
+          "file": "archivo-latin-wdth-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#FFFFFF",
+        "heroStroke": "#111111",
+        "small": "#FFFFFF",
+        "glowRgb": "255,255,255"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 900,
+        "heroUpper": true,
+        "heroGlow": 0
+      }
+    }
+  },
+  "luxe-serif": {
+    "label": "Luxe Serif",
+    "line": "Italic Fraunces in champagne, slow and expensive.",
+    "from": "luxe_serif",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Fraunces",
+          "file": "fraunces-latin-wght-italic.woff2",
+          "style": "italic"
+        }
+      },
+      "palette": {
+        "hero": "#F1DDA6",
+        "heroStroke": "#F1DDA6",
+        "small": "#F8F1E3",
+        "glowRgb": "241,221,166"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 600,
+        "heroUpper": false,
+        "heroGlow": 8
+      }
+    }
+  },
+  "neon-ice": {
+    "label": "Neon Ice",
+    "line": "Ice-white caps lit from inside with a blue neon halo.",
+    "from": "neon_sign + ice_duo",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Bricolage Grotesque",
+          "file": "bricolage-grotesque-latin-wght-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#D9F2FF",
+        "heroStroke": "#7CC4FF",
+        "small": "#FFFFFF",
+        "glowRgb": "62,166,255"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 800,
+        "heroUpper": true,
+        "heroGlow": 22
+      }
+    }
+  },
+  "terminal": {
+    "label": "Terminal",
+    "line": "Green JetBrains Mono with a faint screen glow.",
+    "from": "terminal",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "JetBrains Mono",
+          "file": "jetbrains-mono-latin-wght-normal.woff2",
+          "style": "normal"
+        }
+      },
+      "palette": {
+        "hero": "#7DFFA6",
+        "heroStroke": "#7DFFA6",
+        "small": "#CFEFD9",
+        "glowRgb": "0,255,102"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 700,
+        "heroUpper": false,
+        "heroGlow": 8
+      }
+    }
+  },
+  "serif-accent": {
+    "label": "Serif Accent",
+    "line": "Clean caps with the key word in a glowing italic serif.",
+    "from": "serif_accent_glow",
+    "overrides": {
+      "fonts": {
+        "hero": {
+          "family": "Instrument Serif",
+          "file": "instrument-serif-latin-400-italic.woff2",
+          "style": "italic"
+        }
+      },
+      "palette": {
+        "hero": "#FFFFFF",
+        "heroStroke": "#FFFFFF",
+        "small": "#FFFFFF",
+        "glowRgb": "255,255,255"
+      },
+      "caption": {
+        "heroFont": "hero",
+        "heroWeight": 400,
+        "heroUpper": false,
+        "heroGlow": 12
+      }
+    }
+  }
+};
