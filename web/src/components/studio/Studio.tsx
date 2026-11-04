@@ -20,7 +20,7 @@ type Status = {
   choice?: { by: string; style: string; why: string };
   plan?: { segments: number; layouts: string[]; planner?: string; captions: number; photos: number };
   meta?: { calls?: { call: string; model: string; cache: boolean; seconds: number | null; tokens: number | null; standin: boolean }[] };
-  outputs?: { edit: string; beforeAfter: string | null; raw: string };
+  outputs?: { edit: string; beforeAfter: string | null; raw: string; template?: string; show?: string; download?: string | null; downloadName?: string };
 };
 type Spec = { duration: number; segments: { type: string; t0: number; t1: number; label: string | null }[]; captions: { t0: number; t1: number; text: string; hero: string | null }[]; sfx: { t: number; k: string }[] };
 type Health = { meta: 'live' | 'test' | 'claude' | 'missing'; ffmpeg: boolean; queue: number };
@@ -121,6 +121,7 @@ export function Studio() {
   const [conn, setConn] = useState<'ok' | 'retrying'>('ok');
   const [drag, setDrag] = useState(false);
   const [view, setView] = useState<'edit' | 'split'>('edit');
+  const [touched, setTouched] = useState(false);   // the user picked a view themselves; until then Creator Mix opens on its Before/After
   const [msgs, setMsgs] = useState<Msg[]>([{ who: 'moovi', text: 'Drop your video, or pick a sample on the left. I edit it, then you tell me what to change: "make it Clean UI", "no music", "put @you on it".' }]);
   const [draft, setDraft] = useState('');
   const [t, setT] = useState(0);
@@ -217,7 +218,8 @@ export function Studio() {
 
   const phase = !jobId ? 'pick' : !st ? 'loading' : st.state;
   const file$ = (n: string, dl = false) => `/api/jobs/${jobId}/file/${n}${dl ? '?dl=1' : ''}`;
-  const src = phase === 'done' ? (view === 'edit' ? file$('edit.mp4') : file$('before-after.mp4')) : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
+  // show = what plays (Card Studio: the full frame; Creator Mix: the Before/After); the download button must use file$(<any>, true), which the server answers with the Zoom file only
+  const src = phase === 'done' ? (st?.outputs?.show && !touched ? file$(st.outputs.show) : (view === 'edit' ? file$('edit.mp4') : file$('before-after.mp4'))) : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
   const D = spec?.duration ?? st?.duration ?? 0;
   const label = useMemo(() => styles.find(s => s.id === (st?.style ?? style))?.label ?? (style === 'auto' ? 'Auto' : style), [styles, st?.style, style]);
 
@@ -259,9 +261,9 @@ export function Studio() {
       <section className="ed__stage">
         <div className="ed__tabs">
           <span className="ed__lab">Preview</span>
-          {phase === 'done' && st?.outputs?.beforeAfter && <span className="ed__seg"><button aria-pressed={view === 'edit'} onClick={() => setView('edit')}>Edit</button><button aria-pressed={view === 'split'} onClick={() => setView('split')}>Before / after</button></span>}
+          {phase === 'done' && st?.outputs?.beforeAfter && <span className="ed__seg"><button aria-pressed={view === 'edit'} onClick={() => { setTouched(true); setView('edit'); }}>Edit</button><button aria-pressed={view === 'split'} onClick={() => { setTouched(true); setView('split'); }}>Before / after</button></span>}
         </div>
-        <div className={`ed__screen ${view === 'split' && phase === 'done' ? 'is-wide' : ''}`}>
+        <div className="ed__screen">
           {src ? <video key={src} ref={vid} src={src} controls={phase === 'done'} autoPlay={phase === 'done'} muted={phase !== 'done'} loop={phase !== 'done'} playsInline onTimeUpdate={e => setT(e.currentTarget.currentTime)} />
             : <div className="ed__empty"><HaloMark size={54} /><p>Your edit plays here.</p></div>}
           {(phase === 'running' || phase === 'queued' || phase === 'loading') && st && (

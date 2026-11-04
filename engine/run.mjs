@@ -5,7 +5,7 @@
 // style's rules + one Muse Spark plan) -> build (stock, person matte) -> render (canvas frames) -> mix -> share.
 // Every failure ends as status.state 'error' with a code and a sentence a creator can act on; the raw log stays in log.txt.
 import { spawn, execFileSync } from 'node:child_process';
-import { appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, statSync, renameSync } from 'node:fs';
+import { copyFileSync, appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, statSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ROOT, loadEnv } from './env.mjs';
 import { listStyles, loadStyle } from './styles.mjs';
@@ -22,7 +22,7 @@ const STAGES = [
   ['build', 'Building the looks', 'Fetching photos for the nouns, cutting you out for text-behind'],
   ['render', 'Rendering', 'Drawing every frame'],
   ['mix', 'Mixing the sound', 'Voice, effects on every change, a quiet bed, -14 LUFS'],
-  ['share', 'Making the before/after', 'Raw take beside the edit, in step'],
+  ['share', 'Making the download', 'The show video and the Zoom download'],
 ];
 const status = { id: job.id, pid: process.pid, raw: job.input, state: 'running', stage: 'watch', stages: STAGES.map(([id, label, detail]) => ({ id, label, detail, state: 'pending' })), pct: 0, started: new Date().toISOString(), style: job.style, events: [] };
 // atomic: write a temp file and rename it, so the studio never reads a half-written status
@@ -158,18 +158,28 @@ if (!existsSync(OUT) || statSync(OUT).size < 10000) fail(new JobError('RENDER', 
 if (status.stages.find(x => x.id === 'render').state !== 'done') stage('render', 'done');
 stage('mix', 'done'); event('Sound mixed to -14 LUFS');
 
-// ---- 5 share: the before/after, raw small on the left, the edit large on the right, in step ----------------------------
+// ---- 5 share: what the user SEES and what the user DOWNLOADS -------------------------------------------------------------
+//   Card Studio : show = edit.mp4 (the full frame: white background, storyboard, card)   download = "Card Studio Zoom" (only the card's video)
+//   Creator Mix : show = before-after.mp4 (raw beside the edit, "Edited by Meta")         download = "Creator Mix Zoom" (only the After video)
+// Nothing else is offered for download: the file route serves outputs.download for ?dl=1 whatever name is asked.
 stage('share', 'running');
 const BA = join(JOB, 'before-after.mp4');
+const ZOOM = MIX ? 'creator-mix-zoom.mp4' : 'card-studio-zoom.mp4', ZOOM_NAME = MIX ? 'Creator Mix Zoom.mp4' : 'Card Studio Zoom.mp4';
 try {
-  if (MIX) await step(process.env.PYTHON ?? 'python3', [join(ROOT, 'tools/ba-wrap.py'), OUT, join(CLIP, 'cut.mp4'), BA, '--accent', spec.theme?.accent ?? '#e5333d']);   // portrait Before / After with the visible "Edited by Meta" line
-  else await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', join(CLIP, 'cut.mp4'), '-i', OUT, '-filter_complex',
-    "color=c=0xf4f3f1:s=1920x1080:r=30[bg];[0:v]scale=-2:640,setsar=1[raw];[1:v]scale=-2:1000,setsar=1[ed];[bg][raw]overlay=x=470:y=(H-h)/2+40:shortest=1[a];[a][ed]overlay=x=1920-w-560:y=(H-h)/2[v]",
-    '-map', '[v]', '-map', '1:a', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-shortest', '-movflags', '+faststart', BA]);
+  if (MIX) {
+    copyFileSync(OUT, join(JOB, ZOOM));   // the edit before the Before/After wrapper IS the After video
+    await step(process.env.PYTHON ?? 'python3', [join(ROOT, 'tools/ba-wrap.py'), OUT, join(CLIP, 'cut.mp4'), BA, '--accent', spec.theme?.accent ?? '#e5333d']);   // portrait Before / After with the visible "Edited by Meta" line
+  } else {
+    // cut the card's own video out of the frame (inset past the rounded corners, 9:16), scaled to 1080x1920; the voice and music are copied untouched
+    const c = S.layout?.card ?? { x: 380, y: 422, w: 540, h: 956, r: 30 }, inset = Math.ceil((c.r ?? 30) * 0.33), w = c.w - 2 * inset, h = Math.min(c.h - 2 * inset, Math.round(w * 16 / 9)), x = c.x + inset, y = c.y + Math.round((c.h - h) / 2);
+    await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', OUT, '-vf', `crop=${w - (w % 2)}:${h - (h % 2)}:${x}:${y},scale=1080:1920:flags=lanczos,setsar=1`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'copy', '-movflags', '+faststart', join(JOB, ZOOM)]);
+  }
   stage('share', 'done');
-} catch (e) { log('before/after failed (the edit is fine): ' + e.message); status.stages.find(x => x.id === 'share').state = 'skipped'; }
+} catch (e) { log('share step failed (the edit is fine): ' + e.message); status.stages.find(x => x.id === 'share').state = 'skipped'; }
 
 Object.assign(status, { state: 'done', pct: 100, finished: new Date().toISOString(), seconds: +((Date.now() - T0) / 1000).toFixed(1),
-  outputs: { edit: 'edit.mp4', beforeAfter: existsSync(BA) ? 'before-after.mp4' : null, raw: job.input }, duration: +spec.duration.toFixed(1) });
+  outputs: { edit: 'edit.mp4', beforeAfter: MIX && existsSync(BA) ? 'before-after.mp4' : null, raw: job.input,
+    template: MIX ? 'creator-mix' : 'card-studio', show: MIX && existsSync(BA) ? 'before-after.mp4' : 'edit.mp4',   /* what the player plays */
+    download: existsSync(join(JOB, ZOOM)) ? ZOOM : null, downloadName: ZOOM_NAME },   /* the ONLY file offered for download */ duration: +spec.duration.toFixed(1) });
 event(`Done in ${status.seconds} s`, 'done');
 save();
