@@ -18,6 +18,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string; nam
   if (wantsDl) {
     try { const o = JSON.parse(readFileSync(join(jobDir(id), 'status.json'), 'utf8')).outputs; if (!o?.download) return new Response('not ready', { status: 404 }); name = o.download; dlName = o.downloadName ?? o.download; } catch { return new Response('not ready', { status: 404 }); }
   }
+  // the player always asks for edit.mp4; a Polyester job's final is polyester.mp4 (status.outputs.edit names it), so play that one
+  if (name === 'edit.mp4' && !existsSync(join(jobDir(id), name))) { try { const e = JSON.parse(readFileSync(join(jobDir(id), 'status.json'), 'utf8')).outputs?.edit; if (typeof e === 'string' && ALLOWED.test(e)) name = e; } catch { /* no status yet */ } }
   const f = join(jobDir(id), name);
   if (!existsSync(f)) return new Response('not ready', { status: 404 });
   const size = statSync(f).size, type = TYPE[name.split('.').pop()!] ?? 'application/octet-stream';

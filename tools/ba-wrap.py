@@ -7,7 +7,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 a = sys.argv[1:]
 after, before, out = a[0], a[1], a[2]
 opt = lambda k, d: a[a.index(k) + 1] if k in a else d
-accent = opt('--accent', '#e5333d'); sub = opt('--sub', 'Auto-edited with Meta Muse Spark  |  Creator Mix')
+real = '--real' in a   # only a run that really went through the Meta Model API may say "Meta"; the test stand-in and the Gemini backup say Edit Easy
+accent = opt('--accent', '#e5333d'); sub = opt('--sub', 'Auto-edited with Meta Muse Spark  |  Creator Mix' if real else 'Auto-edited with Edit Easy  |  Creator Mix')
 W, H = 1080, 1920
 BG = (244, 243, 239)
 bw, bh, bx, by = 470, 836, 64, 380
@@ -31,7 +32,7 @@ def chip(x, y, text, fill, fg):
     d.rounded_rectangle((x, y, x + w, y + 70), 35, fill=fill); d.text((x + 28, y + 35), text, font=f, fill=fg, anchor='lm')
 chip(bx + 6, by - 100, 'Before', (255, 255, 255), (20, 20, 20)); chip(ax + 6, ay - 100, 'After', accent, (255, 255, 255))
 # the "Edited by Meta" line (always visible), Meta in its blue
-f1 = font(104); t1, t2 = 'EDITED BY ', 'META'; w1 = d.textlength(t1, font=f1); w2 = d.textlength(t2, font=f1); x0 = (W - w1 - w2) / 2
+f1 = font(104 if real else 84); t1, t2 = 'EDITED BY ', ('META' if real else 'EDIT EASY'); w1 = d.textlength(t1, font=f1); w2 = d.textlength(t2, font=f1); x0 = (W - w1 - w2) / 2
 d.text((x0, 1560), t1, font=f1, fill=(18, 18, 18), anchor='lm'); d.text((x0 + w1, 1560), t2, font=f1, fill=(8, 102, 255), anchor='lm')
 d.text((W / 2, 1664), sub, font=font(38), fill=(110, 110, 110), anchor='mm')
 bgp = os.path.join(tmp, 'bg.png'); bg.save(bgp)

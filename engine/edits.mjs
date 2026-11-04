@@ -65,9 +65,9 @@ const DICT = [
   { op: 'broll.add', kw: ['b-roll', 'broll', 'b roll', 'cutaway', 'photo', 'picture', 'image', 'stock', 'footage', 'visual', 'insert', 'overlay', 'show a', 'show an', 'show some'], need: ['broll', 'b-roll', 'roll', 'cutaway', 'photo', 'picture', 'image', 'stock', 'footage', 'visual', 'insert', 'overlay', 'show'],
     deny: ['remove', 'no', 'fewer', 'less', 'without'], read: (t, c) => ({ query: brollQuery(t, c), at: timeIn(t) }) },
   { op: 'music', kw: ['music', 'song', 'track', 'bed', 'background music', 'soundtrack', 'beat'], need: ['music', 'song', 'track', 'bed', 'soundtrack', 'beat', 'bgm'],
-    read: t => /\b(no|remove|off|mute|without|kill|drop|stop)\b/.test(t) ? { on: false } : /\b(add|back|on|put|bring)\b/.test(t) && !/\b(louder|quieter|softer|lower|higher|down|up)\b/.test(t) ? { on: true } : { db: (/\b(quieter|softer|lower|down|less|reduce)\b/.test(t) ? -1 : 1) * 4 * amount(t) } },
+    read: t => /\b(no|none|nothing|silent|silence|remove|off|mute|without|kill|drop|stop)\b/.test(t) ? { on: false } : /\b(add|back|on|put|bring)\b/.test(t) && !/\b(louder|quieter|softer|lower|higher|down|up)\b/.test(t) ? { on: true } : { db: (/\b(quieter|softer|lower|down|less|reduce)\b/.test(t) ? -1 : 1) * 4 * amount(t) } },
   { op: 'sfx', kw: ['sound effects', 'sfx', 'whoosh', 'whooshes', 'effects sound', 'pops', 'swoosh', 'clicks', 'transitions sound'], need: ['sfx', 'effects', 'effect', 'whoosh', 'whooshes', 'pops', 'swoosh', 'clicks', 'sound'],
-    read: t => /\b(no|remove|off|mute|without|kill|drop)\b/.test(t) ? { on: false } : /\b(add|back|on|bring)\b/.test(t) && !/\b(louder|quieter|softer)\b/.test(t) ? { on: true } : { db: (/\b(quieter|softer|lower|down|less)\b/.test(t) ? -1 : 1) * 4 * amount(t) } },
+    read: t => /\b(no|none|nothing|remove|off|mute|without|kill|drop)\b/.test(t) ? { on: false } : /\b(add|back|on|bring)\b/.test(t) && !/\b(louder|quieter|softer)\b/.test(t) ? { on: true } : { db: (/\b(quieter|softer|lower|down|less)\b/.test(t) ? -1 : 1) * 4 * amount(t) } },
   { op: 'grade', kw: ['warmer', 'warm', 'cooler', 'cool', 'colder', 'brighter', 'bright', 'darker', 'dark', 'moody', 'punchier', 'contrast', 'saturated', 'vibrant', 'colourful', 'colorful', 'muted', 'desaturated', 'grade', 'colour', 'color', 'black and white', 'faded'], need: ['warmer', 'warm', 'cooler', 'colder', 'brighter', 'bright', 'darker', 'dark', 'moody', 'punchier', 'contrast', 'saturated', 'vibrant', 'colourful', 'colorful', 'muted', 'desaturated', 'grade', 'colour', 'color', 'faded', 'white'],
     deny: ['caption', 'captions', 'text', 'font'], read: t => gradeFrom(t) },
   { op: 'text.handle', kw: ['handle', 'username', 'my name', '@', 'put', 'add', 'tag'], need: ['handle', 'username', '@'], read: t => ({ text: (t.match(/@[\w.]+/) ?? [null])[0] }) },
@@ -149,6 +149,7 @@ export function parse(prompt, ctx) {
   if (!pe.named) { pe.named = true; for (const n of Object.keys(presets())) { pe.kw.push(...n.split('-').filter(w => w.length > 3)); pe.need.push(...n.split('-').filter(w => w.length > 3)); } }
   let subject = '';
   for (let c of clauses) {
+    const c0 = c;   // the clause as said, before a pronoun takes the last subject
     const sub = c.match(/\b(captions?|subtitles?|text|music|b-?roll|photos?|zoom|colou?rs?)\b/i);
     if (sub) subject = sub[1]; else if (subject && /\b(them|it|those|these|that)\b/i.test(c)) c = `${c} ${subject}`;
     const tc = textChange(c);
@@ -166,7 +167,9 @@ export function parse(prompt, ctx) {
       return best && { best, t };
     };
     // "bigger and higher": a clause with no subject of its own takes the one before it
-    const m = match(c) ?? (!sub && subject ? match(`${c} ${subject}`) : null);
+    // "make it warmer" is about the whole picture, never about the caption or zoom named one clause before: a grade clause keeps its own meaning
+    const own = c !== c0 ? match(c0) : null;
+    const m = own?.best.op === 'grade' ? own : (match(c) ?? (!sub && subject ? match(`${c} ${subject}`) : null));
     if (!m) { unmatched.push(c); continue; }
     const { best, t } = m;
     const p = best.read(t, ctx);

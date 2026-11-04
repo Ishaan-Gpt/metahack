@@ -281,7 +281,7 @@ async function renderAndShare() {
   try {
     if (MIX) {
       copyFileSync(OUT, join(JOB, ZOOM));   // the edit before the Before/After wrapper IS the After video
-      await step(PY, [join(ROOT, 'tools/ba-wrap.py'), OUT, join(CLIP, 'cut.mp4'), BA, '--accent', spec.theme?.accent ?? '#e5333d']);
+      await step(PY, [join(ROOT, 'tools/ba-wrap.py'), OUT, join(CLIP, 'cut.mp4'), BA, '--accent', spec.theme?.accent ?? '#e5333d', ...(realMeta ? ['--real'] : [])]);
     } else {
       // cut the card's own video out of the frame (inset past the rounded corners, 9:16), scaled to 1080x1920
       const c = S.layout?.card ?? { x: 380, y: 422, w: 540, h: 956, r: 30 }, inset = Math.ceil((c.r ?? 30) * 0.33), w = c.w - 2 * inset, h = Math.min(c.h - 2 * inset, Math.round(w * 16 / 9)), x = c.x + inset, y = c.y + Math.round((c.h - h) / 2);

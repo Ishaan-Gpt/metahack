@@ -2,7 +2,7 @@
 # Build from the repo root:  docker build -f deploy/Dockerfile -t metahack .
 FROM node:22-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip python3-numpy curl xz-utils ca-certificates fontconfig \
- && pip3 install --no-cache-dir --break-system-packages opencv-python-headless==4.10.0.84 onnxruntime==1.19.2 pillow \
+ && pip3 install --no-cache-dir --break-system-packages opencv-python-headless==4.10.0.84 onnxruntime==1.19.2 pillow faster-whisper \
  && curl -fsSL https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | tar -xJ -C /tmp \
  && mv /tmp/ffmpeg-*-static/ffmpeg /tmp/ffmpeg-*-static/ffprobe /usr/local/bin/ && rm -rf /tmp/ffmpeg-* /var/lib/apt/lists/*
 ENV PYTHON=python3 NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
