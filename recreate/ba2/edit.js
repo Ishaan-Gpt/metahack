@@ -174,8 +174,8 @@ function draw(T, s, ctx) {
   // ===== w05 · medium text (ref 8.6-9.3 "you need to / KNOW EXACTLY") =====
   if (on(WD.like, CUT.s6)) {
     const words = [['like', WD.like], ['looking', WD.looking], ['through', WD.through]];
-    let x = 210; for (const [w, t] of words) { if (T >= t + .03) glowText(c, w, x, 1192, { size: 70, ls: 2, color: '#f4f4f6', glow: SOFT }); x += width(c, w, 400, 70, 2) + 26; }
-    if (T >= WD.a + .03) glowText(c, T >= WD.telescope + .03 ? 'a telescope' : 'a', 204, 1300, { w: 700, size: 118, ls: -3, color: '#ffffff', glow: [[24, 'rgba(255,255,255,0.6)']] });
+    let x = 210; for (const [w, t] of words) { if (T >= t + .03) glowText(c, w, x, 1201, { size: 85, ls: 1, color: '#f4f4f6', glow: SOFT }); x += width(c, w, 400, 85, 1) + 30; }
+    if (T >= WD.a + .03) glowText(c, T >= WD.telescope + .03 ? 'a telescope' : 'a', 207, 1290, { w: 700, size: 128, ls: -3, color: '#ffffff', glow: [[24, 'rgba(255,255,255,0.6)']] });
   }
   // ===== w05/w10 · frame-in-frame with eyeballs (ref 9.33-11.35) =====
   if (on(CUT.s6, CUT.s7)) {
@@ -202,7 +202,7 @@ function draw(T, s, ctx) {
     if (T < WD.theyre4 - 0.02) {
       if (T >= WD.and4 + .05) glowText(c, T >= WD.in4 + .03 ? 'and in' : 'and', 150, 762, SM);
       const redK = s.red;
-      if (T >= WD.many + .03) glowText(c, 'many', 118, 1010, { w: 700, size: 200, ls: -12, color: redK > 0.5 ? 'rgb(255,70,90)' : 'rgb(196,170,255)', glow: redK > 0.5 ? [[40, 'rgba(255,40,70,0.9)'], [12, 'rgba(255,120,140,0.8)']] : [[40, 'rgba(160,120,255,0.9)']] });
+      if (T >= WD.many + .03) glowText(c, 'many', 118, 1010, { w: 700, size: 200, ls: -12, color: redK > 0.5 ? 'rgb(248,200,205)' : 'rgb(214,196,255)', glow: redK > 0.5 ? [[40, 'rgba(255,40,70,0.9)'], [12, 'rgba(255,120,140,0.8)']] : [[40, 'rgba(160,120,255,0.9)']] });
       if (T >= WD.ways4 + .03) glowText(c, 'ways', 150, 1065, SM);
     } else {
       if (T >= WD.theyre4 + .03) glowText(c, T >= WD.just + .03 ? "they're just" : "they're", 150, 900, { ...SM, size: 46 });
