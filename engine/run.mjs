@@ -18,8 +18,10 @@ const JOB = resolve(process.argv[2] ?? '');
 if (!process.argv[2] || !existsSync(join(JOB, 'job.json'))) { console.error('usage: node engine/run.mjs <job dir with job.json>'); process.exit(1); }
 const job = JSON.parse(readFileSync(join(JOB, 'job.json'), 'utf8'));
 const CLIP = join(JOB, 'clip'); mkdirSync(CLIP, { recursive: true });
-const ENGINES = ['card-studio', 'creator-mix'], LABEL = { 'card-studio': 'Card Studio', 'creator-mix': 'Creator Mix' };
-if (!ENGINES.includes(job.engine)) {
+const POLY = job.style === 'polyester';   // Template 3: explicit choice only ("auto" never lands here); photos in, no model call at all
+const ENGINES = ['card-studio', 'creator-mix'], LABEL = { 'card-studio': 'Card Studio', 'creator-mix': 'Creator Mix', polyester: 'Polyester' };
+if (POLY) job.engine = 'polyester';
+else if (!ENGINES.includes(job.engine)) {
   if (ENGINES.includes(job.style)) job.engine = job.style;
   else { const turn = join(JOB, '..', '.engine-turn'); const last = existsSync(turn) ? readFileSync(turn, 'utf8').trim() : ENGINES[1]; job.engine = ENGINES[(ENGINES.indexOf(last) + 1) % ENGINES.length]; try { writeFileSync(turn, job.engine); } catch { /* not writable: still fine */ } }
   writeFileSync(join(JOB, 'job.json'), JSON.stringify(job, null, 1));
@@ -30,7 +32,11 @@ const PY = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'pyt
 const RERENDER = !!job.rerender && existsSync(SPEC);
 const prev = RERENDER && existsSync(join(JOB, 'status.json')) ? JSON.parse(readFileSync(join(JOB, 'status.json'), 'utf8')) : null;
 const LOG = join(JOB, 'log.txt');
-const STAGES = [
+const STAGES = POLY ? [
+  ['cutout', 'Cutting you out', 'Local cut-outs of every photo, nothing leaves this machine'],
+  ['render', 'Rendering', 'Frame-accurate Polyester: flashes, glitch frames and splits on the beat'],
+  ['share', 'Making the download', 'The finished edit'],
+] : [
   ['watch', 'Watching your take', 'Cropping to 9:16, hearing every word, cutting the pauses'],
   ['direct', 'Directing', 'The director reads the take and plans every beat'],
   ['build', 'Building the looks', 'Fetching photos for the nouns, cutting you out for text-behind'],
@@ -38,14 +44,14 @@ const STAGES = [
   ['mix', 'Mixing the sound', 'Voice, effects on every change, a quiet bed, -14 LUFS'],
   ['share', 'Making the download', 'The show video and the Zoom download'],
 ];
-const status = { id: job.id, pid: process.pid, raw: job.input, state: 'running', stage: 'watch', stages: STAGES.map(([id, label, detail]) => ({ id, label, detail, state: 'pending' })), pct: 0, started: new Date().toISOString(), style: ENG, styleLabel: LABEL[ENG], engine: ENG, events: RERENDER ? (prev?.events ?? []) : [] };
+const status = { id: job.id, pid: process.pid, raw: job.input ?? job.polyester?.people?.[0]?.photos?.[0], state: 'running', stage: POLY ? 'cutout' : 'watch', stages: STAGES.map(([id, label, detail]) => ({ id, label, detail, state: 'pending' })), pct: 0, started: new Date().toISOString(), style: ENG, styleLabel: LABEL[ENG], engine: ENG, events: RERENDER ? (prev?.events ?? []) : [] };
 if (RERENDER && prev) for (const k of ['input', 'plan', 'meta', 'choice', 'raw', 'outputs', 'finished', 'duration']) if (prev[k]) status[k] = prev[k];
 // atomic: write a temp file and rename it, so the studio never reads a half-written status
 const save = () => { const f = join(JOB, 'status.json'); writeFileSync(f + '.tmp', JSON.stringify(status, null, 1)); renameSync(f + '.tmp', f); };
 const log = s => appendFileSync(LOG, `[${new Date().toISOString().slice(11, 19)}] ${s}\n`);
 const event = (text, kind = 'info') => { status.events.push({ t: +((Date.now() - T0) / 1000).toFixed(1), kind, text }); status.events = status.events.slice(-40); save(); log(text); };
 const T0 = Date.now();
-const WEIGHT = { watch: 22, direct: 10, build: 13, render: 40, mix: 8, share: 7 };
+const WEIGHT = POLY ? { cutout: 30, render: 62, share: 8 } : { watch: 22, direct: 10, build: 13, render: 40, mix: 8, share: 7 };
 function stage(id, state, extra = {}) {
   const s = status.stages.find(x => x.id === id); Object.assign(s, { state, ...extra });
   if (state === 'running') { status.stage = id; s.startedAt = Date.now(); }
@@ -84,6 +90,35 @@ step timed out after ${limit} s`; try { p.kill(); } catch {} }, limit * 1000 * +
   });
 }
 const has = (s, re) => re.test(s ?? '');
+
+
+// ---- Template 3 "Polyester": photos in, a 19.3 s edit out. Zero model/API calls; everything runs on this machine. ------------------
+if (POLY) {
+  const cfg = job.polyester ?? {};
+  const abs = f => resolve(JOB, f);
+  const people = (cfg.people ?? []).map(p => ({ name: String(p.name ?? '').slice(0, 12), photos: (p.photos ?? []).map(abs).filter(existsSync) })).filter(p => p.photos.length);
+  if (!people.length) fail(new JobError('NO_PHOTOS', 'Template 3 needs photos of you. Upload at least two, ideally 8 to 12 (face close-ups, half body, full body).'));
+  if (people.reduce((n, p) => n + p.photos.length, 0) < 2) fail(new JobError('FEW_PHOTOS', 'Upload at least two photos for Polyester; 8 to 12 gives the best result.'));
+  const PD = join(JOB, 'poly'); mkdirSync(join(PD, 'out'), { recursive: true }); mkdirSync(join(PD, 'reference'), { recursive: true });
+  writeFileSync(join(PD, 'poly.json'), JSON.stringify({ people, videos: (cfg.videos ?? []).map(abs).filter(existsSync) }));
+  const names = people.map(p => p.name || 'YOU').join('|');
+  stage('cutout', 'running'); event(`Cutting out ${people.reduce((n, p) => n + p.photos.length, 0)} photos on this machine`);
+  try { await step(PY, [join(ROOT, 'tools/polyester/prep.py'), PD], { limit: 900 }); }
+  catch (e) { fail(new JobError('CUTOUT', 'The cut-out step could not read those photos. Use JPG or PNG photos where you are clearly visible.', e.tail ?? e.message)); }
+  stage('cutout', 'done');
+  stage('render', 'running'); event('Rendering 579 frames');
+  try {
+    await step(PY, ['-I', join(ROOT, 'tools/polyester/render.py'), 'video'], {
+      env: { POLY_DIR: PD, POLY_NAMES: names, ...(cfg.audio && existsSync(abs(cfg.audio)) ? { POLY_AUDIO: abs(cfg.audio) } : {}) }, limit: 1800,
+      onLine: l => { const m = /^frame (\d+)/.exec(l); if (m) sub(+m[1] / 579); } });
+  } catch (e) { fail(new JobError('RENDER', 'The render stopped part way. Your photos are safe; try again.', e.tail ?? e.message)); }
+  stage('render', 'done');
+  stage('share', 'running');
+  copyFileSync(join(PD, 'out/polyester.mp4'), join(JOB, 'polyester.mp4')); stage('share', 'done');
+  Object.assign(status, { state: 'done', pct: 100, finished: new Date().toISOString(), seconds: +((Date.now() - T0) / 1000).toFixed(1),
+    outputs: { edit: 'polyester.mp4', beforeAfter: null, raw: status.raw, template: 'polyester', show: 'polyester.mp4', download: 'polyester.mp4', downloadName: 'Polyester.mp4' }, duration: 19.3 });
+  event(`Done in ${status.seconds} s`, 'done'); save(); process.exit(0);
+}
 
 // ---- preflight: the input is a video with sound, of a length we can edit -------------------------------------------
 const input = join(JOB, job.input);

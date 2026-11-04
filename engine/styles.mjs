@@ -10,8 +10,10 @@ const ROOT = join(import.meta.dirname, '..');
 const BASE = join(ROOT, 'engine/templates/card-studio.json');
 const DIR = join(ROOT, 'engine/styles');
 export const DEFAULT_STYLE = 'card-studio';
-/** THE templates. There are exactly two and this list is the single place that says so: Card Studio (template 1) and Creator Mix (template 2). */
-export const TEMPLATES = ['card-studio', 'creator-mix'];
+/** THE templates. There are exactly three and this list is the single place that says so: Card Studio (1) and Creator Mix (2) are the
+ *  common templates that "auto" may use; Polyester (3) is explicit choice only (its style file says auto:false, explicit:true). */
+export const TEMPLATES = ['card-studio', 'creator-mix', 'polyester'];
+export const EXPLICIT_ONLY = ['polyester'];
 
 const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
 function merge(a, b) {

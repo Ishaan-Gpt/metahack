@@ -1,0 +1,15 @@
+{
+ "order": 7,
+ "label": "Polyester",
+ "line": "The Polyester trend edit from your own photos: you cut out over a background that changes every frame, white flashes and glitch frames on the beat, split screens, and your name in glitching type behind you. Explicit choice only, no AI credits used.",
+ "ref": "\"Polyester Spiderman Edit (Original by foryouamv)\", youtu.be/zswT92VzOYM (YouTube: BlackRob183; TikTok: @foryouamv). Visual reference only, credited in the README",
+ "swatch": [
+  "#0b1a2a",
+  "#35e6ff",
+  "#ffffff"
+ ],
+ "fundamentals": "photos in (about 8 to 12, one or two people), per-frame blurred montage behind a cut-out hero, white flash and inverted glitch on every beat, diagonal, circle and slit masks, horizontal splits with white bars, fade from white, glitch title behind the subject, lightning and aura rings, teal grade, grain; 19.3 s, 16:9; runs locally with no model calls",
+ "engine": "polyester",
+ "auto": false,
+ "explicit": true
+}

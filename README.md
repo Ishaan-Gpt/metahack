@@ -140,6 +140,9 @@ clip (`NO_SOUND`), no Meta key (`NO_META_KEY`).
 
 ## Credits
 
+- **Polyester (Template 3)** recreates the look and timing of **"Polyester Spiderman Edit (Original by foryouamv)"**: https://youtu.be/zswT92VzOYM (YouTube upload by BlackRob183; the original edit is by **@foryouamv on TikTok**). We used it as a visual reference only: we measured its cuts, flashes and effects frame by frame and rebuilt the recipe in our own code (`tools/polyester/`, `docs/POLYESTER.md`). No footage, audio, watermark, logo or character from that video is in this repository or in what the template outputs, and the template ships without any song (a user's own track is added only if they provide one). Polyester is an independent re-creation of a trend style, not affiliated with or endorsed by its creators; if the creators ask for a change or removal we will make it.
+- **Card Studio** was measured from the reel at `instagram.com/p/DerbE18txNg` (Edita Visuals) and **Creator Mix** from the reel at `instagram.com/reel/DaFaIEGIFvx` (Tahrima) plus a real estate motion reel; the same rule applies: the look is re-created in our code, nothing is copied.
+- Cut-outs use U2-Net human segmentation (Apache-2.0 weights) and face boxes use OpenCV's YuNet, both run locally.
 - Sample take in the studio: Iliana for Wikitongues, CC BY-SA 4.0.
 - Music bed: "Funkorama" by Kevin MacLeod (incompetech.com), CC BY 4.0.
 - Sound effects: freesound.org creators and Kenney, CC0 1.0; synthesized tones and risers, MIT. Full list in `assets/CREDITS.md`.
@@ -194,4 +197,4 @@ node engine/matte.mjs data/clips/my-clip                         # → matte.web
 Every Meta Muse model (Spark, Voice Transcribe, Wonder, Image, SAM 3.1, Glimmer, Spark Open) has its own switch in `engine/muse.mjs`. Because Meta credits are low, the credit-costing ones are **OFF by default ("OFF: credit limit")** and the project runs on ordinary keys used minimally. See [docs/MUSE.md](docs/MUSE.md) for the table, what is tested and what is not.
 
 ## Templates
-Exactly two: **Card Studio** and **Creator Mix**. The list lives in `engine/styles.mjs` (`TEMPLATES`); see [docs/TEMPLATES.md](docs/TEMPLATES.md).
+Exactly three: **Card Studio** and **Creator Mix** (the common ones, "auto" alternates between them) and **Polyester**, which is explicit choice only and uses no AI credits. The list lives in `engine/styles.mjs` (`TEMPLATES`); see [docs/TEMPLATES.md](docs/TEMPLATES.md).
