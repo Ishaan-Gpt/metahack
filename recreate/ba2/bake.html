@@ -1,0 +1,32 @@
+<!doctype html><meta charset="utf-8"><title>ba2 matte bake</title>
+<script type="module">
+// MediaPipe selfie segmenter (GPU) on every master frame: the whole window plus a head crop (top 560 rows, twice the
+// vertical detail) merged under y 520; the result (person confidence, 960x1080 grey) goes back to bake.mjs.
+import { FilesetResolver, ImageSegmenter } from '/node_modules/@mediapipe/tasks-vision/vision_bundle.mjs';
+const fs = await FilesetResolver.forVisionTasks('/node_modules/@mediapipe/tasks-vision/wasm');
+const seg = await ImageSegmenter.createFromOptions(fs, { baseOptions: { modelAssetPath: '/assets/vision/selfie_segmenter.tflite', delegate: 'GPU' }, runningMode: 'IMAGE', outputConfidenceMasks: true, outputCategoryMask: false });
+const W = 960, H = 1080, HC = 560;
+const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const out = cv(W, H), ox = out.getContext('2d', { willReadFrequently: true });
+const crop = cv(W, HC), cx = crop.getContext('2d');
+function maskCanvas(img, w, h) {
+  const r = seg.segment(img); const m = r.confidenceMasks[0]; const mw = m.width, mh = m.height, f = m.getAsFloat32Array();
+  const c = cv(mw, mh), x = c.getContext('2d'), id = x.createImageData(mw, mh);
+  for (let i = 0; i < f.length; i++) { const v = Math.round(f[i] * 255); id.data[4 * i] = id.data[4 * i + 1] = id.data[4 * i + 2] = v; id.data[4 * i + 3] = 255; }
+  x.putImageData(id, 0, 0); r.close(); return c;
+}
+window.bake = async (url) => {
+  const img = new Image(); img.src = url; await img.decode();
+  const full = maskCanvas(img, W, H);
+  cx.drawImage(img, 0, 0, W, HC, 0, 0, W, HC); const head = maskCanvas(crop, W, HC);
+  ox.imageSmoothingEnabled = true; ox.imageSmoothingQuality = 'high';
+  ox.drawImage(full, 0, 0, W, H);
+  // head crop above y 480, cross-faded 480-540
+  const g = cv(W, HC), gx = g.getContext('2d'); gx.drawImage(head, 0, 0, W, HC);
+  const grad = gx.createLinearGradient(0, 480, 0, 540); grad.addColorStop(0, 'rgba(0,0,0,1)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
+  gx.globalCompositeOperation = 'destination-in'; gx.fillStyle = grad; gx.fillRect(0, 0, W, HC);
+  ox.drawImage(g, 0, 0);
+  return out.toDataURL('image/png');
+};
+window.__ready = true;
+</script>

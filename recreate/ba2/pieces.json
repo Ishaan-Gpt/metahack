@@ -12,12 +12,18 @@
  "pieces": [
   {
    "a": 139.86,
-   "b": 146.98,
-   "beat": "R0.00-5.6 hook: medium (3 glow groups) \u00e2\u2020\u2019 cut \u00e2\u2020\u2019 ECU neon",
-   "text": "Now, there are some obvious challenges to studying black holes. They're far away. No light can escape them."
+   "b": 143.3,
+   "beat": "R0.00-1.935 hook medium: three glow groups",
+   "text": "Now, there are some obvious challenges to studying black holes."
   },
   {
-   "a": 150.4,
+   "a": 143.97,
+   "b": 146.98,
+   "beat": "R1.935-4.171 ECU neon, face left",
+   "text": "They're far away. No light can escape them."
+  },
+  {
+   "a": 150.85,
    "b": 160.58,
    "beat": "R4.17-11.3 wide + badges \u00e2\u2020\u2019 chapter card 1 \u00e2\u2020\u2019 medium text \u00e2\u2020\u2019 frame + eyeballs",
    "text": "But we managed to learn about them in two main ways. We gather observational data, like looking through a telescope. We can observe how the stuff around black holes behaves."
@@ -29,7 +35,7 @@
    "text": "So black hole researchers actually have a lot to work with. And we find black holes all over the universe."
   },
   {
-   "a": 146.96,
+   "a": 147.4,
    "b": 150.5,
    "beat": "R17.5-20.0 red ground ECU, face right",
    "text": "And in many ways, they're just weird."

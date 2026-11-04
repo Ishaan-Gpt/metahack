@@ -1,0 +1,4 @@
+Arimo (Regular, Bold) by Steve Matteson, from Google Fonts (fonts.gstatic.com, v36), downloaded 2026-11-04.
+Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
+Source: https://github.com/googlefonts/Arimo  ·  https://fonts.google.com/specimen/Arimo/license
+Used by recreate/ba2 as the metric/shape match for the reference's Helvetica/Arial-style captions.
