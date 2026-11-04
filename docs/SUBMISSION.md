@@ -51,7 +51,7 @@ Options, with their length; the first is the pick, because it says the whole pro
 - **Vignesh B S**: the Card Studio theme (the Meta transcribe and plan calls, rule director, nine edit types, MP4 renderer, text-behind).
 
 ## Links
-- Live demo: https://darwin-images-integrate-protecting.trycloudflare.com (studio at https://darwin-images-integrate-protecting.trycloudflare.com/studio; a tunnel to the build machine, so check it is up before pasting)
+- Live demo: https://configuring-educated-heads-relations.trycloudflare.com (studio at https://configuring-educated-heads-relations.trycloudflare.com/studio; a tunnel to the build machine, so check it is up before pasting)
 - Demo video: [[VIDEO_URL]]
 - Repo: https://github.com/Ishaan-Gpt/metahack ([[REPO_URL]] if a submission tag is made)
 

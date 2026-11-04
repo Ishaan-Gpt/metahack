@@ -2,7 +2,7 @@
 
 **Drop a raw talking-head take and get back the edit a hired short-form editor would have made, with a before/after beside it.**
 
-Demo video: [[VIDEO_URL]] · Live studio: https://darwin-images-integrate-protecting.trycloudflare.com/studio · Code: https://github.com/Ishaan-Gpt/metahack
+Demo video: [[VIDEO_URL]] · Live studio: https://configuring-educated-heads-relations.trycloudflare.com/studio · Code: https://github.com/Ishaan-Gpt/metahack
 Built for the Meta Global AI Developer Hackathon (Cerebral Valley x Meta), startup track, theme "Build for Your World".
 
 ## What it does
