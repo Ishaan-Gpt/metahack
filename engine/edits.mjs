@@ -1,12 +1,17 @@
 // Prompt editing at near 0 credits: what a user types after the first render ("add a b-roll of a city", "zoom out",
 // "captions a little funkier", "fix 'governate' to 'governorate'") is split into clauses, each clause is matched against a
 // dictionary of edit functions by keywords, synonyms and fuzzy spelling (no model call), and the matched functions change
-// the edit's plan (spec.card.json or spec.mix.json). The job then re-renders picture and sound only (engine/run.mjs with
-// job.rerender), so no new transcription and no new director call. docs/EDIT-API.md lists the ops.
-// usage: node engine/edits.mjs <job dir> --prompt "..."      or      node engine/edits.mjs <job dir> --ops '[{"op":...}]'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+// the edit's plan (spec.card.json or spec.mix.json). PREVIEW FIRST: nothing re-renders. The studio draws the changed plan
+// live (clip/preview.json is refreshed after every edit), and the answer says what else is needed: needs 'none' (the live
+// preview shows it), 'regrade' (colour: engine/run.mjs with job.regradeOnly) or 'full' (engine switch or Polyester).
+// A target ({kind:'caption',i} | {kind:'word',i,j} | {kind:'segment',i} | {kind:'fx',i} | {kind:'photo',key}) makes the prompt
+// change that one element only (the element the user clicked in the preview). docs/EDIT-API.md lists the ops.
+// usage: node engine/edits.mjs <job dir> --prompt "..." [--target '{"kind":"caption","i":4}']   or   --ops '[{"op":...}]'
+import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { applyWordOp, WORD_OPS } from './word-ops.mjs';
+import { writePreview } from './preview.mjs';
 
 const ROOT = join(import.meta.dirname, '..');
 
@@ -66,8 +71,12 @@ const DICT = [
   { op: 'grade', kw: ['warmer', 'warm', 'cooler', 'cool', 'colder', 'brighter', 'bright', 'darker', 'dark', 'moody', 'punchier', 'contrast', 'saturated', 'vibrant', 'colourful', 'colorful', 'muted', 'desaturated', 'grade', 'colour', 'color', 'black and white', 'faded'], need: ['warmer', 'warm', 'cooler', 'colder', 'brighter', 'bright', 'darker', 'dark', 'moody', 'punchier', 'contrast', 'saturated', 'vibrant', 'colourful', 'colorful', 'muted', 'desaturated', 'grade', 'colour', 'color', 'faded', 'white'],
     deny: ['caption', 'captions', 'text', 'font'], read: t => gradeFrom(t) },
   { op: 'text.handle', kw: ['handle', 'username', 'my name', '@', 'put', 'add', 'tag'], need: ['handle', 'username', '@'], read: t => ({ text: (t.match(/@[\w.]+/) ?? [null])[0] }) },
-  { op: 'engine', kw: ['creator mix', 'studio card', 'other style', 'different style', 'another style', 'switch style', 'change style', 'other engine', 'new look', 'different look'], need: ['mix', 'card', 'style', 'engine', 'look'],
-    read: (t, c) => ({ name: /\bcreator|mix\b/.test(t) ? 'creator-mix' : /\bstudio|card\b/.test(t) ? 'card-studio' : (c.engine === 'creator-mix' ? 'card-studio' : 'creator-mix') }) },
+  { op: 'engine', kw: ['creator mix', 'studio card', 'card studio', 'other style', 'different style', 'another style', 'switch style', 'change style', 'other engine', 'new look', 'different look', 'back to normal', 'normal edit', 'talking edit', 'undo polyester'], need: ['mix', 'card', 'style', 'engine', 'look', 'normal', 'undo'],
+    deny: ['polyester', 'spiderman', 'glitch', 'amv'],
+    read: (t, c) => ({ name: /\bcreator|mix\b/.test(t) ? 'creator-mix' : /\bstudio|card\b/.test(t) ? 'card-studio' : c.job?.style === 'polyester' ? (c.engine ?? 'card-studio') : (c.engine === 'creator-mix' ? 'card-studio' : 'creator-mix') }) },
+  // Vignesh's Polyester template as a skill: the take's own stills in, a fast-cut glitch edit out (engine/run.mjs POLY branch)
+  { op: 'polyester', kw: ['polyester', 'spiderman', 'spider-man', 'spider man', 'glitch montage', 'glitch edit', 'amv', 'montage edit', 'flash edit', 'strobe edit'], need: ['polyester', 'spiderman', 'spider-man', 'spider', 'glitch', 'amv', 'montage', 'strobe'],
+    read: () => ({}) },
 ];
 
 let PRESETS = null;
@@ -168,6 +177,90 @@ export function parse(prompt, ctx) {
   return { ops, unmatched };
 }
 
+// ---- targeted prompts: the user clicked one element in the preview, so the prompt changes that element only ----------
+// ops that are about the whole video still apply with a target ("make it warmer" while a caption is selected)
+const GLOBAL_OK = ['grade', 'music', 'sfx', 'engine', 'polyester', 'text.handle', 'text.cta'];
+const DEL = /\b(delete|remove|drop|get rid|take (?:it |this |that )?out|kill|erase|lose)\b/;
+const STYLE_WORDS = /^(caps|all caps|uppercase|lowercase|sentence case|bigger|smaller|larger|higher|lower|up|down|funky|funkier|clean|cleaner|bold|bolder|warmer|cooler)$/i;
+function newText(raw) {
+  const q = raw.replace(/[“”]/g, '"').replace(/[‘’]/g, "'").trim();
+  const m = q.match(/^(?:please\s+)?(?:change|rewrite|replace|set|edit|update|turn|make)\s+(?:it|this|that|the\s+(?:text|caption|card|word|title|line))?\s*(?:to|into|with|say|read|as)\s+["']?(.+?)["']?\s*\.?$/i)
+    ?? q.match(/^(?:it |this |that )?(?:should\s+)?(?:say|read)s?\s+["']?(.+?)["']?\s*\.?$/i)
+    ?? q.match(/^["'](.+?)["']\s*\.?$/);
+  if (!m) return null;
+  const v = m[1].trim();
+  return v && v.length <= 80 && !STYLE_WORDS.test(v) ? v : null;
+}
+/** find a word index in a caption card by its text ("make indigenous the key word") */
+const wordIndex = (card, w) => (card?.words ?? []).findIndex(x => stripWord(x.w).toLowerCase() === stripWord(w).toLowerCase());
+function stockQuery(raw, fallback) {
+  const m = norm(raw).match(/\b(?:for|to|with|of|showing|into)\s+(?:a |an |the |some |another )?([\p{L}\p{N}\s'-]{2,40}?)(?:\s+(?:photo|picture|image|shot|instead|please))?$/u);
+  return m && !/^(it|this|that|photo|picture|image|another one|a different one|something else)$/.test(m[1].trim()) ? m[1].trim() : fallback;
+}
+/** caption look words for one card: size, position, case, a preset's font and colour, hide */
+function cardLook(raw, i, ctx) {
+  const t = norm(raw), ops = [];
+  if (/\b(bigger|larger|huge|enlarge|increase|grow|smaller|tinier|tiny|shrink|decrease)\b/.test(t)) ops.push({ op: 'caption.look', i, scale: /\b(smaller|tinier|tiny|shrink|decrease)\b/.test(t) ? 1 - 0.15 * amount(t) : 1 + 0.15 * amount(t) });
+  if (/\b(higher|lower|move up|move down|raise|up|down|top|bottom)\b/.test(t)) ops.push({ op: 'caption.look', i, dy: (/\b(higher|raise|up|top)\b/.test(t) ? -1 : 1) * 0.05 * amount(t) });
+  if (/\b(caps|uppercase|capitals?|lowercase|lower case|sentence case|small letters)\b/.test(t)) ops.push({ op: 'caption.look', i, upper: !/\b(lowercase|lower case|sentence case|small letters|no caps|not caps)\b/.test(t) });
+  if (/\b(hide|invisible)\b/.test(t)) ops.push({ op: 'caption.look', i, hidden: true });
+  if (/\b(show|unhide|visible|bring back)\b/.test(t)) ops.push({ op: 'caption.look', i, hidden: false });
+  const pe = DICT.find(d => d.op === 'caption.preset');
+  if (pe.kw.some(k => k.includes(' ') ? t.includes(k) : tokens(t).some(w => near(w, k)))) { const name = pickPreset(t, ctx); if (name) ops.push({ op: 'caption.look', i, preset: name }); }
+  return ops;
+}
+
+/** prompt + target -> ops for that element (no model call); what does not fit the element falls back to whole-video ops */
+export function parseTargeted(prompt, target, ctx) {
+  const raw = String(prompt ?? '').trim(), t = norm(raw), S = ctx.spec, ops = [];
+  const k = target?.kind;
+  if (k === 'word' || k === 'caption') {
+    const i = +target.i, card = S.captions?.[i];
+    if (!card) return { ops: [], unmatched: [raw], error: `There is no caption ${i + 1}.` };
+    const j = k === 'word' ? +target.j : null;
+    const named = raw.match(/\b(?:make|set)\s+["'“]?([^\s"'”]+)["'”]?\s+(?:the\s+|a\s+)?(?:key|hero|main|big|highlighted?)\s*word\b/i) ?? raw.match(/\b(?:highlight|emphasi[sz]e)\s+["'“]?([^\s"'”]+)["'”]?/i);
+    const heroAsk = /\b(key ?word|hero|highlight|emphasi[sz]e|main word|big word|stand out)\b/.test(t);
+    const off = /\b(not|no longer|un-?highlight|normal word|remove the highlight)\b/.test(t);
+    const nt = newText(raw);
+    if (heroAsk && (j != null || named)) {
+      const jj = named && !/^(this|it|that)$/i.test(named[1]) ? wordIndex(card, named[1]) : j;
+      if (jj == null || jj < 0) return { ops: [], unmatched: [raw], error: `“${named?.[1] ?? ''}” is not in that caption.` };
+      ops.push({ op: 'caption.hero', i, j: jj, ...(off ? { off: true } : {}) });
+    } else if (DEL.test(t) && !/\b(caps|highlight|space|gap)\b/.test(t)) ops.push(j != null && !/\b(caption|card|line|whole)\b/.test(t) ? { op: 'caption.wordDelete', i, j } : { op: 'caption.delete', i });
+    else if (j != null && /\bsplit\b|\bnew (card|line)\b|\bbreak\b/.test(t) && j > 0) ops.push({ op: 'caption.split', i, j });
+    else if (nt) ops.push(j != null && !/\b(caption|card|line|sentence)\b/.test(t) ? { op: 'caption.wordText', i, j, text: nt } : { op: 'caption.word', i, text: nt });
+    else { const tc = textChange(raw); if (tc) ops.push({ ...tc, i }); else ops.push(...cardLook(raw, i, ctx)); }
+  } else if (k === 'segment') {
+    const i = +target.i, s = S.segments?.[i];
+    if (!s) return { ops: [], unmatched: [raw], error: `There is no beat ${i + 1}.` };
+    const photoWord = /\b(photo|picture|image|pic|b-?roll|shot|stock|visual)\b/.test(t);
+    if (DEL.test(t)) ops.push({ op: 'segment.face', i });
+    else if (/\b(swap|replace|change|different|another|other|new|instead|show)\b/.test(t) && (photoWord || /\b(for|to|with|of|showing)\b/.test(t)) && !newText(raw)?.match(/^\d/)) ops.push({ op: 'segment.photo', i, query: stockQuery(raw, s.query ?? s.shots?.[0]?.query ?? s.title ?? 'city skyline') });
+    else if (/\b(zoom|closer|wider|wide|punch|push in|pull back)\b/.test(t)) ops.push({ op: 'segment.zoom', i, scale: /\b(out|wider|wide|pull back|back|less)\b/.test(t) ? 1 - 0.08 * amount(t) : 1 + 0.1 * amount(t) });
+    else { const nt = newText(raw); if (nt) ops.push({ op: 'segment.title', i, text: nt }); }
+  } else if (k === 'fx') {
+    const i = +target.i;
+    if (!S.fx?.[i]) return { ops: [], unmatched: [raw], error: `There is no effect ${i + 1}.` };
+    const nt = newText(raw);
+    if (DEL.test(t)) ops.push({ op: 'fx.delete', i });
+    else if (nt) ops.push({ op: 'fx.word', i, text: nt });
+  } else if (k === 'photo') {
+    const key = String(target.key ?? '');
+    if (!S.images?.[key]) return { ops: [], unmatched: [raw], error: 'That photo is not in this edit.' };
+    if (DEL.test(t)) ops.push({ op: 'photo.remove', key });
+    else if (/\b(swap|replace|change|different|another|other|new|instead|show)\b/.test(t)) ops.push({ op: 'photo.swap', key, query: stockQuery(raw, key) });
+  } else if (k === 'chrome') {   // the page around the take: { kind: 'chrome', part: 'handle' | 'badge' | 'cta' }
+    const part = String(target.part ?? ''), nt = newText(raw) ?? (part === 'handle' ? (raw.match(/@[\w.]+/) ?? [null])[0] : null);
+    if (part === 'handle' && (nt || DEL.test(t))) ops.push({ op: 'text.handle', text: DEL.test(t) && !nt ? '' : nt.startsWith('@') ? nt : '@' + nt.replace(/\s+/g, '') });
+    else if (part === 'badge' && (nt || DEL.test(t))) ops.push({ op: 'text.badge', text: DEL.test(t) && !nt ? '' : nt });
+    else if (part === 'cta' && (nt || DEL.test(t))) ops.push({ op: 'text.cta', line1: DEL.test(t) && !nt ? '' : nt, ...(DEL.test(t) && !nt ? { line2: '' } : {}) });
+  }
+  if (ops.length) return { ops, unmatched: [] };
+  // nothing about this element: whole-video ops only ("warmer", "music off"); element ops never spill over to every caption
+  const g = parse(raw, ctx), keep = g.ops.filter(o => GLOBAL_OK.includes(o.op));
+  return { ops: keep, unmatched: [...g.unmatched, ...(keep.length ? [] : g.ops.length ? [raw] : [])] };
+}
+
 // ---- appliers: each op changes the plan, and says what it did in plain words ------------------------------------------
 const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
 const merge = (a, b) => { const o = { ...(a ?? {}) }; for (const [k, v] of Object.entries(b)) o[k] = isObj(v) && isObj(o[k]) ? merge(o[k], v) : v; return o; };
@@ -217,12 +310,32 @@ function replaceText(spec, find, rep) {
   return { n, target };
 }
 
+/** one stock photo for a query, as a path relative to the clip dir (null when none came back) */
+async function stock(query, ctx) {
+  try { const { fetchStock } = await import('./stock.mjs'); const r = await fetchStock(String(query).toLowerCase()); if (r?.file) { ctx.spec.credits = [...(ctx.spec.credits ?? []), { query, credit: r.credit, page: r.page, license: r.license }]; return relative(ctx.clip, r.file).replace(/\\/g, '/'); } } catch { /* no photo */ }
+  return null;
+}
+/** Polyester's photos from the take itself: 10 stills spread evenly over clip/cut.mp4 -> <job>/poly-photos/p01.jpg... (paths relative to the job) */
+function stillsFromTake(ctx, n = 10) {
+  const src = ['cut.mp4', 'graded.mp4', 'src.mp4'].map(f => join(ctx.clip, f)).find(existsSync);
+  if (!src) return [];
+  let dur = +ctx.spec.duration || 0;
+  try { dur = +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', src], { encoding: 'utf8' }).trim() || dur; } catch { /* spec duration */ }
+  const dir = join(ctx.jobDir, 'poly-photos'); mkdirSync(dir, { recursive: true });
+  const out = [];
+  for (let k = 0; k < n; k++) {
+    const f = `p${String(k + 1).padStart(2, '0')}.jpg`, t = (dur * (k + 0.5) / n).toFixed(3);
+    try { execFileSync('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-ss', t, '-i', src, '-frames:v', '1', '-q:v', '2', join(dir, f)]); if (existsSync(join(dir, f))) out.push(`poly-photos/${f}`); } catch { /* skip that still */ }
+  }
+  return out;
+}
+
 async function apply(op, ctx) {
   const S = ctx.spec, mix = ctx.engine === 'creator-mix';
   // word-level edits from the studio timeline (engine/word-ops.mjs, ported from Captions Easy's caption engine)
   if (WORD_OPS.includes(op.op)) return applyWordOp(S.captions ?? [], op, S.duration);
   switch (op.op) {
-    case 'caption.text': { const r = replaceText(S, op.find, op.replace); return r.n ? `Changed “${r.target}” to “${op.replace}” in ${r.n} place${r.n > 1 ? 's' : ''}.` : `I could not find “${op.find}” on screen.`; }
+    case 'caption.text': { if (op.i != null && !S.captions?.[op.i]) return 'That caption is not there.'; const r = replaceText(op.i != null ? { captions: [S.captions[op.i]] } : S, op.find, op.replace); return r.n ? `Changed “${r.target}” to “${op.replace}” in ${r.n} place${r.n > 1 ? 's' : ''}.` : `I could not find “${op.find}” on screen.`; }
     case 'caption.word': { const c = S.captions?.[op.i]; if (!c) return 'That caption is not there.'; const ws = String(op.text).split(/\s+/).filter(Boolean), d = (c.t1 - c.t0) / Math.max(1, ws.length); const hero = c.words.find(w => w.hero)?.w; c.words = ws.map((w, k) => ({ w, t: +(c.t0 + k * d).toFixed(3), hero: !!hero && stripWord(w).toLowerCase() === stripWord(hero).toLowerCase() })); if (!c.words.some(w => w.hero) && c.words.length) c.words.sort((a, b) => b.w.length - a.w.length)[0].hero = true, c.words.sort((a, b) => a.t - b.t); return `Caption ${op.i + 1} now reads “${op.text}”.`; }
     case 'caption.timing': { const c = S.captions?.[op.i]; if (!c) return 'That caption is not there.'; const t0 = Math.max(0, +op.t0), t1 = Math.min(S.duration, +op.t1); if (!(t1 > t0 + 0.2)) return 'A caption needs at least a fifth of a second.'; const k = (t1 - t0) / (c.t1 - c.t0); c.words.forEach(w => { w.t = +(t0 + (w.t - c.t0) * k).toFixed(3); }); c.t0 = +t0.toFixed(3); c.t1 = +t1.toFixed(3); return `Caption ${op.i + 1} now runs ${c.t0.toFixed(1)}–${c.t1.toFixed(1)} s.`; }
     case 'caption.delete': { if (!S.captions?.[op.i]) return 'That caption is not there.'; S.captions.splice(op.i, 1); return `Removed caption ${op.i + 1}.`; }
@@ -265,37 +378,119 @@ async function apply(op, ctx) {
     case 'music': { if (op.on === false) { ctx.job.noMusic = true; return 'Music is off.'; } if (op.on === true) { ctx.job.noMusic = false; return 'Music is back.'; } ctx.job.noMusic = false; const v = eff(ctx, 'music.gainDb') ?? -27; over(ctx, 'music.gainDb', Math.max(-40, Math.min(-12, v + op.db))); return op.db > 0 ? 'Music is louder.' : 'Music is quieter.'; }
     case 'sfx': { const v = eff(ctx, 'sfx.gainDb') ?? -15; if (op.on === false) { over(ctx, 'sfx.gainDb', -99); return 'Sound effects are off.'; } if (op.on === true) { over(ctx, 'sfx.gainDb', -15); return 'Sound effects are back.'; } over(ctx, 'sfx.gainDb', Math.max(-40, Math.min(-4, (v < -60 ? -15 : v) + op.db))); return op.db > 0 ? 'Sound effects are louder.' : 'Sound effects are quieter.'; }
     case 'grade': { const g = S.gradeDelta ?? {}; for (const k of ['warm', 'bright', 'contrast', 'sat']) if (op[k]) g[k] = +((g[k] ?? 0) + op[k]).toFixed(3); S.gradeDelta = g; ctx.regrade = true; return 'Colour changed.'; }
-    case 'text.handle': { S.handle = op.text; return `The handle is now ${op.text}.`; }
+    case 'text.handle': { S.handle = op.text; return op.text ? `The handle is now ${op.text}.` : 'The handle is off.'; }
+    case 'text.badge': { S.badge = op.text; return op.text ? `The badge now reads “${op.text}”.` : 'The badge is off.'; }
     case 'text.cta': { S.cta = [op.line1 ?? S.cta?.[0] ?? '', op.line2 ?? S.cta?.[1] ?? '']; return 'The call to action is updated.'; }
-    case 'engine': { if (op.name === ctx.engine) return `It is already ${op.name === 'creator-mix' ? 'Creator Mix' : 'Card Studio'}.`; ctx.job.engine = op.name; ctx.fullRerun = true; return `Re-editing it as ${op.name === 'creator-mix' ? 'Creator Mix' : 'Card Studio'}.`; }
+    case 'engine': {
+      const label = op.name === 'creator-mix' ? 'Creator Mix' : 'Card Studio', fromPoly = ctx.job.style === 'polyester';
+      if (fromPoly) ctx.job.style = op.name;   // leave Polyester: the talking edit comes back
+      if (op.name === ctx.engine) { if (!fromPoly) return `It is already ${label}.`; ctx.job.regradeOnly = true; ctx.fullRerun = true; return `Back to your ${label} edit.`; }
+      ctx.job.engine = op.name; ctx.job.redirect = true; ctx.fullRerun = true; return `Re-editing it as ${label}.`;
+    }
+    case 'polyester': {
+      if (ctx.job.style === 'polyester') return 'It is already a Polyester edit.';
+      const photos = stillsFromTake(ctx);
+      if (photos.length < 2) return 'I could not pull stills of you from the take for the Polyester edit.';
+      const h0 = String(ctx.job.handle ?? '').replace(/^@+/, '').split(/[\s._-]+/).filter(Boolean)[0]?.slice(0, 12);
+      const name = h0 && !/^(moovi|editeasy|yourhandle)$/i.test(h0) ? h0 : 'YOU';   // the studio's own default handles are not a name
+      ctx.job.engine = ctx.engine; ctx.job.style = 'polyester';   // the engine stays, so "switch back" finds the talking edit's plan
+      ctx.job.polyester = { people: [{ name, photos }], ...(ctx.job.polyester?.audio ? { audio: ctx.job.polyester.audio } : {}) };
+      ctx.fullRerun = true;
+      return `Making a Polyester edit from ${photos.length} stills of you: flashes, glitch frames and splits on the beat.`;
+    }
+    // ---- one element (a target from the preview) ----
+    case 'caption.look': {
+      const c = S.captions?.[op.i]; if (!c) return 'That caption is not there.';
+      const said = [];
+      if (op.scale != null) { c.scale = +Math.min(2.5, Math.max(0.4, (c.scale ?? 1) * op.scale)).toFixed(3); said.push(op.scale > 1 ? 'bigger' : 'smaller'); }
+      if (op.dy != null) { c.dy = +Math.min(0.3, Math.max(-0.5, (c.dy ?? 0) + op.dy)).toFixed(3); said.push(op.dy < 0 ? 'higher' : 'lower'); }
+      if (op.upper != null) { c.upper = !!op.upper; said.push(op.upper ? 'in caps' : 'in sentence case'); }
+      if (op.hidden != null) { if (op.hidden) c.hidden = true; else delete c.hidden; said.push(op.hidden ? 'hidden' : 'shown'); }
+      if (op.preset) { const P = presets()[op.preset]; if (!P) return `There is no caption look called “${op.preset}”.`; const o = P.overrides ?? {};
+        if (o.fonts?.hero?.family) { c.font = o.fonts.hero.family; c.fontFile = o.fonts.hero.file; } if (o.palette?.hero) c.color = o.palette.hero; c.preset = op.preset; said.push(`in the ${P.label ?? op.preset} look`); }
+      return said.length ? `Caption ${op.i + 1} is ${said.join(', ')}.` : null;
+    }
+    case 'segment.face': {
+      const s = S.segments?.[op.i]; if (!s) return 'That beat is not there.';
+      if (!['graphic', 'split'].includes(s.type)) return 'That beat has no photo to take out.';
+      s.type = 'face'; s.zoom = s.zoom ?? [1, 1.04]; delete s.shots; delete s.img; s.enter = 'cut';
+      return `Took the photo out at ${s.t0.toFixed(1)} s; it is just you there now.`;
+    }
+    case 'segment.photo': {
+      const s = S.segments?.[op.i]; if (!s) return 'That beat is not there.';
+      const img = await stock(op.query, ctx);
+      if (!img) return `No photo of “${op.query}” came back, so that beat is unchanged.`;
+      S.images = S.images ?? {}; S.images[op.query] = img;
+      if (s.type === 'graphic') Object.assign(s, { img, query: op.query, title: s.title && s.title === s.query ? op.query : (s.title ?? op.query) });
+      else Object.assign(s, { type: 'split', shots: [{ query: op.query, t: s.t0, img }], enter: s.enter && s.enter !== 'none' ? s.enter : 'pop' });
+      return `The photo at ${s.t0.toFixed(1)} s is now “${op.query}”.`;
+    }
+    case 'segment.zoom': { const s = S.segments?.[op.i]; if (!s) return 'That beat is not there.'; s.zoom = (Array.isArray(s.zoom) ? s.zoom : [1, 1.04]).map(v => Math.max(1, +(v * op.scale).toFixed(3))); return op.scale < 1 ? 'Zoomed out on that beat.' : 'Zoomed in on that beat.'; }
+    case 'segment.title': { const s = S.segments?.[op.i]; if (!s) return 'That beat is not there.'; if (typeof s.title !== 'string' && typeof s.word !== 'string') return 'That beat has no title to change; click a caption to change words.'; if (typeof s.title === 'string') s.title = op.text; else s.word = op.text; return `That beat now reads “${op.text}”.`; }
+    case 'fx.delete': { const f = S.fx?.[op.i]; if (!f) return 'That effect is not there.'; S.fx.splice(op.i, 1); return `Removed the ${f.name ?? 'effect'} at ${(+f.t0).toFixed(1)} s.`; }
+    case 'fx.word': { const f = S.fx?.[op.i]; if (!f) return 'That effect is not there.'; f.word = op.text; f.phrase = op.text; f.hi0 = 0; f.hi1 = op.text.length; return `The effect now says “${op.text}”.`; }
+    case 'photo.remove': {
+      const p = S.images?.[op.key]; if (!p) return 'That photo is not in this edit.';
+      let n = 0;
+      for (const s of S.segments ?? []) if (['graphic', 'split'].includes(s.type) && (s.img === p || s.shots?.some(x => x.img === p))) { s.type = 'face'; s.zoom = s.zoom ?? [1, 1.04]; delete s.shots; delete s.img; s.enter = 'cut'; n++; }
+      for (const f of S.fx ?? []) if (Array.isArray(f.imgs) && f.imgs.includes(op.key)) { f.imgs = f.imgs.filter(x => x !== op.key); n++; }
+      delete S.images[op.key];
+      return n ? 'Took that photo out.' : 'That photo was not on screen.';
+    }
+    case 'photo.swap': {
+      const p = S.images?.[op.key]; if (!p) return 'That photo is not in this edit.';
+      const img = await stock(op.query, ctx); if (!img) return `No photo of “${op.query}” came back, so the photo is unchanged.`;
+      S.images[op.key] = img;
+      for (const s of S.segments ?? []) { if (s.img === p) { s.img = img; s.query = op.query; } for (const x of s.shots ?? []) if (x.img === p) { x.img = img; x.query = op.query; } }
+      return `Swapped the photo for “${op.query}”.`;
+    }
     default: return null;
   }
 }
 
-/** apply a prompt or ops to a finished job; writes the plan and job.json; returns what changed and what was not understood */
-export async function editJob(jobDir, { prompt, ops } = {}) {
+/** apply a prompt or ops to a job in preview (or a finished one); writes the plan, job.json and clip/preview.json.
+ *  Returns { applied, unmatched, changed, needs: 'none'|'regrade'|'full', target?, said? }. Nothing re-renders here:
+ *  'none' = the live preview already shows it; 'regrade' / 'full' = start engine/run.mjs (job.json carries the flag). */
+export async function editJob(jobDir, { prompt, ops, target } = {}) {
   const job = JSON.parse(readFileSync(join(jobDir, 'job.json'), 'utf8'));
-  const clip = join(jobDir, 'clip'), engine = job.engine ?? 'card-studio';
+  const clip = join(jobDir, 'clip'), engine = ENGINES_.includes(job.engine) ? job.engine : 'card-studio';
   const specFile = join(clip, engine === 'creator-mix' ? 'spec.mix.json' : 'spec.card.json');
-  if (!existsSync(specFile)) return { error: { code: 'NOT_READY', human: 'This edit has not finished its first render yet.' } };
+  if (!existsSync(specFile)) return { error: { code: 'NOT_READY', human: 'This edit is still being made; try again when the preview is up.' } };
   const spec = JSON.parse(readFileSync(specFile, 'utf8'));
-  const ctx = { job, spec, engine, clip, T: baseTemplate(engine, spec), regrade: false, fullRerun: false };
+  const ctx = { job, jobDir, spec, engine, clip, T: baseTemplate(engine, spec), regrade: false, fullRerun: false };
+  if (typeof target === 'string') { try { target = JSON.parse(target); } catch { target = null; } }
   let parsed = { ops: ops ?? [], unmatched: [] };
-  if (prompt) parsed = parse(prompt, ctx);
+  if (prompt) parsed = target?.kind ? parseTargeted(prompt, target, ctx) : parse(prompt, ctx);
+  if (parsed.error) return { applied: [], unmatched: parsed.unmatched, changed: false, needs: 'none', target, error: { code: 'NO_TARGET', human: parsed.error } };
   const applied = [];
-  for (const op of parsed.ops) { const said = await apply(op, ctx); if (said) applied.push({ op: op.op, said }); }
-  if (!applied.length) return { applied, unmatched: parsed.unmatched, changed: false };
-  spec.edits = [...(spec.edits ?? []), { at: new Date().toISOString(), prompt: prompt ?? null, ops: parsed.ops }];
+  for (const op of parsed.ops) {
+    // a Polyester job is a photo montage: only "go back" or another Polyester make sense until it is switched back
+    if (job.style === 'polyester' && !['engine', 'polyester'].includes(op.op)) { applied.push({ op: op.op, said: null, skipped: 'This is the Polyester edit now. Say “switch back to card studio” to edit the talking video again.' }); continue; }
+    const said = await apply(op, ctx); if (said) applied.push({ op: op.op, said });
+  }
+  const done = applied.filter(a => a.said);
+  if (!done.length) return { applied, unmatched: parsed.unmatched, changed: false, needs: 'none', ...(target ? { target } : {}) };
+  spec.edits = [...(spec.edits ?? []), { at: new Date().toISOString(), prompt: prompt ?? null, ...(target ? { target } : {}), ops: parsed.ops }];
   writeFileSync(specFile, JSON.stringify(spec, null, 1));
-  job.rerender = !ctx.fullRerun; job.regrade = ctx.regrade || !!job.regrade;
+  const needs = ctx.fullRerun ? 'full' : ctx.regrade ? 'regrade' : 'none';
+  if (needs === 'regrade') job.regradeOnly = true;
+  job.rerender = false;   // preview first: edits never re-render; the studio's Render button sets job.render
   writeFileSync(join(jobDir, 'job.json'), JSON.stringify(job, null, 1));
-  return { applied, unmatched: parsed.unmatched, changed: true, full: ctx.fullRerun };
+  // the live preview's template, and the status the studio polls: any edit takes the job back to 'preview'
+  let preview = null;
+  try { preview = writePreview(clip, engine, spec); } catch (e) { /* the spec is saved; the next run writes it */ }
+  if (needs === 'none' && preview) {
+    const sf = join(jobDir, 'status.json');
+    try { const st = JSON.parse(readFileSync(sf, 'utf8')); if (['done', 'preview'].includes(st.state)) { Object.assign(st, { state: 'preview', preview, edits: spec.edits.length }); writeFileSync(sf + '.tmp', JSON.stringify(st, null, 1)); renameSync(sf + '.tmp', sf); } } catch { /* no status yet */ }
+  }
+  return { applied, unmatched: parsed.unmatched, changed: true, needs, ...(target ? { target } : {}) };
 }
+const ENGINES_ = ['card-studio', 'creator-mix'];
 
 if (process.argv[1] && import.meta.url === (await import('node:url')).pathToFileURL(process.argv[1]).href) {
   const [dir] = process.argv.slice(2), a = process.argv, opt = k => { const i = a.indexOf(k); return i > 0 ? a[i + 1] : undefined; };
   if (!dir) { console.error('usage: node engine/edits.mjs <job dir> --prompt "..." | --ops \'[...]\' | --parse "..."'); process.exit(1); }
   if (opt('--parse')) { console.log(JSON.stringify(parse(opt('--parse'), { spec: { captions: [] }, engine: 'card-studio' }), null, 1)); process.exit(0); }
-  const r = await editJob(dir, { prompt: opt('--prompt'), ops: opt('--ops') ? JSON.parse(opt('--ops')) : undefined });
+  const r = await editJob(dir, { prompt: opt('--prompt'), ops: opt('--ops') ? JSON.parse(opt('--ops')) : undefined, target: opt('--target') ? JSON.parse(opt('--target')) : undefined });
   console.log(JSON.stringify(r));
 }

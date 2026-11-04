@@ -16,3 +16,10 @@
   Captions Easy (Ishaan's own repo) into the studio: the caption editor, the word-level timeline and its ops
   (`engine/word-ops.mjs`), and a stored library of its looks and animations (`library/captions-easy/`). It also put the
   reference recreations on /styles beside their raw takes. Ishaan set what to build; nothing was submitted or posted by the AI.
+- 2026-11-05 (later): Claude Code (Claude Opus 5.5) made the studio preview-first: a new edit stops after planning and
+  plays as a live preview drawn in the browser with the engines' own drawing code (`player/*.js`), prompt edits change
+  the plan with no render, and the MP4 is made only on "Render final video". It made every part of the preview
+  clickable (caption, word, photo beat, effect, badge, handle, call to action) so a prompt edits only that part, added
+  Edit and Before/After views (white, a Muse pill on the After), the reference edits as samples that open already
+  edited, Card Studio without the storyboard card, and Vignesh's Polyester edit as a prompt skill
+  ("make it a polyester edit"). Ishaan set what to build; nothing was submitted or posted by the AI.

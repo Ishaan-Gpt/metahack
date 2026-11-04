@@ -73,6 +73,7 @@ export function buildLayers(spec, T, res, mk) {
   u.globalAlpha = P.blobAlpha; starburst(u, L.blob.cx, L.blob.cy, L.blob.r, L.blob.petals, P.blob); u.globalAlpha = 1;
   // storyboard card: sketch-like greyscale thumbnails of the clip's own stock images
   const S = L.storyboard;
+  if (S && S.show !== false) {   // off in today's Card Studio (Ishaan, 5 Nov: no storyboard card for now)
   u.save(); u.shadowColor = 'rgba(0,0,0,0.12)'; u.shadowBlur = 30; u.shadowOffsetY = 10; u.fillStyle = '#fdfcfa'; rr(u, S.x, S.y, S.w, S.h, S.r); u.fill(); u.restore();
   const thumbs = (spec.storyboard ?? []).map(p => res.images[p]).filter(Boolean);
   const ph = (S.h - 4 * 18) / 3;
@@ -95,6 +96,7 @@ export function buildLayers(spec, T, res, mk) {
   u.fillStyle = '#1d1d1d'; rr(u, S.x, S.pillY, sw + 92, S.pillH, S.pillH / 2); u.fill();
   u.fillStyle = '#e8553e'; u.beginPath(); u.arc(S.x + 36, S.pillY + S.pillH / 2, 9, 0, Math.PI * 2); u.fill();
   u.fillStyle = '#fff'; u.textBaseline = 'middle'; u.fillText('Storyboard', S.x + 60, S.pillY + S.pillH / 2 + 1);
+  }
   // main card shadow (the card itself is drawn per frame)
   u.save(); u.shadowColor = C.shadowColor; u.shadowBlur = C.shadowBlur; u.shadowOffsetY = C.shadowY; u.fillStyle = '#ddd'; rr(u, C.x, C.y, C.w, C.h, C.r); u.fill(); u.restore();
 
@@ -420,13 +422,15 @@ function drawList(ctx, t, seg, T, C) {
 function drawCaption(ctx, t, spec, T, C, seg, res) {
   if (['graphic', 'post', 'wide', 'orbit'].includes(seg.type) || (seg.type === 'textbehind' && res.matteAt?.(t) && seg.word)) return;
   if ((seg.enter === 'wipe' && t - seg.t0 < T.motion.wipe) || (seg.enter === 'wash' && t - seg.t0 < T.motion.wash)) return; // no caption over a half-revealed card
-  const cap = spec.captions.find(c => t >= c.t0 && t < c.t1); if (!cap) return;
-  const L = T.layout.caption, P = T.palette, M = T.motion;
+  const cap = spec.captions.find(c => t >= c.t0 && t < c.t1); if (!cap || cap.hidden) return;
+  // per-card overrides from a targeted edit (engine/edits.mjs): scale, dy (fraction of the frame), upper, font, color
+  const L0 = T.layout.caption, L = cap.scale ? { ...L0, smallSize: L0.smallSize * cap.scale, heroSize: L0.heroSize * cap.scale, lineGap: L0.lineGap * cap.scale } : L0, P = T.palette, M = T.motion;
   const hi = cap.words.findIndex(w => w.hero);
   const before = (hi < 0 ? cap.words : cap.words.slice(0, hi)).map(w => w.w).join(' ').toUpperCase();
   const after = hi < 0 ? '' : cap.words.slice(hi + 1).map(w => w.w).join(' ').toUpperCase();
   const CS = T.caption ?? {}, HF = CS.heroFont ?? 'serifItalic', HW = CS.heroWeight ?? 400;
-  const hero = hi < 0 ? '' : (CS.heroUpper === false ? cap.words[hi].w : cap.words[hi].w.toUpperCase());
+  const hero = hi < 0 ? '' : (cap.upper === true ? cap.words[hi].w.toUpperCase() : cap.upper === false || CS.heroUpper === false ? cap.words[hi].w : cap.words[hi].w.toUpperCase());
+  const heroFont = fs => cap.font ? `${HW} ${fs}px "${cap.font}"` : font(T, HF, fs, HW);
   const maxW = C.w * L.maxWFrac;
   let cy = seg.type === 'split' ? C.y + T.layout.split.border + (C.h - 2 * T.layout.split.border - T.layout.split.gap) * T.layout.split.topFrac + T.layout.split.gap / 2 : C.y + C.h * L.yFrac;
   const heroH0 = hero ? L.heroSize * 0.9 : 0, sH0 = L.smallSize + L.lineGap;
@@ -442,6 +446,7 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   if (seg.capY != null) cy = C.y + C.h * seg.capY;
   const pale = seg.type === 'topsquare';
   if (pale) cy = C.y + 22 + (C.w - 44) + (C.h - (C.w - 44) - 22) / 2;
+  if (cap.dy) cy += cap.dy * T.canvas.h;
   const k = ease.out((t - cap.t0) / M.captionIn), hk = ease.back((t - (hi >= 0 ? cap.words[hi].t : cap.t0)) / M.heroPop);
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = k;
   const x = C.x + C.w / 2, dy = (1 - k) * 14;
@@ -452,9 +457,9 @@ function drawCaption(ctx, t, spec, T, C, seg, res) {
   let y = cy - total / 2;
   if (before && !heroOnly) { small(before, y + sH / 2); y += sH; }
   if (hero) {
-    let fs = L.heroSize; ctx.font = font(T, HF, fs, HW); while (ctx.measureText(hero).width > maxW && fs > 40) { fs -= 4; ctx.font = font(T, HF, fs, HW); }
+    let fs = L.heroSize; ctx.font = heroFont(fs); while (ctx.measureText(hero).width > maxW && fs > 40) { fs -= 4; ctx.font = heroFont(fs); }
     ctx.save(); ctx.translate(x, y + heroH / 2 + dy); const sc = hero ? lerp(0.82, 1, clamp(hk, 0, 1.2)) : 1; ctx.scale(sc, sc);
-    const HC = pale && T.chrome === false ? (P.heroStroke ?? P.hero) : (P.hero ?? P.lime);   // on a pale panel the pale hero colour vanishes: use its deeper stroke colour
+    const HC = cap.color ?? (pale && T.chrome === false ? (P.heroStroke ?? P.hero) : (P.hero ?? P.lime));   // on a pale panel the pale hero colour vanishes: use its deeper stroke colour
     if (CS.heroGlow) { ctx.shadowColor = `rgba(${P.glowRgb ?? '255,255,255'},0.85)`; ctx.shadowBlur = CS.heroGlow; ctx.fillStyle = HC; ctx.fillText(hero, 0, 0); }
     ctx.shadowColor = pale ? 'rgba(60,70,20,0.45)' : 'rgba(0,0,0,0.45)'; ctx.shadowBlur = pale ? 6 : 18; ctx.fillStyle = HC; ctx.fillText(hero, 0, 0);
     ctx.shadowBlur = 0; ctx.lineWidth = pale ? 2.2 : 1.6; ctx.strokeStyle = pale ? (T.chrome === false ? HC : '#9bb532') : (P.heroStroke ?? HC); ctx.strokeText(hero, 0, 0); ctx.restore();

@@ -338,13 +338,14 @@ const OWNS_CAPTION = new Set([25, 26, 23, 24, 18, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 
 function captions(ctx, t, spec, T, owned) {
   if (owned) return;
-  const c = (spec.captions ?? []).find(c => t >= c.t0 && t < c.t1); if (!c) return;
+  const c = (spec.captions ?? []).find(c => t >= c.t0 && t < c.t1); if (!c || c.hidden) return;
   const small = c.words.filter(w => !w.hero && w.t <= t), hero = c.words.find(w => w.hero && w.t <= t);
-  const y = H * 0.80, kk = eo((t - (hero?.t ?? c.t0)) / 0.14);
+  const S = c.scale ?? 1, HFAM = c.font ?? famOf(T, 'serifItalic');   // per-card overrides from a targeted edit
+  const y = H * (0.80 + (c.dy ?? 0)), kk = eo((t - (hero?.t ?? c.t0)) / 0.14);
   ctx.save();
-  if (small.length) text(ctx, small.map(w => w.w).join(' ').toUpperCase(), W / 2, y - (hero ? 130 : 0), 54, famOf(T, 'ui', 800), '#fff', { glow: 'rgba(0,0,0,0.85)', glowBlur: 16 });
-  if (hero) { const col = themeCol(spec, hero.w.length), s = hero.w, sz = fitSize(ctx, s, famOf(T, 'serifItalic'), W * 0.86, 170 * (0.8 + 0.2 * eb(kk)));
-    text(ctx, s, W / 2, y, sz, famOf(T, 'serifItalic'), '#fff', { glow: col, glowBlur: 46 }); }
+  if (small.length) text(ctx, small.map(w => w.w).join(' ').toUpperCase(), W / 2, y - (hero ? 130 * S : 0), 54 * S, famOf(T, 'ui', 800), '#fff', { glow: 'rgba(0,0,0,0.85)', glowBlur: 16 });
+  if (hero) { const col = c.color ?? themeCol(spec, hero.w.length), s = c.upper ? hero.w.toUpperCase() : hero.w, sz = fitSize(ctx, s, HFAM, W * 0.86, 170 * S * (0.8 + 0.2 * eb(kk)));
+    text(ctx, s, W / 2, y, sz, HFAM, '#fff', { glow: col, glowBlur: 46 }); }
   ctx.restore();
 }
 
@@ -380,16 +381,18 @@ function worldDraw(ctx, t, k, c, spec, T, res, face, z, anchor) {
   const v = ctx.createRadialGradient(W / 2, H * 0.45, H * 0.3, W / 2, H * 0.5, H * 0.8); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.45)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
 }
 function captionsOnePart(ctx, t, spec, T, c) {
-  const cap = (spec.captions ?? []).find(x => t >= x.t0 && t < x.t1); if (!cap) return;
+  const cap = (spec.captions ?? []).find(x => t >= x.t0 && t < x.t1); if (!cap || cap.hidden) return;
   const small = cap.words.filter(w => !w.hero && w.t <= t), hero = cap.words.find(w => w.hero && w.t <= t);
+  const S = cap.scale ?? 1, HFAM = cap.font ?? famOf(T, 'serifItalic');   // per-card overrides from a targeted edit
   // the text block lives in ONE part of the frame: the half opposite the face in tight shots, the chest/lower area otherwise
   let cx = W / 2, cy = H * 0.74, maxW = W * 0.86, align = 'center';
   if (c && c.textSide) { cx = c.textSide > 0 ? W * 0.74 : W * 0.26; cy = H * 0.5; maxW = W * 0.44; }
+  cy += (cap.dy ?? 0) * H;
   const kk = eo((t - (hero?.t ?? cap.t0)) / 0.14);
   ctx.save();
-  if (small.length) text(ctx, small.map(w => w.w).join(' ').toUpperCase(), cx, cy - (hero ? 120 : 0), c?.textSide ? 40 : 52, famOf(T, 'ui', 800), '#fff', { glow: 'rgba(0,0,0,0.85)', glowBlur: 16 });
-  if (hero) { const col = themeCol(spec, hero.w.length), s = hero.w, sz = fitSize(ctx, s, famOf(T, 'serifItalic'), maxW, 170 * (0.8 + 0.2 * eb(kk)));
-    text(ctx, s, cx, cy, sz, famOf(T, 'serifItalic'), '#fff', { glow: col, glowBlur: 46 }); }
+  if (small.length) text(ctx, small.map(w => w.w).join(' ').toUpperCase(), cx, cy - (hero ? 120 * S : 0), (c?.textSide ? 40 : 52) * S, famOf(T, 'ui', 800), '#fff', { glow: 'rgba(0,0,0,0.85)', glowBlur: 16 });
+  if (hero) { const col = cap.color ?? themeCol(spec, hero.w.length), s = cap.upper ? hero.w.toUpperCase() : hero.w, sz = fitSize(ctx, s, HFAM, maxW, 170 * S * (0.8 + 0.2 * eb(kk)));
+    text(ctx, s, cx, cy, sz, HFAM, '#fff', { glow: col, glowBlur: 46 }); }
   ctx.restore();
 }
 

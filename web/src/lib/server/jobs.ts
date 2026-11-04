@@ -126,3 +126,71 @@ export function requeueEdit(id: string) {
   writeFileSync(join(jobDir(id), 'status.json'), JSON.stringify({ ...s, state: 'queued', pct: 0, error: undefined }, null, 1));
   enqueue(id);
 }
+
+function setJob(id: string, k: string) {
+  const f = join(jobDir(id), 'job.json'), job = JSON.parse(readFileSync(f, 'utf8'));
+  job[k] = true;
+  writeFileSync(f, JSON.stringify(job, null, 1));
+}
+/** ask for the final MP4: the next run renders + shares from the planned edit and ends 'done' (engine/run.mjs, job.render) */
+export function requestRender(id: string) { setJob(id, 'render'); requeueEdit(id); }
+/** a prompt that only changes the grade: the engine re-grades and rebuilds the preview, nothing else */
+export function requeueRegrade(id: string) { setJob(id, 'regradeOnly'); requeueEdit(id); }
+
+/** the reference edits recreated once in code (recreate/<id>, served by app/ref); their raw take is data/clips/<clip>/before.mp4.
+ *  ba5 is not listed: it is the Storyboard card behind Card Studio, which the engines already make. */
+export type RefSample = { id: string; name: string; line: string; clip: string; before: string; player: string };
+const REFS: Omit<RefSample, 'before' | 'player'>[] = [
+  { id: 'ba1', name: 'Brand ad', line: 'A product ad edit', clip: 'ba1c' },
+  { id: 'ba2', name: 'Creator studio', line: 'A creator talking-head edit', clip: 'ba2c' },
+  { id: 'ba3', name: '$10 vs $80', line: 'A side-by-side comparison', clip: 'ba3c' },
+  { id: 'ba4', name: 'Interview desk', line: 'An interview at a desk', clip: 'ba4c' },
+  { id: 'self1', name: 'Our own edit', line: 'A take we edited ourselves', clip: 'self1' },
+];
+export function refSamples(): RefSample[] {
+  return REFS.filter(r => existsSync(join(ROOT, 'data', 'clips', r.clip, 'before.mp4')) && existsSync(join(ROOT, 'recreate', r.id, 'index.html')))
+    .map(r => ({ ...r, before: `/data/clips/${r.clip}/before.mp4`, player: `/recreate/${r.id}/index.html?embed=1` }));
+}
+/** a prompt on a reference sample: its raw take goes through a real engine like any sample, then the prompt is applied */
+export function startRefSample(style: string, refId: string) {
+  const r = REFS.find(x => x.id === refId); if (!r) return null;
+  const src = join(ROOT, 'data', 'clips', r.clip, 'before.mp4');
+  if (!existsSync(src)) return null;
+  const id = newId(); mkdirSync(jobDir(id), { recursive: true });
+  copyFileSync(src, join(jobDir(id), 'input.mp4'));
+  writeJob(id, 'input.mp4', { style, sample: true });
+  enqueue(id);
+  return id;
+}
+
+/** what the live preview draws: clip/preview.json (the merged T written by engine/preview.mjs) or, for jobs made before it,
+ *  the same merge done here (engine template + style for Card Studio); the spec's own overrides always go on top (a no-op twice) */
+type O = Record<string, unknown>;
+const isObj = (v: unknown): v is O => !!v && typeof v === 'object' && !Array.isArray(v);
+function merge(a: O, b: unknown): O {
+  const o: O = { ...a };
+  if (isObj(b)) for (const [k, v] of Object.entries(b)) o[k] = isObj(v) && isObj(a?.[k]) ? merge(a[k] as O, v) : v;
+  return o;
+}
+const readJson = (f: string) => JSON.parse(readFileSync(f, 'utf8'));
+export type Preview = { engine: string; spec: O; T: O; specFile: string; video: string; from: 'preview.json' | 'template'; t: string | null };
+export function previewOf(id: string): Preview | null {
+  const dir = jobDir(id), clip = join(dir, 'clip');
+  let job: O = {}; try { job = readJson(join(dir, 'job.json')); } catch { /* old job */ }
+  const st = readStatus(id) as { preview?: { engine?: string; spec?: string; video?: string; t?: string } } | null;
+  const engine = st?.preview?.engine ?? (job.engine as string | undefined) ?? (job.style === 'creator-mix' ? 'creator-mix' : 'card-studio');
+  const specFile = st?.preview?.spec ?? (engine === 'creator-mix' ? 'spec.mix.json' : 'spec.card.json');
+  if (!/^[\w.-]+\.json$/.test(specFile) || !existsSync(join(clip, specFile))) return null;
+  const spec = readJson(join(clip, specFile)) as O;
+  let T: O | null = null, from: Preview['from'] = 'template';
+  if (existsSync(join(clip, 'preview.json'))) { try { T = readJson(join(clip, 'preview.json')); from = 'preview.json'; } catch { T = null; } }
+  if (!T) {
+    if (engine === 'creator-mix') T = readJson(join(ROOT, 'engine', 'templates', 'creator-mix.json')) as O;
+    else {
+      const base = readJson(join(ROOT, 'engine', 'templates', 'card-studio.json')), sid = String(spec.style ?? 'card-studio');
+      const f = /^[\w-]+$/.test(sid) ? [join(ROOT, 'engine', 'styles', `${sid}.json`), join(ROOT, 'engine', 'styles', 'retired', `${sid}.json`)].find(x => existsSync(x)) : undefined;
+      T = { ...merge(base, f ? readJson(f) : {}), name: sid };
+    }
+  }
+  return { engine, spec, T: merge(T, spec.overrides), specFile, video: st?.preview?.video ?? String(spec.video ?? 'graded.mp4'), from, t: st?.preview?.t ?? null };
+}

@@ -19,6 +19,8 @@ const isObj_ = v => v && typeof v === 'object' && !Array.isArray(v), merge_ = (a
 // the style the director used (engine/styles.mjs), plus any changes asked for after the first render (engine/edits.mjs)
 const T = merge_(loadStyle(spec.style), spec.overrides);
 for (const f of Object.values(T.fonts)) GlobalFonts.registerFromPath(join(ROOT, 'assets/renderer/fonts', f.file), f.family);
+// a caption restyled on its own (a targeted edit) carries its font file
+for (const c of spec.captions ?? []) if (c.font && c.fontFile && existsSync(join(ROOT, 'assets/renderer/fonts', c.fontFile))) GlobalFonts.registerFromPath(join(ROOT, 'assets/renderer/fonts', c.fontFile), c.font);
 const W = T.canvas.w, H = T.canvas.h, FPS = +opt('--fps', spec.fps ?? 30);
 const video = join(dir, spec.video);
 const pr = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'json', video], { encoding: 'utf8' })).streams[0];

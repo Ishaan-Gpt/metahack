@@ -1,17 +1,22 @@
 // One edit job, end to end: raw take in, edited MP4 (and a before/after) out. The studio's API starts this as a child
 // process per job and reads <job>/status.json; nothing here needs the web app.
-//   node engine/run.mjs <job dir>        (the dir holds job.json { engine?, badge, handle, input, rerender? })
+//   node engine/run.mjs <job dir>        (the dir holds job.json { engine?, badge, handle, input, render?, regradeOnly?, redirect? })
 // Two render engines, Vignesh's templates: card-studio (Card Studio) and creator-mix (Creator Mix, 26 effects, 8 to 16 picked per video). A new job
 // gets the other engine from the last one (data/jobs/.engine-turn), so uploads alternate between them.
 // Stages: watch (crop to 9:16, transcribe, pauses cut) -> direct (rules + one director plan) -> build (stock, person matte)
 // -> render (canvas frames) -> mix -> share. job.rerender (set by engine/edits.mjs after a prompt) skips straight to
 // render with the edited plan: no new transcription, no new director call.
+// PREVIEW FIRST (5 Nov 2026): a new job runs watch -> direct -> build and STOPS at status.state 'preview' (status.preview,
+// clip/preview.json = the merged template; the studio draws the edit live with player/*.js). The MP4 is made only when
+// job.json has render: true (the studio's Render button): that run is the old re-render (render -> mix -> share -> 'done').
+// job.regradeOnly re-grades graded.mp4 and goes back to 'preview'; job.redirect re-directs from the cached words (engine switch).
 // Every failure ends as status.state 'error' with a code and a sentence a creator can act on; the raw log stays in log.txt.
 import { spawn, execFileSync } from 'node:child_process';
 import { copyFileSync, appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, statSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ROOT, loadEnv } from './env.mjs';
 import { listStyles, loadStyle } from './styles.mjs';
+import { writePreview } from './preview.mjs';
 
 loadEnv();
 const JOB = resolve(process.argv[2] ?? '');
@@ -20,6 +25,7 @@ const job = JSON.parse(readFileSync(join(JOB, 'job.json'), 'utf8'));
 const CLIP = join(JOB, 'clip'); mkdirSync(CLIP, { recursive: true });
 const POLY = job.style === 'polyester';   // Template 3: explicit choice only ("auto" never lands here); photos in, no model call at all
 const ENGINES = ['card-studio', 'creator-mix'], LABEL = { 'card-studio': 'Card Studio', 'creator-mix': 'Creator Mix', polyester: 'Polyester' };
+const ENGINE0 = job.engine;   // Polyester keeps the talking edit's engine in job.json, so "switch back" finds its plan
 if (POLY) job.engine = 'polyester';
 else if (!ENGINES.includes(job.engine)) {
   if (ENGINES.includes(job.style)) job.engine = job.style;
@@ -29,29 +35,39 @@ else if (!ENGINES.includes(job.engine)) {
 const ENG = job.engine, MIX = ENG === 'creator-mix', SPEC = join(CLIP, MIX ? 'spec.mix.json' : 'spec.card.json');
 const S = loadStyle(ENG);   // the engine's style: grade, card layout (Card Studio's Zoom download crops the card)
 const PY = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3');   // Windows: python3 is the Store stub
-const RERENDER = !!job.rerender && existsSync(SPEC);
-const prev = RERENDER && existsSync(join(JOB, 'status.json')) ? JSON.parse(readFileSync(join(JOB, 'status.json'), 'utf8')) : null;
+// which run this is: 'render' (the final MP4; job.render from the studio, job.rerender from before preview-first),
+// 'regrade' (colour only, back to preview), 'redirect' (engine switch: direct again from the cached words), 'full' (a new take)
+const HAVE_SPEC = existsSync(SPEC);
+const MODE = POLY ? 'poly' : (job.render || job.rerender) && HAVE_SPEC ? 'render' : job.regradeOnly && HAVE_SPEC ? 'regrade'
+  : job.redirect && ['words.json', 'cut.json', 'cut.mp4'].every(f => existsSync(join(CLIP, f))) ? 'redirect' : 'full';
+const RERENDER = MODE === 'render';
+const prev = MODE !== 'full' && existsSync(join(JOB, 'status.json')) ? (() => { try { return JSON.parse(readFileSync(join(JOB, 'status.json'), 'utf8')); } catch { return null; } })() : null;
 const LOG = join(JOB, 'log.txt');
 const STAGES = POLY ? [
   ['cutout', 'Cutting you out', 'Local cut-outs of every photo, nothing leaves this machine'],
   ['render', 'Rendering', 'Frame-accurate Polyester: flashes, glitch frames and splits on the beat'],
   ['share', 'Making the download', 'The finished edit'],
+] : MODE === 'render' ? [
+  ['render', 'Rendering', 'Drawing every frame'],
+  ['mix', 'Mixing the sound', 'Voice, effects on every change, a quiet bed, -14 LUFS'],
+  ['share', 'Making the download', 'The show video and the Zoom download'],
+] : MODE === 'regrade' ? [
+  ['grade', 'Re-grading the colour', 'Your new colour on the whole take'],
 ] : [
   ['watch', 'Watching your take', 'Cropping to 9:16, hearing every word, cutting the pauses'],
   ['direct', 'Directing', 'The director reads the take and plans every beat'],
   ['build', 'Building the looks', 'Fetching photos for the nouns, cutting you out for text-behind'],
-  ['render', 'Rendering', 'Drawing every frame'],
-  ['mix', 'Mixing the sound', 'Voice, effects on every change, a quiet bed, -14 LUFS'],
-  ['share', 'Making the download', 'The show video and the Zoom download'],
 ];
-const status = { id: job.id, pid: process.pid, raw: job.input ?? job.polyester?.people?.[0]?.photos?.[0], state: 'running', stage: POLY ? 'cutout' : 'watch', stages: STAGES.map(([id, label, detail]) => ({ id, label, detail, state: 'pending' })), pct: 0, started: new Date().toISOString(), style: ENG, styleLabel: LABEL[ENG], engine: ENG, events: RERENDER ? (prev?.events ?? []) : [] };
-if (RERENDER && prev) for (const k of ['input', 'plan', 'meta', 'choice', 'raw', 'outputs', 'finished', 'duration']) if (prev[k]) status[k] = prev[k];
+const status = { id: job.id, pid: process.pid, raw: job.input ?? job.polyester?.people?.[0]?.photos?.[0], state: 'running', stage: STAGES[0][0], stages: STAGES.map(([id, label, detail]) => ({ id, label, detail, state: 'pending' })), pct: 0, started: new Date().toISOString(), style: ENG, styleLabel: LABEL[ENG], engine: ENG, events: MODE !== 'full' && MODE !== 'poly' ? (prev?.events ?? []) : [] };
+// keep what an earlier run found (and the last final render's outputs, so a download stays offered while the preview changes)
+if (prev && MODE !== 'full') for (const k of ['input', 'plan', 'meta', 'choice', 'raw', 'outputs', 'finished', 'duration', 'preview', 'renderedEdits']) if (prev[k] != null) status[k] = prev[k];
+if (MODE === 'poly') delete status.preview;
 // atomic: write a temp file and rename it, so the studio never reads a half-written status
 const save = () => { const f = join(JOB, 'status.json'); writeFileSync(f + '.tmp', JSON.stringify(status, null, 1)); renameSync(f + '.tmp', f); };
 const log = s => appendFileSync(LOG, `[${new Date().toISOString().slice(11, 19)}] ${s}\n`);
 const event = (text, kind = 'info') => { status.events.push({ t: +((Date.now() - T0) / 1000).toFixed(1), kind, text }); status.events = status.events.slice(-40); save(); log(text); };
 const T0 = Date.now();
-const WEIGHT = POLY ? { cutout: 30, render: 62, share: 8 } : { watch: 22, direct: 10, build: 13, render: 40, mix: 8, share: 7 };
+const WEIGHT = POLY ? { cutout: 30, render: 62, share: 8 } : MODE === 'render' ? { render: 75, mix: 12, share: 13 } : MODE === 'regrade' ? { grade: 100 } : { watch: 50, direct: 25, build: 25 };
 function stage(id, state, extra = {}) {
   const s = status.stages.find(x => x.id === id); Object.assign(s, { state, ...extra });
   if (state === 'running') { status.stage = id; s.startedAt = Date.now(); }
@@ -95,6 +111,11 @@ const has = (s, re) => re.test(s ?? '');
 // ---- Template 3 "Polyester": photos in, a 19.3 s edit out. Zero model/API calls; everything runs on this machine. ------------------
 if (POLY) {
   const cfg = job.polyester ?? {};
+  if ((job.render || job.rerender) && existsSync(join(JOB, 'polyester.mp4')) && prev?.outputs?.template === 'polyester') {   // the Polyester MP4 is already final
+    job.render = false; job.rerender = false; writeFileSync(join(JOB, 'job.json'), JSON.stringify({ ...job, engine: ENGINE0 }, null, 1));
+    for (const s of status.stages) s.state = 'skipped';
+    Object.assign(status, { outputs: prev.outputs, duration: prev.duration, state: 'done', pct: 100, finished: new Date().toISOString(), seconds: 0 }); save(); process.exit(0);
+  }
   const abs = f => resolve(JOB, f);
   const people = (cfg.people ?? []).map(p => ({ name: String(p.name ?? '').slice(0, 12), photos: (p.photos ?? []).map(abs).filter(existsSync) })).filter(p => p.photos.length);
   if (!people.length) fail(new JobError('NO_PHOTOS', 'Template 3 needs photos of you. Upload at least two, ideally 8 to 12 (face close-ups, half body, full body).'));
@@ -108,13 +129,14 @@ if (POLY) {
   stage('cutout', 'done');
   stage('render', 'running'); event('Rendering 579 frames');
   try {
-    await step(PY, ['-I', join(ROOT, 'tools/polyester/render.py'), 'video'], {
+    await step(PY, [join(ROOT, 'tools/polyester/render.py'), 'video'], {
       env: { POLY_DIR: PD, POLY_NAMES: names, ...(cfg.audio && existsSync(abs(cfg.audio)) ? { POLY_AUDIO: abs(cfg.audio) } : {}) }, limit: 1800,
       onLine: l => { const m = /^frame (\d+)/.exec(l); if (m) sub(+m[1] / 579); } });
   } catch (e) { fail(new JobError('RENDER', 'The render stopped part way. Your photos are safe; try again.', e.tail ?? e.message)); }
   stage('render', 'done');
   stage('share', 'running');
   copyFileSync(join(PD, 'out/polyester.mp4'), join(JOB, 'polyester.mp4')); stage('share', 'done');
+  job.render = false; job.rerender = false; job.regradeOnly = false; job.redirect = false; writeFileSync(join(JOB, 'job.json'), JSON.stringify({ ...job, engine: ENGINE0 }, null, 1));
   Object.assign(status, { state: 'done', pct: 100, finished: new Date().toISOString(), seconds: +((Date.now() - T0) / 1000).toFixed(1),
     outputs: { edit: 'polyester.mp4', beforeAfter: null, raw: status.raw, template: 'polyester', show: 'polyester.mp4', download: 'polyester.mp4', downloadName: 'Polyester.mp4' }, duration: 19.3 });
   event(`Done in ${status.seconds} s`, 'done'); save(); process.exit(0);
@@ -140,24 +162,34 @@ const claude = (process.env.DIRECTOR ?? '').toLowerCase() === 'claude';   // tem
 const realMeta = !claude && !!process.env.MODEL_API_KEY?.trim() && !process.env.META_API_BASE;
 const standin = !claude && !!process.env.META_API_BASE;
 const gem = !claude && !standin && !process.env.MODEL_API_KEY?.trim() && (!!process.env.GEMINI_API_KEY?.trim() || !!(await import('./muse.mjs')).localDirector());   // free Gemini API, BACKUP only (no Meta key)
-if (!RERENDER && claude && !process.env.ANTHROPIC_API_KEY?.trim()) fail(new JobError('NO_DIRECTOR_KEY', 'The studio is missing its director key, so nothing can plan your edit. This is on our side, not yours: we are on it.'));
-if (!RERENDER && !claude && !realMeta && !standin && !gem) fail(new JobError('NO_META_KEY', 'The studio is missing its Meta Model API key, so Muse Spark cannot direct. This is on our side, not yours: we are on it.'));
-if (!RERENDER) {
+const NEEDS_MODEL = MODE === 'full' || MODE === 'redirect';
+if (NEEDS_MODEL && claude && !process.env.ANTHROPIC_API_KEY?.trim()) fail(new JobError('NO_DIRECTOR_KEY', 'The studio is missing its director key, so nothing can plan your edit. This is on our side, not yours: we are on it.'));
+if (NEEDS_MODEL && !claude && !realMeta && !standin && !gem) fail(new JobError('NO_META_KEY', 'The studio is missing its Meta Model API key, so Muse Spark cannot direct. This is on our side, not yours: we are on it.'));
+if (NEEDS_MODEL) {
   log('Muse model map: ' + (await import('./muse.mjs')).museTable());
   const local = (await import('./muse.mjs')).localDirector();
   status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : local ? 'local-open-weights' : gem ? 'gemini' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : local ? local.model : gem ? (process.env.GEMINI_MODEL || 'gemini-2.5-flash') : 'muse-spark-1.3' }; save();
 }
 
-// ---- a re-render after a prompt edit: the plan is already edited, so draw and mix it again ---------------------------
+// ---- the final render (the studio's Render button, or a re-render from before preview-first) --------------------------
 if (RERENDER) {
-  for (const id of ['watch', 'direct', 'build']) status.stages.find(x => x.id === id).state = 'skipped';
-  event('Applying your changes', 'decision');
+  event('Rendering your final video', 'decision');
   await renderAndShare();
   process.exit(0);
 }
 
-// ---- 1 watch ---------------------------------------------------------------------------------------------------------
-stage('watch', 'running');
+// ---- colour only: re-grade graded.mp4 and go back to the live preview -------------------------------------------------
+if (MODE === 'regrade') {
+  stage('grade', 'running'); event('Re-grading the colour');
+  try { await regrade(); } catch (e) { fail(new JobError('GRADE', 'The colour change did not go through. Press Try again; your edit is kept.', (e.tail ?? '').slice(-400) || e.message)); }
+  stage('grade', 'done');
+  finishPreview('New colour is in the preview');
+  process.exit(0);
+}
+
+// ---- 1 watch (skipped on an engine switch: the words, the cut and the framing are already here) ---------------------
+if (MODE === 'redirect') { status.stages.find(x => x.id === 'watch').state = 'skipped'; event('Re-directing from the words already heard', 'decision'); }
+else { stage('watch', 'running');
 try {
   await step(process.execPath, [join(ROOT, 'engine/prep.mjs'), input, CLIP], {
     env: { HEAR: realMeta || (gem && !(await import('./muse.mjs')).localDirector()) ? 'meta' : 'groq', DIALECT: 'card-studio', PREP_GRADE: '0' },   // test runs: Whisper on Groq for the words
@@ -171,10 +203,11 @@ try {
   if (has(t, /no words|0 words/i)) fail(new JobError('NO_SPEECH', 'We could not hear any words in your take. Check the mic was on and you speak in the first seconds.', t.slice(-400)));
   fail(new JobError('PREP', 'We could not prepare your video. Try exporting it again from your phone (MP4, H.264) and upload once more.', t.slice(-400)));
 }
+}
 const words = JSON.parse(readFileSync(join(CLIP, 'words.json'), 'utf8'));
 if (words.length < 6) fail(new JobError('NO_SPEECH', 'We heard almost nothing in your take. The edit is built from your words, so upload a take where you talk.'));
 const cut = JSON.parse(readFileSync(join(CLIP, 'cut.json'), 'utf8'));
-stage('watch', 'done'); event(`${words.length} words; pauses cut, ${dur.toFixed(1)} s to ${cut.duration.toFixed(1)} s`);
+if (MODE !== 'redirect') stage('watch', 'done'); event(`${words.length} words; pauses cut, ${dur.toFixed(1)} s to ${cut.duration.toFixed(1)} s`);
 
 // ---- 2 direct ----------------------------------------------------------------------------------------------------------
 stage('direct', 'running');
@@ -201,7 +234,19 @@ status.plan = { engine: ENG, effects: mixSpec?.fx?.length ?? null, segments: spe
 status.meta.calls = usage?.calls?.map(c => ({ call: c.call, model: c.model, ok: c.ok !== false, cache: !!c.cache_hit, seconds: c.seconds ?? null, tokens: c.usage?.total_tokens ?? null, standin: !!c.standin })) ?? [];
 event(`${spec.segments.length} beats in ${status.plan.layouts.length} layouts; ${spec.director?.plan ?? ''}`, 'decision');
 
-await renderAndShare();
+// preview first: stop here; the MP4 is made only when the studio sets job.render (its Render button)
+finishPreview('Preview ready: change anything, then render');
+process.exit(0);
+
+/** end a run at the live preview: clip/preview.json + status.preview, state 'preview' (outputs of an earlier render kept) */
+function finishPreview(said) {
+  const sp = JSON.parse(readFileSync(SPEC, 'utf8'));
+  status.preview = writePreview(CLIP, ENG, sp);
+  job.regradeOnly = false; job.regrade = false; job.redirect = false; job.rerender = false; job.render = false;
+  writeFileSync(join(JOB, 'job.json'), JSON.stringify(job, null, 1));
+  Object.assign(status, { state: 'preview', pct: 100, finished: new Date().toISOString(), seconds: +((Date.now() - T0) / 1000).toFixed(1), duration: +sp.duration.toFixed(1), edits: (sp.edits ?? []).length });
+  event(said, 'done'); save();
+}
 
 // ---- 3 render + 4 mix + 5 share: also the whole of a re-render after a prompt edit ------------------------------------
 async function regrade() {
@@ -244,11 +289,12 @@ async function renderAndShare() {
     }
     stage('share', 'done');
   } catch (e) { log('share step failed (the edit is fine): ' + e.message); status.stages.find(x => x.id === 'share').state = 'skipped'; }
-  job.rerender = false; job.regrade = false; writeFileSync(join(JOB, 'job.json'), JSON.stringify(job, null, 1));
-  Object.assign(status, { state: 'done', pct: 100, finished: new Date().toISOString(), seconds: +((Date.now() - T0) / 1000).toFixed(1), edits: (spec.edits ?? []).length,
+  job.rerender = false; job.render = false; job.regrade = false; job.regradeOnly = false; writeFileSync(join(JOB, 'job.json'), JSON.stringify(job, null, 1));
+  Object.assign(status, { state: 'done', pct: 100, finished: new Date().toISOString(), seconds: +((Date.now() - T0) / 1000).toFixed(1), edits: (spec.edits ?? []).length, renderedEdits: (spec.edits ?? []).length,
     outputs: { edit: 'edit.mp4', beforeAfter: MIX && existsSync(BA) ? 'before-after.mp4' : null, raw: job.input,
       template: ENG, show: MIX && existsSync(BA) ? 'before-after.mp4' : 'edit.mp4', download: existsSync(join(JOB, ZOOM)) ? ZOOM : null, downloadName: ZOOM_NAME },
     duration: +spec.duration.toFixed(1) });
-  event(RERENDER ? `Changes applied in ${status.seconds} s` : `Done in ${status.seconds} s`, 'done');
+  try { status.preview = writePreview(CLIP, ENG, spec); } catch (e) { log('preview.json not refreshed: ' + e.message); }
+  event(`Final video rendered in ${status.seconds} s`, 'done');
   save();
 }

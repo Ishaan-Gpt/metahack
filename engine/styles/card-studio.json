@@ -1,8 +1,26 @@
 {
   "order": 1,
   "label": "Card Studio",
-  "line": "Your take framed in a clean studio card, with a storyboard beside it and lime serif hero words.",
+  "line": "Your take framed in a clean studio card on a light page, with lime serif hero words.",
   "ref": "Edita Visuals, instagram.com/p/DerbE18txNg",
-  "swatch": ["#efefee", "#cbe65e", "#de7e59"],
-  "fundamentals": "light grey studio page; speaker in a rounded 9:16 card; 1-3 word captions with one lime serif-italic hero word; graphic cards with a title and a rising object; split with photos; post card with a cursor tap; orbit of icons; change every 2-3 s; soft whoosh and pop on every change"
+  "swatch": [
+    "#efefee",
+    "#cbe65e",
+    "#de7e59"
+  ],
+  "fundamentals": "light grey studio page; speaker in a rounded 9:16 card; 1-3 word captions with one lime serif-italic hero word; graphic cards with a title and a rising object; split with photos; post card with a cursor tap; orbit of icons; change every 2-3 s; soft whoosh and pop on every change",
+  "layout": {
+    "storyboard": {
+      "show": false
+    },
+    "card": {
+      "x": 270
+    },
+    "badge": {
+      "x": 278
+    },
+    "blob": {
+      "cx": 540
+    }
+  }
 }

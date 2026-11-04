@@ -5,6 +5,8 @@ import { HaloMark, Wordmark } from '@/components/ui/Logo';
 import { IconArrow, IconClose, IconSend, IconUpload } from '@/components/ui/icons';
 import { CaptionEditor, useCaptionDraft, type Op } from './CaptionEditor';
 import { CaptionLane, WordTools, useTimelineShortcuts } from './TimelineTools';
+import { LivePreview, type Pick } from './LivePreview';
+import { RefPlayer, type RefSample } from './RefPlayer';
 
 /**
  * The studio as an editor: footage bin on the left, the preview in the middle, Edit Easy's chat on the right where you
@@ -18,7 +20,7 @@ type Stage = { id: string; label: string; detail: string; state: 'pending' | 'ru
 type Ev = { t: number; kind: string; text: string };
 type JobErr = { code: string; human: string; detail?: string };
 type Status = {
-  id: string; finished?: string; state: 'queued' | 'running' | 'done' | 'error'; pct: number; stage?: string; stages: Stage[]; events: Ev[];
+  id: string; finished?: string; state: 'queued' | 'running' | 'preview' | 'done' | 'error'; preview?: { engine: string; spec: string; video: string; t: string; edits?: number }; renderedEdits?: number; pct: number; stage?: string; stages: Stage[]; events: Ev[];
   style?: string; styleLabel?: string; ahead?: number; error?: JobErr; seconds?: number; duration?: number; raw?: string;
   choice?: { by: string; style: string; why: string };
   plan?: { segments: number; layouts: string[]; planner?: string; captions: number; photos: number };
@@ -28,7 +30,7 @@ type Status = {
 type Spec = { engine?: string; captionPreset?: string | null; captionsHidden?: boolean; edits?: number; duration: number; segments: { type: string; t0: number; t1: number; label: string | null }[]; captions: { t0: number; t1: number; text: string; hero: string | null; words?: { w: string; t: number; e?: number; hero: boolean }[] }[]; sfx: { t: number; k: string }[] };
 type Health = { meta: 'live' | 'test' | 'claude' | 'missing'; ffmpeg: boolean; queue: number };
 type Msg = { who: 'you' | 'moovi'; text: string; kind?: string };
-type EditRes = { applied: { op: string; said: string }[]; unmatched: string[]; rendering: boolean };
+type EditRes = { applied: { op: string; said: string }[]; unmatched: string[]; rendering: boolean; needs?: 'none' | 'regrade' | 'full' };
 const ENGINE_NAME: Record<string, string> = { 'card-studio': 'Card Studio', 'creator-mix': 'Creator Mix', polyester: 'Polyester' };
 const TRY = ['zoom out a little', 'make the captions funkier', 'captions a bit bigger and higher', 'add a b-roll of a city at 6s', 'change governate to governorate', 'lower the music', 'no sound effects', 'warmer colour'];
 
@@ -114,7 +116,17 @@ export function Studio() {
   const [conn, setConn] = useState<'ok' | 'retrying'>('ok');
   const [drag, setDrag] = useState(false);
   const [view, setView] = useState<'edit' | 'split'>('edit');
-  const [touched, setTouched] = useState(false);   // the user picked a view themselves; until then the engine's show video plays (Creator Mix: its Before/After)
+  const [refs, setRefs] = useState<RefSample[]>([]);
+  /** a reference sample open in the studio: its edit is the live recreation player until a prompt starts a real job on its take */
+  const [refOpen, setRefOpen] = useState<RefSample | null>(null);
+  /** bumps when the plan changes without a render (a prompt with needs 'none'): the live preview refetches and redraws */
+  const [pv, setPv] = useState(0);
+  const [liveFail, setLiveFail] = useState<string | null>(null);
+  const [forceLive, setForceLive] = useState(false);
+  const [chip, setChip] = useState<Pick | null>(null);
+  const rendering = useRef(false);
+  const rawRef = useRef<HTMLVideoElement>(null);
+  const refClock = useRef<(() => { t: number; playing: boolean }) | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([{ who: 'moovi', text: 'Drop your video, or pick a sample on the left. I edit it, then you tell me what to change in plain words: "zoom out", "funkier captions", "add a b-roll of a city", or fix a word: "change governate to governorate".' }]);
   const [tab, setTab] = useState<'chat' | 'captions'>('chat');
   const [selected, setSelected] = useState<number | null>(null);
@@ -132,7 +144,7 @@ export function Studio() {
   const say = useCallback((m: Msg) => setMsgs(x => [...x, m]), []);
 
   useEffect(() => {
-    api<{ samples: Sample[] }>('/api/samples').then(r => setSamples(r.samples)).catch(() => setSamples([]));
+    api<{ samples: Sample[]; refs?: RefSample[] }>('/api/samples').then(r => { setSamples(r.samples); setRefs(r.refs ?? []); }).catch(() => setSamples([]));
     api<Health>('/api/health').then(setHealth).catch(() => setHealth(null));
   }, []);
   useEffect(() => {
@@ -148,7 +160,7 @@ export function Studio() {
   }, []);
 
   const go = useCallback((id: string | null) => {
-    setJobId(id); setSt(null); setSpec(null); seen.current = 0;
+    setJobId(id); setSt(null); setSpec(null); seen.current = 0; setChip(null); setLiveFail(null); setForceLive(false); rendering.current = false;
     router.replace(`/studio${id ? `?job=${id}` : ''}`, { scroll: false });
   }, [router]);
 
@@ -164,8 +176,9 @@ export function Studio() {
         const fresh = s.events.slice(seen.current); seen.current = s.events.length;
         for (const e of fresh) if (e.kind !== 'info' || /chose|heard|beats|Done/i.test(e.text)) say({ who: 'moovi', text: e.text, kind: e.kind });
         if (s.plan && !spec) api<Spec>(`/api/jobs/${jobId}/spec`).then(setSpec).catch(() => {});
-        if (s.state === 'done') {
+        if (s.state === 'done' || s.state === 'preview') {
           api<Spec>(`/api/jobs/${jobId}/spec`).then(setSpec).catch(() => {});
+          if (s.state === 'done' && rendering.current) { rendering.current = false; say({ who: 'moovi', text: 'The final video is rendered. Play it here or download it with Export.' }); }
           const p = pending.current; if (p) { pending.current = null; void edit({ prompt: p }); }
           return;
         }
@@ -182,10 +195,29 @@ export function Studio() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId, pollKey]);
 
+  /** a reference sample opens at once with its edit (the recreation player); nothing runs until a prompt asks for a change */
+  function openRef(r: RefSample) {
+    setFile(null); setPreview(null); go(null); setRefOpen(r); setView('edit');
+    say({ who: 'moovi', text: `${r.name}: this edit was made once in code, so it plays as it is. Tell me a change and I will run its raw take through an engine and apply it.` });
+  }
+  /** a prompt on a reference sample: a real job on its raw take, and the prompt is applied when its preview is ready */
+  async function startRef(r: RefSample, prompt: string) {
+    try {
+      const { id } = await api<{ id: string }>(`/api/sample?style=auto&ref=${encodeURIComponent(r.id)}`, { method: 'POST' });
+      pending.current = prompt; setRefOpen(null); go(id);
+      say({ who: 'moovi', text: `${r.name} has no engine of its own, so I am editing its raw take with one of mine first, then I will make that change.` });
+    } catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
+  }
+  /** the final MP4: rendered from the plan the live preview shows */
+  async function renderFinal() {
+    if (!jobId) return;
+    try { await api(`/api/jobs/${jobId}/render`, { method: 'POST' }); rendering.current = true; setSt(x => x ? { ...x, state: 'queued', pct: 0 } : x); setPollKey(k => k + 1); say({ who: 'moovi', text: 'Rendering the final video. The live preview keeps playing meanwhile.' }); }
+    catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
+  }
   async function pick(f: File) {
     const r = await checkFile(f);
     if (!r.ok) { say({ who: 'moovi', text: r.err.human, kind: 'error' }); return; }
-    setFile(f); setPreview(r.url); go(null);
+    setFile(f); setPreview(r.url); go(null); setRefOpen(null);
     say({ who: 'moovi', text: `Got ${f.name}. Press Edit, or tell me how it should look.` });
   }
   async function start() {
@@ -196,7 +228,7 @@ export function Studio() {
   }
   async function startSample(sid?: string) {
     const smp = samples.find(x => x.id === sid);
-    setFile(null); setPreview(null);
+    setFile(null); setPreview(null); setRefOpen(null);
     try { const { id } = await api<{ id: string }>(`/api/sample?style=auto${sid ? `&id=${encodeURIComponent(sid)}` : ''}`, { method: 'POST' }); go(id); say({ who: 'moovi', text: smp ? `Editing ${smp.name}'s take (${smp.credit}, ${smp.licence}).` : 'Editing a sample take.' }); }
     catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
   }
@@ -207,15 +239,17 @@ export function Studio() {
     catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
   }
   /** change the finished edit: a prompt is matched to the edit dictionary on the server; ops come from the Captions tab */
-  async function edit(body: { prompt: string } | { ops: Op[] }) {
+  async function edit(body: { prompt: string; target?: Pick['target'] } | { ops: Op[] }) {
     if (!jobId) return;
     setEditing(true);
     try {
       const r = await api<EditRes>(`/api/jobs/${jobId}/edit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      if (r.applied.length) say({ who: 'moovi', text: `${r.applied.map(a => a.said.replace(/\.+$/, '')).join('. ')}.${r.rendering ? ' Re-rendering now; the last cut keeps playing until the new one is in.' : ''}` });
+      const needs = r.needs ?? (r.rendering ? 'full' : 'none');
+      if (r.applied.length) say({ who: 'moovi', text: `${r.applied.map(a => a.said.replace(/\.+$/, '')).join('. ')}.${needs === 'full' ? ' Re-cutting now; the last cut keeps playing until the new one is in.' : needs === 'regrade' ? ' Re-grading the picture; this takes a moment.' : ''}` });
       if (r.unmatched.length) say({ who: 'moovi', kind: r.applied.length ? 'info' : 'error', text: `I could not match "${r.unmatched.join('", "')}" to an edit I know. Try one like "${TRY[msgs.length % TRY.length]}".` });
       if (!r.applied.length && !r.unmatched.length) say({ who: 'moovi', text: 'That is already how the edit looks, so nothing changed.' });
-      if (r.rendering) { setSt(x => x ? { ...x, state: 'queued', pct: 0 } : x); setPollKey(k => k + 1); }
+      if (needs !== 'none') { setSt(x => x ? { ...x, state: 'queued', pct: 0 } : x); setPollKey(k => k + 1); }
+      else if (r.applied.length) { setPv(k => k + 1); setForceLive(true); api<Spec>(`/api/jobs/${jobId}/spec`).then(setSpec).catch(() => {}); }
     } catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
     finally { setEditing(false); }
   }
@@ -226,7 +260,9 @@ export function Studio() {
   }
   function send() {
     const text = draft.trim(); if (!text) return;
-    setDraft(''); say({ who: 'you', text });
+    const target = chip?.target;
+    setDraft(''); say({ who: 'you', text: chip ? `${chip.label}: ${text}` : text }); setChip(null);
+    if (!jobId && refOpen) { void startRef(refOpen, text); return; }
     if (!jobId) {
       pending.current = text;
       say({ who: 'moovi', text: file ? 'Noted. Press Edit my video; I will make that change as soon as the first cut is ready.' : 'Noted. Drop a take or pick a sample, and I will make that change once it is edited.' });
@@ -234,25 +270,48 @@ export function Studio() {
     }
     if (st && (st.state === 'running' || st.state === 'queued')) { pending.current = text; say({ who: 'moovi', text: 'Still cutting. I will make that change the moment this cut is done.' }); return; }
     if (st?.state === 'error') { say({ who: 'moovi', text: 'This edit stopped, so there is nothing to change yet. Press Try again first.', kind: 'error' }); return; }
-    void edit({ prompt: text });
+    void edit(target ? { prompt: text, target } : { prompt: text });
   }
 
   const phase = !jobId ? 'pick' : !st ? 'loading' : st.state;
   const file$ = (n: string, dl = false) => `/api/jobs/${jobId}/file/${n}${dl ? '?dl=1' : ''}`;
-  // show = what plays (Card Studio: the full frame; Creator Mix: the Before/After) until the user picks a view; the
-  // download is file$(<any>, true), which the server answers with the Zoom file only (Vignesh, docs/TEMPLATES.md).
-  // While a prompt edit re-renders, the last cut keeps playing; ?v= changes when a new cut lands so the player reloads it.
+  // What the Edit tab plays: the live preview (the plan drawn in the browser) from the moment the plan is ready, and the
+  // final MP4 only when it is rendered and no edit came after it. The download is file$(<any>, true), which the server
+  // answers with the job's download file only. ?v= changes when a new cut lands so the player reloads it.
+  const ready = phase === 'done' || phase === 'preview';
+  const renderingNow = (phase === 'running' || phase === 'queued') && (rendering.current || (!!st?.preview && ['render', 'mix', 'share'].includes(st?.stage ?? '')));
+  const finalCurrent = phase === 'done' && !!st?.outputs?.edit && !forceLive && (st.renderedEdits == null || st.renderedEdits === (spec?.edits ?? 0));
+  const live = !!jobId && !liveFail && (phase === 'preview' || (phase === 'done' && !finalCurrent) || (renderingNow && !!st?.preview));
   const cut = phase === 'done' || (!!st?.outputs?.edit && phase !== 'error');
   const v = encodeURIComponent(st?.finished ?? '');
-  const shown = st?.outputs?.show && !touched ? st.outputs.show : view === 'edit' ? 'edit.mp4' : 'before-after.mp4';
-  const src = cut ? `${file$(shown)}?v=${v}` : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
+  const src = cut ? `${file$('edit.mp4')}?v=${v}` : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
+  const rawSrc = jobId ? file$(st?.raw ?? 'input.mp4') : refOpen ? refOpen.before : preview;
+  const canSplit = ready || !!refOpen || renderingNow;
+  // a spec fetch that failed (a slow first compile, a blip) is retried once the edit is ready, so the timeline fills in
+  useEffect(() => { if (ready && !spec && jobId) { const k = setTimeout(() => api<Spec>(`/api/jobs/${jobId}/spec`).then(setSpec).catch(() => {}), 1500); return () => clearTimeout(k); } }, [ready, spec, jobId, pollKey]);
   const D = spec?.duration ?? st?.duration ?? 0;
   // named from the engine id, so jobs made before a rename still show today's name
   const label = ENGINE_NAME[st?.style ?? ''] ?? st?.styleLabel ?? (jobId ? 'Choosing the engine' : 'Card Studio or Creator Mix');
   const capSpec = useMemo(() => spec ? { duration: spec.duration, captions: spec.captions } : null, [spec]);
   const capDraft = useCaptionDraft(capSpec);
   const busy = editing || phase === 'running' || phase === 'queued';
-  useTimelineShortcuts({ video: vid, draft: capDraft, selected, onSelect: setSelected, onApply: () => applyOps(capDraft.ops, capDraft.said), zoom, onZoom: setZoom, enabled: phase === 'done' && !busy });
+  useTimelineShortcuts({ video: vid, draft: capDraft, selected, onSelect: setSelected, onApply: () => applyOps(capDraft.ops, capDraft.said), zoom, onZoom: setZoom, enabled: ready && !busy });
+  // Before / After: the raw take follows the edit's clock (play, pause, seek), muted; the edit carries the sound
+  useEffect(() => {
+    if (view !== 'split') { rawRef.current?.pause(); return; }
+    let raf = 0;
+    const loop = () => {
+      const r = rawRef.current, m = refOpen && !jobId ? refClock.current?.() : vid.current ? { t: vid.current.currentTime, playing: !vid.current.paused } : null;
+      if (r && m && r.readyState >= 1) {
+        const tt = Math.min(m.t, (r.duration || 1e9) - 0.05);
+        if (Math.abs(r.currentTime - tt) > 0.25) r.currentTime = tt;
+        if (m.playing && r.paused && m.t < (r.duration || 1e9)) void r.play().catch(() => {}); else if (!m.playing && !r.paused) r.pause();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [view, refOpen, jobId]);
   const seek = (x: number) => { if (vid.current) vid.current.currentTime = x; };
   // zoomed in, the timeline follows the playhead so the words being said stay in view (Captions Easy)
   useEffect(() => {
@@ -270,7 +329,7 @@ export function Studio() {
         <span className="ed__sp" />
         {conn === 'retrying' && <span className="ed__conn">Reconnecting…</span>}
         {health && <span className={`ed__meta ed__meta--${health.meta}`}><i />{health.meta === 'live' ? 'Muse Spark live' : health.meta === 'claude' ? 'Claude Sonnet directing' : health.meta === 'test' ? 'Test mode' : 'Meta key missing'}</span>}
-        <a className={`ed__export ${phase === 'done' ? '' : 'is-off'}`} href={phase === 'done' ? file$('edit.mp4', true) : undefined} aria-disabled={phase !== 'done'}>Export</a>
+        <a className={`ed__export ${phase === 'done' && cut ? '' : 'is-off'}`} href={phase === 'done' && cut ? file$('edit.mp4', true) : undefined} aria-disabled={!(phase === 'done' && cut)}>Export</a>
       </header>
 
       <aside className="ed__bin">
@@ -295,17 +354,43 @@ export function Studio() {
           ))}
           {!samples.length && <p className="ed__ph">Loading sample takes…</p>}
         </div>
+        {refs.length > 0 && <>
+          <span className="ed__lab">Edits made once</span>
+          <div className="ed__samples" role="list" aria-label="Reference edits">
+            {refs.map(x => (
+              <button key={x.id} role="listitem" className={`ed__sample ${refOpen?.id === x.id ? 'is-on' : ''}`} onClick={() => openRef(x)} disabled={phase === 'running' || phase === 'queued'}>
+                <video src={`${x.before}#t=1`} muted preload="metadata" />
+                <span><b>{x.name}</b><em>{x.line}</em></span>
+              </button>
+            ))}
+          </div>
+        </>}
       </aside>
 
       <section className="ed__stage">
         <div className="ed__tabs">
           <span className="ed__lab">Preview</span>
-          {phase === 'done' && st?.outputs?.beforeAfter && <span className="ed__seg"><button aria-pressed={view === 'edit'} onClick={() => { setTouched(true); setView('edit'); }}>Edit</button><button aria-pressed={view === 'split'} onClick={() => { setTouched(true); setView('split'); }}>Before / after</button></span>}
+          {canSplit && <span className="ed__seg"><button aria-pressed={view === 'edit'} onClick={() => setView('edit')}>Edit</button><button aria-pressed={view === 'split'} onClick={() => setView('split')}>Before / After</button></span>}
+          <span className="ed__sp" />
+          {jobId && (ready || renderingNow) && (
+            renderingNow ? <button className="ed__render" disabled><HaloMark size={14} spin /> Rendering {Math.round(st?.pct ?? 0)}%</button>
+            : finalCurrent ? <span className="ed__row">{!liveFail && <button className="ed__textbtn" onClick={() => setForceLive(true)}>Click to edit parts</button>}<a className="ed__render" href={file$('edit.mp4', true)}>Download</a></span>
+            : <span className="ed__row">{phase === 'done' && !!st?.outputs?.edit && forceLive && (st.renderedEdits == null || st.renderedEdits === (spec?.edits ?? 0)) && <button className="ed__textbtn" onClick={() => setForceLive(false)}>Final video</button>}<button className="ed__render" onClick={renderFinal} disabled={editing}>{st?.outputs?.edit ? 'Render again' : 'Render final video'}</button></span>
+          )}
         </div>
-        <div className="ed__screen">
-          {src ? <video key={src} ref={vid} src={src} controls={cut} autoPlay={phase === 'done'} muted={phase !== 'done'} loop={phase !== 'done'} playsInline onTimeUpdate={e => setT(e.currentTarget.currentTime)} />
-            : <div className="ed__empty"><HaloMark size={54} /><p>Your edit plays here.</p></div>}
-          {(phase === 'running' || phase === 'queued' || phase === 'loading') && st && (
+        <div className={`ed__screen ${view === 'split' && canSplit ? 'is-ba' : ''}`}>
+          <div className="ed__ba-l" hidden={!(view === 'split' && canSplit)}>{rawSrc && <video ref={rawRef} src={rawSrc} muted playsInline preload="auto" />}</div>
+          <div className="ed__ba-r">
+            {refOpen && !jobId ? <RefPlayer key={refOpen.id} r={refOpen} clock={refClock} />
+              : live && jobId ? <LivePreview jobId={jobId} version={`${st?.preview?.t ?? st?.finished ?? ''}-${pv}`} videoRef={vid} picked={chip}
+                  onTime={x => setT(p => Math.abs(p - x) > 0.04 ? x : p)} onPick={p => { setChip(p); setTab('chat'); }}
+                  onFail={why => { setLiveFail(why); setChip(null); say({ who: 'moovi', kind: 'info', text: `The live preview could not draw (${why}), so this shows ${cut ? 'the last rendered cut' : 'your raw take'}.` }); }} />
+              : src ? <video key={src} ref={vid} src={src} controls={cut} autoPlay={phase === 'done'} muted={phase !== 'done'} loop={phase !== 'done'} playsInline onTimeUpdate={e => setT(e.currentTarget.currentTime)} />
+              : <div className="ed__empty"><HaloMark size={54} /><p>Your edit plays here.</p></div>}
+            {view === 'split' && canSplit && <span className="ed__muse"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 0c.5 4.2 3.8 7.5 8 8-4.2.5-7.5 3.8-8 8-.5-4.2-3.8-7.5-8-8 4.2-.5 7.5-3.8 8-8z" fill="currentColor" /></svg>Muse</span>}
+          </div>
+          {liveFail && jobId && view === 'edit' && <span className="ed__note">Live preview unavailable: showing {cut ? 'the last rendered cut' : 'the raw take'}.</span>}
+          {(phase === 'running' || phase === 'queued' || phase === 'loading') && st && !renderingNow && (
             <div className="ed__busy">
               <HaloMark size={30} spin />
               <b>{st.state === 'queued' ? (st.ahead ? `${st.ahead} ahead of you` : 'Starting') : st.stages.find(x => x.id === st.stage)?.label ?? 'Working'}</b>
@@ -331,7 +416,7 @@ export function Studio() {
           <span className="ed__seg" role="tablist" aria-label="Chat or captions"><button role="tab" aria-pressed={tab === 'chat'} onClick={() => setTab('chat')}>Chat</button><button role="tab" aria-pressed={tab === 'captions'} onClick={() => setTab('captions')} disabled={!spec}>Captions</button></span>
         </div>
         {tab === 'captions' && jobId && spec ? (
-          <div className="ed__capx"><CaptionEditor jobId={jobId} spec={capSpec} draft={capDraft} onApply={applyOps} busy={busy || phase !== 'done'} selected={selected} onSelect={setSelected} currentTime={t} onSeek={seek} /></div>
+          <div className="ed__capx"><CaptionEditor jobId={jobId} spec={capSpec} draft={capDraft} onApply={applyOps} busy={busy || !ready} selected={selected} onSelect={setSelected} currentTime={t} onSeek={seek} /></div>
         ) : <>
         <ol className="ed__msgs" ref={el => { el?.scrollTo({ top: el.scrollHeight }); }}>
           {msgs.map((m, i) => <li key={i} className={`is-${m.who} ${m.kind ? `is-${m.kind}` : ''}`}>{m.text}</li>)}
@@ -341,17 +426,18 @@ export function Studio() {
             {st.meta?.calls?.map(c => <code key={c.call}>{c.model} · {c.call}{c.cache ? ' · cached' : c.seconds ? ` · ${c.seconds}s` : ''}{c.standin ? ' · test' : ''}</code>)}
           </li>}
         </ol>
-        {phase === 'done' && !busy && <div className="ed__try" aria-label="Try saying">{TRY.slice(0, 4).map(x => <button key={x} onClick={() => setDraft(x)}>{x}</button>)}</div>}
+        {ready && !busy && <div className="ed__try" aria-label="Try saying">{TRY.slice(0, 4).map(x => <button key={x} onClick={() => setDraft(x)}>{x}</button>)}</div>}
+        {chip && <div className="ed__chips"><span className="ed__chip" title="Your next message changes only this">{chip.label}<button aria-label="Remove" onClick={() => setChip(null)}><IconClose width={12} height={12} /></button></span></div>}
         <form className="ed__ask" onSubmit={e => { e.preventDefault(); send(); }}>
-          <textarea value={draft} rows={2} placeholder={phase === 'done' ? 'Zoom out, funkier captions, fix a word…' : 'Tell me what you want changed…'} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
+          <textarea value={draft} rows={2} placeholder={chip ? 'What should change about it?' : ready ? 'Zoom out, funkier captions, fix a word…' : refOpen ? 'Tell me a change to this edit…' : 'Tell me what you want changed…'} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
           <button aria-label="Send" disabled={!draft.trim() || editing}><IconSend width={18} height={18} /></button>
         </form>
         </>}
       </aside>
 
       <section className="ed__tl" aria-label="Timeline">
-        <div className="ed__tl-h"><span className="ed__lab">Timeline</span><span className="ed__time">{fmt(t)} / {fmt(D)}</span>{spec && <span className="ed__legend">{[...new Set(spec.segments.map(s => s.type))].map(k => <i key={k} style={{ ['--c' as string]: LAYOUT[k]?.c }}>{LAYOUT[k]?.name ?? k}</i>)}</span>}{spec && phase === 'done' && <WordTools draft={capDraft} zoom={zoom} onZoom={setZoom} />}</div>
-        <div className="ed__tracks" onClick={e => { if (!D || !vid.current || phase !== 'done') return; const r = (e.currentTarget.querySelector('.ed__lanes') as HTMLElement).getBoundingClientRect(); const k = (e.clientX - r.left) / r.width; if (k >= 0 && k <= 1) vid.current.currentTime = k * D; }}>
+        <div className="ed__tl-h"><span className="ed__lab">Timeline</span><span className="ed__time">{fmt(t)} / {fmt(D)}</span>{spec && <span className="ed__legend">{[...new Set(spec.segments.map(s => s.type))].map(k => <i key={k} style={{ ['--c' as string]: LAYOUT[k]?.c }}>{LAYOUT[k]?.name ?? k}</i>)}</span>}{spec && ready && <WordTools draft={capDraft} zoom={zoom} onZoom={setZoom} />}</div>
+        <div className="ed__tracks" onClick={e => { if (!D || !vid.current || !ready) return; const r = (e.currentTarget.querySelector('.ed__lanes') as HTMLElement).getBoundingClientRect(); const k = (e.clientX - r.left) / r.width; if (k >= 0 && k <= 1) vid.current.currentTime = k * D; }}>
           <div className="ed__names"><span>Ruler</span><span>V1 · Beats</span><span>T1 · Captions</span><span>FX</span><span>A1 · Voice</span></div>
           <div className="ed__scroll" ref={scroller}>
           <div className="ed__lanes" style={zoom > 1 ? { width: `${zoom * 100}%` } : undefined}>
@@ -370,4 +456,3 @@ export function Studio() {
 }
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-void IconClose;

@@ -18,6 +18,8 @@ const T0 = JSON.parse(readFileSync(join(ROOT, 'engine/templates/creator-mix.json
 const spec = JSON.parse(readFileSync(join(dir, 'spec.mix.json'), 'utf8'));
 const T = merge_(T0, spec.overrides);   // changes asked for after the first render (engine/edits.mjs)
 for (const f of Object.values(T.fonts)) GlobalFonts.registerFromPath(join(ROOT, 'assets/renderer/fonts', f.file), f.family);
+// a caption restyled on its own (a targeted edit) carries its font file
+for (const c of spec.captions ?? []) if (c.font && c.fontFile && existsSync(join(ROOT, 'assets/renderer/fonts', c.fontFile))) GlobalFonts.registerFromPath(join(ROOT, 'assets/renderer/fonts', c.fontFile), c.font);
 const W = T.canvas.w, H = T.canvas.h, FPS = +opt('--fps', spec.fps ?? 30);
 const video = join(dir, spec.video);
 const pr = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'json', video], { encoding: 'utf8' })).streams[0];

@@ -18,8 +18,18 @@ W, H, FPS, N = 1280, 720, 30, 579
 CUTDIR = os.environ.get('CUTDIR', 'work/assets_final')
 
 
+
+def _font(env, repo_name, linux_path):
+    """a font that exists on this machine: the env var, then the repo's own copy (assets/fonts), then the Linux path"""
+    import os
+    here = os.path.dirname(os.path.abspath(__file__))
+    for p in (os.environ.get(env), os.path.join(here, '..', '..', 'assets', 'fonts', repo_name), linux_path):
+        if p and os.path.exists(p):
+            return p
+    return linux_path
+
 def _impact():
-    f = ImageFont.truetype('/home/user/.local/share/fonts/Oswald.ttf', 400)
+    f = ImageFont.truetype(_font('POLY_TITLE_FONT', 'Anton-Regular.ttf', '/home/user/.local/share/fonts/Oswald.ttf'), 400)
     try: f.set_variation_by_name('Bold')
     except Exception: pass
     return f
@@ -625,7 +635,7 @@ if __name__ == '__main__':
     elif mode == 'sheets':
         a0 = int(sys.argv[2]) if len(sys.argv) > 2 else 0
         a1 = int(sys.argv[3]) if len(sys.argv) > 3 else N - 1
-        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 18)
+        font = ImageFont.truetype(_font('POLY_LABEL_FONT', 'Arimo-Bold.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'), 18)
         for page in range(a0 // 48, a1 // 48 + 1):
             sheet = Image.new('RGB', (1920, 810))
             for k in range(48):
