@@ -1,0 +1,9 @@
+{
+  "source": "data/clips/self1/ew.webm",
+  "note": "NASA SVS 14791, Ernie Wright, lunar eclipse interview, 1920x1080 23.976 fps, public domain. Face (Haar) centre x 1006, y 370, w 347 at 445 s.",
+  "pieces": [
+    { "a": 439.00, "b": 441.22, "beat": "hook claim", "text": "The moon remembers everything." },
+    { "a": 442.40, "b": 452.72, "beat": "contrast: Earth erases", "text": "You know, on the Earth, all of this is erased by weather and tectonics and all kinds of things that make cratering events and other things just go away." },
+    { "a": 453.05, "b": 464.62, "beat": "turn, number, payoff", "text": "But all of that's remembered on the moon. And so we can look at craters that were formed three and four billion years ago and learn about what was going on in the early solar system from that. I think that's just very cool." }
+  ]
+}
