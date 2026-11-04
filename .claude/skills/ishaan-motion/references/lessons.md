@@ -313,9 +313,9 @@ video and it doesn't feel repetitive." And: "animation is shitty 3/10, so many e
   colours sampled from frames, camera zoom/pan per frame, motion-blur shutter), build, OURS.md, DIFF.md (every difference), PLAN.md,
   fix, compare again, then the next 5 s; use the sharpest copy of the reference; finish with a side-by-side and a per-region motion
   check (no jitter); show a preview, then move to the next reference. Do not ask him questions mid-way; show the result.
-- **2026-11-04 · metahack edits: "4+ caption colours... captions were overlapping... u didnt use caption instructions".** Captions use
-  2-3 colours at most for the whole film (white + one accent from the film's palette, + the dark ink of a UI chip if any), never a new
-  colour per word or block; cards of 2-3 words (talking-head.md "Captions"), never overlapping another text layer (the caption hides
-  whenever a graphic carries words), never on the face, no punctuation, at least 1.2 s on screen. Read talking-head.md "Captions" and
-  captions.md before writing any caption, every time. A before/after is shown the references' way: a light page, the raw take small
-  on the left, the edit large on the right, in step, with sound.
+- **2026-11-04 · metahack edits: "4+ caption colours... captions were overlapping... u didnt use caption instructions".** The fix
+  that worked on his take 3 (white + one accent, short cards, the caption stepping aside under a graphic) is ONE good use case, not a
+  rule (Ishaan: "this is a bad rule it was just one gud usecase"). What holds: keep a film's caption colours few (about 2-3), never let
+  two text layers overlap each other or a face, and read the caption references (talking-head.md "Captions", captions.md) before
+  writing captions; how many words, which colours and which style are chosen per film from its reference, never fixed by a rule.
+  A before/after is shown the references' way: a light page, the raw take small on the left, the edit large on the right, in step.

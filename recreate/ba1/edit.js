@@ -263,11 +263,11 @@ function draw(T, s, ctx) {
       const kn = Math.pow(seg(T, 5.55, 6.40), 1.25), N = L.num;   // ref: dim dark red at the void's reveal (7.6), full by 8.4
       const col = `rgb(${Math.round(lerp(55, 255, kn))},${Math.round(lerp(2, 22, kn))},${Math.round(lerp(2, 14, kn))})`;
       fx.save(); fx.globalAlpha = vOut * (T < 5.53 ? 0 : 1);
-      txt(fx, '%70', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,20,10,${0.25 + 0.65 * kn})`, 30 + 18 * kn] });
-      txt(fx, '%70', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,40,20,${0.5 * kn})`, 14] });
+      txt(fx, '70%', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,20,10,${0.25 + 0.65 * kn})`, 30 + 18 * kn] });
+      txt(fx, '70%', { font: N.font, x: N.x, y: N.y, ls: N.ls, fill: col, shadow: [`rgba(255,40,20,${0.5 * kn})`, 14] });
       fx.restore();
       const ko = enter(T, WD.of + 0.06, 0.2);
-      txt(fx, 'OF', { font: F.anton(96), sy: 1.3, x: 534, y: 708, align: 'center', fill: `rgba(120,6,4,${0.75 * ko * vOut})`, stroke: `rgba(250,30,18,${ko * vOut})`, sw: 3.5, shadow: ['rgba(255,20,10,0.8)', 22] });
+      if (false) txt(fx, 'OF', { font: F.anton(96), sy: 1.3, x: 534, y: 708, align: 'center', fill: `rgba(120,6,4,${0.75 * ko * vOut})`, stroke: `rgba(250,30,18,${ko * vOut})`, sw: 3.5, shadow: ['rgba(255,20,10,0.8)', 22] });
       const ks = enter(T, WD.earths + 0.05, 0.22);
       txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(250,28,18,${ks * vOut})`, sw: 5, blur: (1 - ks) * 8 });
       bx.save(); bx.filter = 'blur(14px)'; txt(bx, 'EARTH’S SURFACE', { font: L.surf.font, x: L.surf.x, y: L.surf.y, sy: L.surf.sy, stroke: `rgba(255,20,10,${0.95 * ks * vOut})`, sw: 12 }); bx.restore();
@@ -278,25 +278,26 @@ function draw(T, s, ctx) {
       const f = F.xb(sizeForCap(F.xb, 108));
       txt(fx, 'RECORD', { font: f, x: 542, y: 1177, align: 'center', stroke: '#fbfbfb', sw: 5, stroke2: '#3a3a3a', sw2: 1.6, alpha: kr, blur: (1 - kr) * 6, shadow: ['rgba(0,0,0,0.4)', 8] });
     }
-    if (T >= WD.warming) txt(fx, 'warming', { font: F.script(108), x: 550, y: 1262, align: 'center', grad: [[0, '#fbe3a4'], [0.55, '#e7b264'], [1, '#c98a3e']], gradDesc: true, alpha: kw, blur: (1 - kw) * 6, shadow: ['rgba(0,0,0,0.45)', 10, 0, 3] });
+    if (T >= WD.warming) txt(fx, 'warming', { font: F.script(108), x: 550, y: 1310, align: 'center', grad: [[0, '#fbe3a4'], [0.55, '#e7b264'], [1, '#c98a3e']], gradDesc: true, alpha: kw, blur: (1 - kw) * 6, shadow: ['rgba(0,0,0,0.45)', 10, 0, 3] });
   }
   // ===== B4a (10.865 → 13.765): bold + warm outline + thin + teal, low left =====
   if (T >= CUT.p4 && T < CUT.p5) {
     const out = 1 - seg(T, 13.62, 13.76), sh = ['rgba(0,0,0,0.45)', 10, 0, 3];
     const k1 = enter(T, 10.95), k2 = enter(T, WD.heat + 0.12), k3 = enter(T, WD.and3 + 0.08), k4 = enter(T, WD.carbon + 0.1);
     txt(fx, 'so they absorb', { font: F.sb(100), x: 151, y: 1145, fill: '#ffffff', alpha: k1 * out, blur: (1 - k1) * 6, dy: 10 * (1 - k1), shadow: sh });
-    txt(fx, 'HEAT', { font: F.sb(sizeForCap(F.sb, 123)), x: 248, y: 1284, fill: 'rgba(38,24,14,0.55)', shadow: ['rgba(0,0,0,0.45)', 10, 0, 3], stroke: '#d79d63', sw: 3.2, alpha: k2 * out, blur: (1 - k2) * 6, dy: 10 * (1 - k2) });
-    txt(fx, 'and', { font: F.xl(100), x: 400 - 260, y: 1352, fill: '#ffffff', alpha: k3 * out, blur: (1 - k3) * 6 });
-    txt(fx, 'carbon dioxide', { font: F.sb(86), x: 312, y: 1352, fill: '#2e9aa3', alpha: k4 * out, blur: (1 - k4) * 6, shadow: ['rgba(0,0,0,0.35)', 8] });
+    txt(fx, 'HEAT', { font: F.sb(sizeForCap(F.sb, 123)), x: 248, y: 1300, fill: 'rgba(38,24,14,0.55)', shadow: ['rgba(0,0,0,0.45)', 10, 0, 3], stroke: '#e7b264', sw: 3.2, alpha: k2 * out, blur: (1 - k2) * 6, dy: 10 * (1 - k2) });
+    fx.font = F.xl(100); const andW = fx.measureText('and ').width;   // 'carbon dioxide' starts after 'and', never on it
+    txt(fx, 'and', { font: F.xl(100), x: 140, y: 1420, fill: '#ffffff', alpha: k3 * out, blur: (1 - k3) * 6 });
+    txt(fx, 'carbon dioxide', { font: F.sb(86), x: 140 + andW, y: 1420, fill: '#e7b264', alpha: k4 * out, blur: (1 - k4) * 6, shadow: ['rgba(0,0,0,0.35)', 8] });
   }
   // ===== B4b (13.765 → 15.015): top-left stack, caps + outlined scripts =====
   if (T >= CUT.p5 && T < CUT.p6) {
     const sh = ['rgba(0,0,0,0.45)', 10, 0, 3];
     const it = (t, t0, o) => { const k = enter(T, t0, 0.16); txt(fx, t, { ...o, alpha: k, blur: (1 - k) * 7, dy: 8 * (1 - k) }); };
     it('IT’S', WD.its + 0.12, { font: F.xb(sizeForCap(F.xb, 104)), x: 86, y: 363, fill: '#ffffff', shadow: sh });
-    it('not', WD.not + 0.12, { font: F.lob(132), x: 92, y: 440, stroke: '#9fd0ff', sw: 3, stroke2: '#2e6fb3', sw2: 1.2, shadow: ['rgba(80,160,255,0.6)', 10] });
+    it('not', WD.not + 0.12, { font: F.lob(132), x: 92, y: 440, stroke: '#ffffff', sw: 3, stroke2: '#6e6e6e', sw2: 1.2, shadow: ['rgba(255,255,255,0.35)', 10] });
     it('IN', WD.in + 0.1, { font: F.xb(sizeForCap(F.xb, 97)), x: 97, y: 557, grad: [[0, '#ffffff'], [1, '#a7a7a7']], shadow: sh });
-    it('the', WD.the2 + 0.06, { font: F.lob(132), x: 97, y: 640, stroke: '#e2b98d', sw: 3, stroke2: '#7a5536', sw2: 1.2 });
+    it('the', WD.the2 + 0.06, { font: F.lob(132), x: 97, y: 640, stroke: '#e7b264', sw: 3, stroke2: '#7a5536', sw2: 1.2 });
     it('ATMOSPHERE', WD.atmosphere + 0.08, { font: L.b4b.atm, x: 89, y: 734, grad: [[0, '#ffffff'], [1, '#b3b3b3']], shadow: sh });
   }
   // ===== B5 (15.015 → 19.805): one-word subtitles at the chest, B&W then colour =====
