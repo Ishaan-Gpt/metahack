@@ -12,29 +12,72 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadEnv } from './env.mjs';
+import { localDirector } from './muse.mjs';   // Muse Glimmer / Muse Spark Open as a local director: OFF by default (credit limit)
 
 export const KEY_ERROR = 'MODEL_API_KEY is required for the Card Studio theme (Meta Model API)';
 export const TRANSCRIBE_MODEL = 'muse-voice-transcribe-1.0';
-export const SPARK_MODEL = 'muse-spark-1.3';
+export const SPARK_MODEL = process.env.SPARK_MODEL || 'muse-spark-1.3';   // 'muse-spark-1.3-contributor' is the cheaper tier (Meta may use the calls to improve its products)
 // TEMPORARY, until the Meta key is in: DIRECTOR=claude routes the two director calls (style pick, beat plan) to Claude
 // Sonnet with the same prompts and the same strict JSON schema. Recorded as claude-sonnet-5-5 everywhere (usage log,
 // status, studio), cached separately from Muse answers, and never labelled as Meta. Transcription then uses Whisper.
 export const CLAUDE_MODEL = 'claude-sonnet-5-5';
 export const isClaude = () => (process.env.DIRECTOR ?? '').toLowerCase() === 'claude';
-export const directorModel = () => isClaude() ? CLAUDE_MODEL : SPARK_MODEL;
+// Free Gemini API as the BACKUP, never the default: only when there is NO Meta key (MODEL_API_KEY) and GEMINI_API_KEY is set
+// (or DIRECTOR=gemini is asked for). Same two calls, same cache, same usage log, one wait-and-retry on a 429 (free tier).
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+export const geminiBase = () => (process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
+export const isGemini = () => { loadEnv(); if (isClaude() || localDirector()) return false; if ((process.env.DIRECTOR ?? '').toLowerCase() === 'gemini') return true; return !(process.env.MODEL_API_KEY ?? '').trim() && !!(process.env.GEMINI_API_KEY ?? '').trim(); };
+export const directorModel = () => localDirector() ? localDirector().model : isClaude() ? CLAUDE_MODEL : isGemini() ? GEMINI_MODEL : SPARK_MODEL;
 export const metaBase = () => (process.env.META_API_BASE || 'https://api.meta.ai/v1').replace(/\/+$/, '');
 export const sha256 = b => createHash('sha256').update(b).digest('hex');
 
 /** Exit before any work when the Meta key is missing (read the way engine/env.mjs reads it: env, then .env.local). */
 export function requireMetaKey() {
   loadEnv();
+  if (localDirector()) { console.warn(`MUSE_LOCAL=${localDirector().which}: the director runs on your own server (${localDirector().base})`); return 'local'; }
   if (isClaude()) {
     if (!process.env.ANTHROPIC_API_KEY?.trim() && !process.env.ANTHROPIC_AUTH_TOKEN?.trim()) { console.error('DIRECTOR=claude needs ANTHROPIC_API_KEY in .env.local'); process.exit(2); }
     return 'claude';
   }
+  if (isGemini()) {
+    if (!(process.env.GEMINI_API_KEY ?? '').trim()) { console.error('DIRECTOR=gemini needs GEMINI_API_KEY'); process.exit(2); }
+    console.warn('MODEL_API_KEY not set: running the same two-call pipeline on the free Gemini API (backup). Set MODEL_API_KEY to use Meta.');
+    return process.env.GEMINI_API_KEY.trim();
+  }
   const key = process.env.MODEL_API_KEY;
-  if (!key || !key.trim()) { console.error(KEY_ERROR); process.exit(2); }
+  if (!key || !key.trim()) { console.error(KEY_ERROR + ' (or GEMINI_API_KEY as the free backup)'); process.exit(2); }
   return key.trim();
+}
+
+// ---- Gemini backup (free tier): same two calls, same cache, same usage log, one attempt each (a single wait-and-retry on a 429) ----
+const gUpper = s => Array.isArray(s) ? s.map(gUpper) : s && typeof s === 'object' ? Object.fromEntries(Object.entries(s).filter(([k]) => k !== 'additionalProperties').map(([k, v]) => [k, k === 'type' && typeof v === 'string' ? v.toUpperCase() : gUpper(v)])) : s;
+async function geminiCall(key, body, what) {
+  const url = `${geminiBase()}/models/${GEMINI_MODEL}:generateContent`;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const r = await fetch(url, { method: 'POST', headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const text = await r.text();
+    if (r.status === 429 && attempt === 0) { const m = text.match(/"retryDelay":\s*"(\d+)/); const wait = Math.min(45, m ? +m[1] + 1 : 20); console.warn(`Gemini ${what}: rate limit (free tier), waiting ${wait} s once`); await new Promise(res => setTimeout(res, wait * 1000)); continue; }
+    return { r, text };
+  }
+}
+async function geminiTranscribe(key, wav) {
+  const body = { systemInstruction: { parts: [{ text: 'Transcribe the speech exactly as spoken. Return the speaker turns (stretches of speech separated by pauses of about half a second or more) with start and end in milliseconds from the start of the audio. Do not add or drop words.' }] },
+    contents: [{ role: 'user', parts: [{ inlineData: { mimeType: 'audio/wav', data: wav.toString('base64') } }, { text: 'Transcribe this audio.' }] }],
+    generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: gUpper({ type: 'object', required: ['transcript', 'turns'], properties: { transcript: { type: 'string' }, turns: { type: 'array', items: { type: 'object', required: ['transcript', 'startMs', 'endMs'], properties: { transcript: { type: 'string' }, startMs: { type: 'integer' }, endMs: { type: 'integer' } } } } } }) } };
+  const { r, text } = await geminiCall(key, body, 'transcribe'); if (!r.ok) throw new Error(`Gemini transcribe answered ${r.status}: ${text.slice(0, 300)}`);
+  const j = JSON.parse(text), out = JSON.parse(j.candidates?.[0]?.content?.parts?.map(p => p.text ?? '').join('') ?? '{}');
+  if (typeof out.transcript !== 'string' || !Array.isArray(out.turns)) throw new Error('Gemini transcribe answer has no transcript/turns');
+  return { ...out, audioDurationMs: Math.round(((wav.length - 44) / 2 / 16000) * 1000), standin: r.headers.get('x-meta-standin') === '1' };
+}
+async function geminiChat(key, body) {   // body = the Meta chat body; the same system text, user text and JSON schema go to Gemini
+  const sys = body.messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n'), user = body.messages.filter(m => m.role === 'user').map(m => m.content).join('\n\n'), schema = body.response_format.json_schema.schema;
+  const gb = { systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: gUpper(schema), thinkingConfig: { thinkingBudget: 0 } } };
+  const { r, text } = await geminiCall(key, gb, 'plan');
+  const rep = (status, obj, standin = false) => ({ ok: status < 300, status, headers: { get: k => (k === 'x-meta-standin' && standin ? '1' : null) }, text: async () => JSON.stringify(obj) });
+  if (!r.ok) return rep(r.status, { error: { message: text.slice(0, 300) } });
+  const j = JSON.parse(text), content = j.candidates?.[0]?.content?.parts?.map(p => p.text ?? '').join('') ?? '';
+  const u = j.usageMetadata ?? {};
+  return rep(200, { model: GEMINI_MODEL, choices: [{ message: { role: 'assistant', content }, finish_reason: j.candidates?.[0]?.finishReason ?? null }], usage: { prompt_tokens: u.promptTokenCount ?? 0, completion_tokens: u.candidatesTokenCount ?? 0, total_tokens: u.totalTokenCount ?? 0 } }, r.headers.get('x-meta-standin') === '1');
 }
 
 // ---- usage log -------------------------------------------------------------------------------------------------
@@ -72,6 +115,12 @@ export async function metaTranscribe(dir, wavPath, { key = requireMetaKey() } = 
     const c = JSON.parse(readFileSync(cache, 'utf8'));
     recordUsage(dir, { call: 'transcribe', model: TRANSCRIBE_MODEL, cache_hit: true, audio_sha256: h, cache: 'meta/' + cache.split('/').pop(), standin: !!c.standin });
     return c.response;
+  }
+  if (isGemini()) {
+    const t0g = performance.now(), response = await geminiTranscribe(key, wav), standin = !!response.standin; delete response.standin; const seconds = +((performance.now() - t0g) / 1000).toFixed(2);
+    writeFileSync(cache, JSON.stringify({ audio_sha256: h, request: { model: GEMINI_MODEL }, response, standin, provider: 'gemini', at: new Date().toISOString() }, null, 1));
+    recordUsage(dir, { call: 'transcribe', provider: 'gemini', model: GEMINI_MODEL, cache_hit: false, ok: true, seconds, audio_sha256: h, audio_seconds: +((response.audioDurationMs ?? 0) / 1000).toFixed(1), turns: response.turns.length, usage: null, standin });
+    return response;
   }
   const request = { model: TRANSCRIBE_MODEL, audioEncoding: 'WAV', mode: 'ENDPOINTING' };
   const fd = new FormData();
@@ -226,61 +275,15 @@ export function validateItem(it, seg, { layouts, icons, transitions }) {
   return null;
 }
 
-// ---- call 0 (auto mode only): Muse Spark picks the style for this take ------------------------------------------
-// One short call (cached by transcript + catalogue): the transcript, what the camera sees (face share, source shape) and
-// the style catalogue with each style's fundamentals in; { style, why, hero_words } out. The rest of the edit is the
-// chosen style's rules plus the usual plan call. On any failure the caller falls back to plain rules (chooseStyleByRules).
-export async function metaChooseStyle(dir, { transcript, catalogue, facts }, { key = requireMetaKey() } = {}) {
-  const ids = catalogue.map(s => s.id);
-  const schema = { type: 'object', additionalProperties: false, required: ['style', 'why', 'hero_words'], properties: {
-    style: { type: 'string', enum: ids }, why: { type: 'string', maxLength: 180 },
-    hero_words: { type: 'array', maxItems: 6, items: { type: 'string', maxLength: 24 } } } };
-  const system = `You are the director of a short-form video editing studio. A creator sent one raw talking-head take. Pick the ONE edit style from the catalogue that will make this take look like a hired pro editor made it, judging by what is said (topic, numbers, products, story, tone) and what the camera sees. Each style lists its fundamentals. Answer with the style id, why in one plain sentence a creator understands (under 25 words, no jargon), and up to 6 hero words copied exactly from the transcript that the edit should make big. Answer only with the JSON object.`;
-  const user = JSON.stringify({ transcript, facts, catalogue: catalogue.map(s => ({ id: s.id, name: s.label, fundamentals: s.fundamentals })) });
-  const body = { model: directorModel(), messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-    response_format: { type: 'json_schema', json_schema: { name: 'style_pick', strict: true, schema } }, temperature: 0, reasoning_effort: 'minimal', max_tokens: 1024 };
-  const h = sha256(JSON.stringify(body)), cdir = join(dir, 'meta'); mkdirSync(cdir, { recursive: true });
-  const cache = join(cdir, `style.${h.slice(0, 16)}.json`);
-  let response, cacheHit = false, standin = false, seconds = 0;
-  if (existsSync(cache)) { const c = JSON.parse(readFileSync(cache, 'utf8')); response = c.response; cacheHit = true; standin = !!c.standin; }
-  else {
-    const t0 = performance.now();
-    const r = await postChat(body, key);
-    seconds = +((performance.now() - t0) / 1000).toFixed(2); standin = r.headers.get('x-meta-standin') === '1';
-    const text = await r.text();
-    if (!r.ok) { recordUsage(dir, { call: 'style', model: directorModel(), cache_hit: false, ok: false, status: r.status, seconds }); return { ok: false, why: `Muse Spark answered ${r.status}` }; }
-    response = JSON.parse(text);
-    writeFileSync(cache, JSON.stringify({ key_sha256: h, response, standin, at: new Date().toISOString() }, null, 1));
-  }
-  recordUsage(dir, { call: 'style', model: directorModel(), cache_hit: cacheHit, ok: true, seconds, usage: response.usage ?? null, standin });
-  let pick = null; try { pick = JSON.parse(response.choices?.[0]?.message?.content ?? ''); } catch { pick = null; }
-  if (!pick || !ids.includes(pick.style) || typeof pick.why !== 'string') return { ok: false, why: 'answer is not the schema object', standin };
-  return { ok: true, style: pick.style, why: pick.why.trim(), hero_words: Array.isArray(pick.hero_words) ? pick.hero_words.filter(w => typeof w === 'string') : [], standin, cache_hit: cacheHit };
-}
-
-/** the rule fallback for auto mode when Spark is unreachable: plain keyword counts, stated as rules in the job log */
-export function chooseStyleByRules(transcript, facts) {
-  const t = transcript.toLowerCase(), n = re => (t.match(re) ?? []).length;
-  const score = {
-    'desk-doc': n(/\b(\d[\d,.]*|hundred|thousand|million|billion|percent|years?|months?|dollars?)\b/g) * 1.2 + n(/\b(story|journey|started|process|before|after)\b/g),
-    'clean-ui': n(/\b(app|apps|tool|tools|software|click|post|upload|website|ai|feature|product|price|subscribe)\b/g) * 1.3,
-    'kinetic-brand': n(/\b(brand|launch|new|never|power|future|change|world|climate|heat)\b/g) * 1.1,
-    'creator-studio': n(/\b(first|second|third|tips?|steps?|ways|mistakes?|reasons?|chapter)\b/g) * 1.4,
-    'card-studio': 2 + (facts.sourceShape !== '9:16' ? 1.5 : 0) + n(/\b(social|media|marketing|business|viral|views|followers|guide)\b/g),
-  };
-  const [style] = Object.entries(score).sort((a, b) => b[1] - a[1])[0];
-  const WHY = { 'desk-doc': 'your take is full of numbers and steps, so photos and big numbers prove each point',
-    'clean-ui': 'you talk about tools and products, so clean interface cards act them out',
-    'kinetic-brand': 'your take sounds like a launch, so the words go big and behind you',
-    'creator-studio': 'your take is a list of points, so chapter cards and a colour field carry it',
-    'card-studio': facts.sourceShape !== '9:16' ? 'your take was not shot vertical, so it sits best framed in a clean studio card' : 'a calm talking take reads best framed in a clean studio card' };
-  return { style, why: WHY[style], scores: score };
-}
+// (the style picker is gone: there are exactly two templates, Card Studio and Creator Mix, and the user or the job names one)
 
 // ---- the director's wire: Muse Spark (OpenAI-style chat/completions) or, temporarily, Claude Sonnet -------------------
 /** One director call. Muse Spark: the body as is. Claude: same system + user text, the same JSON schema as structured
  *  output, answered back in the chat/completions shape the callers already read (choices[0].message.content, usage). */
 async function postChat(body, key) {
+  const L = localDirector();   // Muse Glimmer / Spark Open served locally through an OpenAI-compatible endpoint
+  if (L) return fetch(`${L.base}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${process.env.MUSE_LOCAL_KEY || 'local'}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, model: L.model }), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });
+  if (isGemini()) return geminiChat(key, body);
   if (!isClaude()) return fetch(`${metaBase()}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });   // a silent endpoint fails in 2 min, never hangs the job
   const { default: Anthropic, APIError } = await import('@anthropic-ai/sdk');
   const client = new Anthropic();

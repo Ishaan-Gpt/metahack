@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
  * in recreate/<id>), each marked with the engine it became, or "no engine yet".
  */
 const REFS = [
-  { id: 'ba5', name: 'Storyboard card', clip: 'ba5c', note: 'the reference behind Studio Card' },
+  { id: 'ba5', name: 'Storyboard card', clip: 'ba5c', note: 'the reference behind Card Studio' },
   { id: 'ba2', name: 'Creator studio', clip: 'ba2c', note: 'one of the two references behind Creator Mix' },
   { id: 'ba1', name: 'Brand ad', clip: 'ba1c', note: 'no engine yet' },
   { id: 'ba3', name: '$10 vs $80', clip: 'ba3c', note: 'no engine yet' },

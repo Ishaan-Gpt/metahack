@@ -1,5 +1,5 @@
 // The whole engine for one clip: prep (once) → read → direct → cast → spec.json for the player.
-// usage: node engine/edit.mjs <clip dir> [--theme kinetic-brand|card-studio|auto] [--brand "Name"] [--no-model]
+// usage: node engine/edit.mjs <clip dir> [--theme card-studio] [--brand "Name"] [--no-model]
 //   --theme card-studio (or auto when it fits) hands off to engine/card-studio.mjs: rules only, writes spec.card.json
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -13,7 +13,7 @@ loadEnv();
 const args = process.argv.slice(2), dir = args[0];
 const opt = k => { const i = args.indexOf(k); return i > 0 ? args[i + 1] : null; };
 if (!dir || !existsSync(join(dir, 'words.json'))) { console.error('usage: node engine/edit.mjs <clip dir> (run engine/prep.mjs first)'); process.exit(1); }
-let dialectId = opt('--theme') ?? opt('--dialect') ?? process.env.THEME ?? 'kinetic-brand';
+let dialectId = opt('--theme') ?? opt('--dialect') ?? process.env.THEME ?? 'card-studio';
 if (dialectId === 'auto') dialectId = autoTheme(dir);
 if (dialectId === 'card-studio') {
   const { direct } = await import('./card-studio.mjs');
@@ -31,10 +31,10 @@ function autoTheme(d) {
     if (!existsSync(facesPath)) execFileSync(PY, [join(ROOT, 'engine/faces.py'), join(d, 'cut.mp4'), facesPath, '2'], { stdio: 'inherit' });
     const f = JSON.parse(readFileSync(facesPath, 'utf8'));
     const ratio = f.found / Math.max(1, f.n), not916 = prep.sourceAspect ? Math.abs(prep.sourceAspect - 9 / 16) > 0.02 : false;
-    const pick = ratio >= t.minFaceRatio && (!t.whenSourceNot916 || not916) ? 'card-studio' : 'kinetic-brand';
+    const pick = ratio >= t.minFaceRatio && (!t.whenSourceNot916 || not916) ? 'card-studio' : 'card-studio';
     console.log(`auto theme: ${pick} (face in ${(ratio * 100).toFixed(0)}% of samples, source ${not916 ? 'not ' : ''}9:16)`);
     return pick;
-  } catch (e) { console.warn('auto theme fell back to kinetic-brand:', e.message); return 'kinetic-brand'; }
+  } catch (e) { console.warn('auto theme fell back to card-studio:', e.message); return 'card-studio'; }
 }
 const dialect = JSON.parse(readFileSync(join(ROOT, 'engine/templates', `${dialectId}.json`), 'utf8'));
 const words = JSON.parse(readFileSync(join(dir, 'words.json'), 'utf8'));

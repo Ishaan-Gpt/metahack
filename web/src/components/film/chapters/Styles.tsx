@@ -10,7 +10,7 @@ const WINDOWS = [[.16, .4], [.4, .64], [.64, .88], [.88, 1]] as const;
 
 /**
  * "One director, ..." The mascot becomes four shapes (play → film frame → waveform → himself) while the giant word
- * behind him changes and a brief slides in: the two engines (Studio Card, Creator Mix), then two kinds of edit by prompt.
+ * behind him changes and a brief slides in: the two engines (Card Studio, Creator Mix), then two kinds of edit by prompt.
  */
 export function Styles() {
   const section = useRef<HTMLElement | null>(null);

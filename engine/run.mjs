@@ -1,14 +1,14 @@
 // One edit job, end to end: raw take in, edited MP4 (and a before/after) out. The studio's API starts this as a child
 // process per job and reads <job>/status.json; nothing here needs the web app.
 //   node engine/run.mjs <job dir>        (the dir holds job.json { engine?, badge, handle, input, rerender? })
-// Two render engines, Vignesh's templates: card-studio (Studio Card) and creator-mix (Creator Mix, 22 effects). A new job
+// Two render engines, Vignesh's templates: card-studio (Card Studio) and creator-mix (Creator Mix, 26 effects, 8 to 16 picked per video). A new job
 // gets the other engine from the last one (data/jobs/.engine-turn), so uploads alternate between them.
 // Stages: watch (crop to 9:16, transcribe, pauses cut) -> direct (rules + one director plan) -> build (stock, person matte)
 // -> render (canvas frames) -> mix -> share. job.rerender (set by engine/edits.mjs after a prompt) skips straight to
 // render with the edited plan: no new transcription, no new director call.
 // Every failure ends as status.state 'error' with a code and a sentence a creator can act on; the raw log stays in log.txt.
 import { spawn, execFileSync } from 'node:child_process';
-import { appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, statSync, renameSync } from 'node:fs';
+import { copyFileSync, appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, statSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ROOT, loadEnv } from './env.mjs';
 import { listStyles, loadStyle } from './styles.mjs';
@@ -18,13 +18,15 @@ const JOB = resolve(process.argv[2] ?? '');
 if (!process.argv[2] || !existsSync(join(JOB, 'job.json'))) { console.error('usage: node engine/run.mjs <job dir with job.json>'); process.exit(1); }
 const job = JSON.parse(readFileSync(join(JOB, 'job.json'), 'utf8'));
 const CLIP = join(JOB, 'clip'); mkdirSync(CLIP, { recursive: true });
-const ENGINES = ['card-studio', 'creator-mix'], LABEL = { 'card-studio': 'Studio Card', 'creator-mix': 'Creator Mix' };
+const ENGINES = ['card-studio', 'creator-mix'], LABEL = { 'card-studio': 'Card Studio', 'creator-mix': 'Creator Mix' };
 if (!ENGINES.includes(job.engine)) {
   if (ENGINES.includes(job.style)) job.engine = job.style;
   else { const turn = join(JOB, '..', '.engine-turn'); const last = existsSync(turn) ? readFileSync(turn, 'utf8').trim() : ENGINES[1]; job.engine = ENGINES[(ENGINES.indexOf(last) + 1) % ENGINES.length]; try { writeFileSync(turn, job.engine); } catch { /* not writable: still fine */ } }
   writeFileSync(join(JOB, 'job.json'), JSON.stringify(job, null, 1));
 }
-const ENG = job.engine, SPEC = join(CLIP, ENG === 'creator-mix' ? 'spec.mix.json' : 'spec.card.json');
+const ENG = job.engine, MIX = ENG === 'creator-mix', SPEC = join(CLIP, MIX ? 'spec.mix.json' : 'spec.card.json');
+const S = loadStyle(ENG);   // the engine's style: grade, card layout (Card Studio's Zoom download crops the card)
+const PY = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3');   // Windows: python3 is the Store stub
 const RERENDER = !!job.rerender && existsSync(SPEC);
 const prev = RERENDER && existsSync(join(JOB, 'status.json')) ? JSON.parse(readFileSync(join(JOB, 'status.json'), 'utf8')) : null;
 const LOG = join(JOB, 'log.txt');
@@ -34,7 +36,7 @@ const STAGES = [
   ['build', 'Building the looks', 'Fetching photos for the nouns, cutting you out for text-behind'],
   ['render', 'Rendering', 'Drawing every frame'],
   ['mix', 'Mixing the sound', 'Voice, effects on every change, a quiet bed, -14 LUFS'],
-  ['share', 'Making the before/after', 'Raw take beside the edit, in step'],
+  ['share', 'Making the download', 'The show video and the Zoom download'],
 ];
 const status = { id: job.id, pid: process.pid, raw: job.input, state: 'running', stage: 'watch', stages: STAGES.map(([id, label, detail]) => ({ id, label, detail, state: 'pending' })), pct: 0, started: new Date().toISOString(), style: ENG, styleLabel: LABEL[ENG], engine: ENG, events: RERENDER ? (prev?.events ?? []) : [] };
 if (RERENDER && prev) for (const k of ['input', 'plan', 'meta', 'choice', 'raw', 'outputs', 'finished', 'duration']) if (prev[k]) status[k] = prev[k];
@@ -102,9 +104,14 @@ event(`Got your take: ${dur.toFixed(1)} s, ${v.width}x${v.height}`);
 const claude = (process.env.DIRECTOR ?? '').toLowerCase() === 'claude';   // temporary: Claude Sonnet directs until the Meta key is in
 const realMeta = !claude && !!process.env.MODEL_API_KEY?.trim() && !process.env.META_API_BASE;
 const standin = !claude && !!process.env.META_API_BASE;
+const gem = !claude && !standin && !process.env.MODEL_API_KEY?.trim() && (!!process.env.GEMINI_API_KEY?.trim() || !!(await import('./muse.mjs')).localDirector());   // free Gemini API, BACKUP only (no Meta key)
 if (!RERENDER && claude && !process.env.ANTHROPIC_API_KEY?.trim()) fail(new JobError('NO_DIRECTOR_KEY', 'The studio is missing its director key, so nothing can plan your edit. This is on our side, not yours: we are on it.'));
-if (!RERENDER && !claude && !realMeta && !standin) fail(new JobError('NO_META_KEY', 'The studio is missing its Meta Model API key, so Muse Spark cannot direct. This is on our side, not yours: we are on it.'));
-if (!RERENDER) status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : 'muse-spark-1.3' }; save();
+if (!RERENDER && !claude && !realMeta && !standin && !gem) fail(new JobError('NO_META_KEY', 'The studio is missing its Meta Model API key, so Muse Spark cannot direct. This is on our side, not yours: we are on it.'));
+if (!RERENDER) {
+  log('Muse model map: ' + (await import('./muse.mjs')).museTable());
+  const local = (await import('./muse.mjs')).localDirector();
+  status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : local ? 'local-open-weights' : gem ? 'gemini' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : local ? local.model : gem ? (process.env.GEMINI_MODEL || 'gemini-2.5-flash') : 'muse-spark-1.3' }; save();
+}
 
 // ---- a re-render after a prompt edit: the plan is already edited, so draw and mix it again ---------------------------
 if (RERENDER) {
@@ -118,7 +125,7 @@ if (RERENDER) {
 stage('watch', 'running');
 try {
   await step(process.execPath, [join(ROOT, 'engine/prep.mjs'), input, CLIP], {
-    env: { HEAR: realMeta ? 'meta' : 'groq', DIALECT: 'card-studio', PREP_GRADE: '0' },   // test runs: Whisper on Groq for the words
+    env: { HEAR: realMeta || (gem && !(await import('./muse.mjs')).localDirector()) ? 'meta' : 'groq', DIALECT: 'card-studio', PREP_GRADE: '0' },   // test runs: Whisper on Groq for the words
     onLine: l => { if (/^ingest/.test(l)) { sub(0.35); event('Framed for 9:16 around your face'); } if (/^hear/.test(l)) { sub(0.7); event(realMeta ? 'Muse Voice Transcribe heard every word' : 'Words timed'); } if (/^clean/.test(l)) { sub(0.95); } },
   });
 } catch (e) {
@@ -146,11 +153,12 @@ try {
   console.log = (...x) => { const l = x.join(' '); log(l); if (/^coverage: added/.test(l)) sub(0.6); if (/^build:|stock|matte/i.test(l) && status.stage === 'direct') { stage('direct', 'done'); stage('build', 'running'); } };
   console.warn = (...x) => log('warn: ' + x.join(' '));
   const dog = setTimeout(() => fail(new JobError('DIRECT', 'Directing took far too long (a photo or model service stopped answering). Press Try again.', 'direct watchdog')), 1500 * 1000 * +(process.env.STEP_LIMIT_SCALE ?? 1));
-  await direct(CLIP, { style: 'card-studio', badge: job.badge || (realMeta ? 'Muse Spark' : 'Edit Easy'), handle: job.handle || '@editeasy', cta1: job.cta1, cta2: job.cta2, kw: job.kw, noStock: ENG === 'creator-mix' ? true : job.noStock });
-  if (ENG === 'creator-mix') { const { buildMix } = await import('./creator-mix.mjs'); await buildMix(CLIP, { handle: job.handle || '@editeasy', cta1: job.cta1, cta2: job.cta2 }); }
+  // each engine plans with its own style (engine/styles/<engine>.json); Creator Mix then lays its effects on that plan
+  await direct(CLIP, { style: ENG, mix: false, badge: job.badge || (realMeta ? 'Muse Spark' : 'Edit Easy'), handle: job.handle || '@editeasy', cta1: job.cta1, cta2: job.cta2, kw: job.kw, noStock: job.noStock });
+  if (MIX) { const { buildMix } = await import('./creator-mix.mjs'); await buildMix(CLIP, { handle: job.handle || '@editeasy', cta1: job.cta1, cta2: job.cta2 }); }
   clearTimeout(dog); console.log = origLog; console.warn = origWarn;
 } catch (e) { fail(new JobError('DIRECT', 'The director could not plan this take. Press Try again.', e.stack)); }
-const spec = JSON.parse(readFileSync(join(CLIP, 'spec.card.json'), 'utf8')), mixSpec = ENG === 'creator-mix' && existsSync(SPEC) ? JSON.parse(readFileSync(SPEC, 'utf8')) : null;
+const spec = JSON.parse(readFileSync(join(CLIP, 'spec.card.json'), 'utf8')), mixSpec = MIX && existsSync(SPEC) ? JSON.parse(readFileSync(SPEC, 'utf8')) : null;
 if (status.stages.find(x => x.id === 'direct').state !== 'done') stage('direct', 'done');
 stage('build', 'done');
 const usage = existsSync(join(CLIP, 'meta-usage.json')) ? JSON.parse(readFileSync(join(CLIP, 'meta-usage.json'), 'utf8')) : null;
@@ -162,9 +170,8 @@ await renderAndShare();
 
 // ---- 3 render + 4 mix + 5 share: also the whole of a re-render after a prompt edit ------------------------------------
 async function regrade() {
-  const T = JSON.parse(readFileSync(join(ROOT, 'engine/templates', `${ENG}.json`), 'utf8'));
   const d = existsSync(SPEC) ? (JSON.parse(readFileSync(SPEC, 'utf8')).gradeDelta ?? {}) : {};
-  const G = T.grade ?? { contrast: 1, saturate: 1, brightness: 1, warm: 0 };
+  const G = S.grade ?? { contrast: 1, saturate: 1, brightness: 1, warm: 0 };
   const c = +(G.contrast + (d.contrast ?? 0)).toFixed(3), sat = +Math.max(0, G.saturate + (d.sat ?? 0)).toFixed(3), br = +((G.brightness - 1) + (d.bright ?? 0)).toFixed(3), w = +((G.warm ?? 0) + (d.warm ?? 0)).toFixed(3);
   await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', join(CLIP, 'cut.mp4'), '-vf', `eq=contrast=${c}:saturation=${sat}:brightness=${br},colorbalance=rs=${w}:bs=${-w}:rm=${w / 2}:bm=${-w / 2}`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '17', '-g', '15', '-c:a', 'copy', '-movflags', '+faststart', join(CLIP, 'graded.mp4')]);
 }
@@ -185,17 +192,28 @@ async function renderAndShare() {
   renameSync(TMP, OUT);
   if (status.stages.find(x => x.id === 'render').state !== 'done') stage('render', 'done');
   stage('mix', 'done'); event('Sound mixed to -14 LUFS');
+  // ---- 5 share: what the user SEES and what the user DOWNLOADS (Vignesh, docs/TEMPLATES.md) ----
+  //   Card Studio : show = edit.mp4 (the full frame)               download = "Card Studio Zoom" (only the card's video)
+  //   Creator Mix : show = before-after.mp4 ("Edited by Meta")     download = "Creator Mix Zoom" (only the After video)
   stage('share', 'running');
   const BA = join(JOB, 'before-after.mp4');
+  const ZOOM = MIX ? 'creator-mix-zoom.mp4' : 'card-studio-zoom.mp4', ZOOM_NAME = MIX ? 'Creator Mix Zoom.mp4' : 'Card Studio Zoom.mp4';
   try {
-    await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', join(CLIP, 'cut.mp4'), '-i', OUT, '-filter_complex',
-      "color=c=0xf4f3f1:s=1920x1080:r=30[bg];[0:v]scale=-2:640,setsar=1[raw];[1:v]scale=-2:1000,setsar=1[ed];[bg][raw]overlay=x=470:y=(H-h)/2+40:shortest=1[a];[a][ed]overlay=x=1920-w-560:y=(H-h)/2[v]",
-      '-map', '[v]', '-map', '1:a', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-shortest', '-movflags', '+faststart', BA]);
+    if (MIX) {
+      copyFileSync(OUT, join(JOB, ZOOM));   // the edit before the Before/After wrapper IS the After video
+      await step(PY, [join(ROOT, 'tools/ba-wrap.py'), OUT, join(CLIP, 'cut.mp4'), BA, '--accent', spec.theme?.accent ?? '#e5333d']);
+    } else {
+      // cut the card's own video out of the frame (inset past the rounded corners, 9:16), scaled to 1080x1920
+      const c = S.layout?.card ?? { x: 380, y: 422, w: 540, h: 956, r: 30 }, inset = Math.ceil((c.r ?? 30) * 0.33), w = c.w - 2 * inset, h = Math.min(c.h - 2 * inset, Math.round(w * 16 / 9)), x = c.x + inset, y = c.y + Math.round((c.h - h) / 2);
+      await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', OUT, '-vf', `crop=${w - (w % 2)}:${h - (h % 2)}:${x}:${y},scale=1080:1920:flags=lanczos,setsar=1`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'copy', '-movflags', '+faststart', join(JOB, ZOOM)]);
+    }
     stage('share', 'done');
-  } catch (e) { log('before/after failed (the edit is fine): ' + e.message); status.stages.find(x => x.id === 'share').state = 'skipped'; }
+  } catch (e) { log('share step failed (the edit is fine): ' + e.message); status.stages.find(x => x.id === 'share').state = 'skipped'; }
   job.rerender = false; job.regrade = false; writeFileSync(join(JOB, 'job.json'), JSON.stringify(job, null, 1));
   Object.assign(status, { state: 'done', pct: 100, finished: new Date().toISOString(), seconds: +((Date.now() - T0) / 1000).toFixed(1), edits: (spec.edits ?? []).length,
-    outputs: { edit: 'edit.mp4', beforeAfter: existsSync(BA) ? 'before-after.mp4' : null, raw: job.input }, duration: +spec.duration.toFixed(1) });
+    outputs: { edit: 'edit.mp4', beforeAfter: MIX && existsSync(BA) ? 'before-after.mp4' : null, raw: job.input,
+      template: ENG, show: MIX && existsSync(BA) ? 'before-after.mp4' : 'edit.mp4', download: existsSync(join(JOB, ZOOM)) ? ZOOM : null, downloadName: ZOOM_NAME },
+    duration: +spec.duration.toFixed(1) });
   event(RERENDER ? `Changes applied in ${status.seconds} s` : `Done in ${status.seconds} s`, 'done');
   save();
 }

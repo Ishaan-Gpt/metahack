@@ -22,7 +22,7 @@ want to try it on their own.
 |---|---|---|
 | 0:00-0:02 | The edit's strongest beat (the big word behind his head) full frame, the raw take in a small inset beside his shoulder, both playing | `my raw take` (on the inset) · `Edit Easy's edit` |
 | 0:02-0:12 | The take flips raw → edit on every sentence: about 0.6 s of the flat raw, then the edited beat, so the gap between them is felt, not explained | none |
-| 0:12-0:24 | One sentence through both engines (Studio Card, then Creator Mix), then the studio chat taking "bigger captions, no music" and the cut changing | the engine's name, small, under the chin; then the typed request |
+| 0:12-0:24 | One sentence through both engines (Card Studio, then Creator Mix), then the studio chat taking "bigger captions, no music" and the cut changing | the engine's name, small, under the chin; then the typed request |
 | 0:24-0:34 | The studio, cropped to 9:16: the take dropped in, the engine it drew ([[ENGINE]]), the stage clocks, then "made in [[RUN_SECONDS]] s" | `directed by Meta's Muse Spark` |
 | 0:34-0:40 | Raw on top, edit below, in step, then the end card | `Edit Easy · [[LIVE_URL]]` |
 
@@ -37,7 +37,7 @@ One export, after Ishaan has watched the live preview and said export.
 **LinkedIn**
 > For two days Vignesh and I built one thing for the Meta Global AI Developer Hackathon: you drop in the raw take you filmed on your phone, and you get back the edit a short-form editor would have made, with your own face and voice still in it.
 >
-> Edit Easy hears the take with Meta's Muse Voice Transcribe, then Muse Spark reads all of it and plans every beat, and one of two engines, Studio Card or Creator Mix, draws every frame in plain code. If you want it different you ask in plain words and the change is matched by a dictionary of edits, so it costs next to nothing. The take in the video is one of mine, and it took [[RUN_SECONDS]] seconds and [[META_CALLS]] model calls to edit.
+> Edit Easy hears the take with Meta's Muse Voice Transcribe, then Muse Spark reads all of it and plans every beat, and one of two engines, Card Studio or Creator Mix, draws every frame in plain code. If you want it different you ask in plain words and the change is matched by a dictionary of edits, so it costs next to nothing. The take in the video is one of mine, and it took [[RUN_SECONDS]] seconds and [[META_CALLS]] model calls to edit.
 >
 > Edit Easy grew out of Moovi, an AI video director built before this hackathon, and the editor you see here is what we built during it. If you make videos for a living I'd like to hear where it falls short, so try it on a take of your own: [[LIVE_URL]]
 

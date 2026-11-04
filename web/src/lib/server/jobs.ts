@@ -13,8 +13,8 @@ export const JOBS = join(ROOT, 'data', 'jobs');
 export type Style = { id: string; label: string; line: string; ref: string; fundamentals: string; swatch: string[]; order: number };
 /** the two render engines (Vignesh's templates). Uploads take turns between them (engine/run.mjs); prompts edit after */
 const ENGINES: Style[] = [
-  { id: 'card-studio', label: 'Studio Card', line: 'Your take in a clean studio card, a storyboard beside it, serif hero words.', ref: 'engine/templates/card-studio.json', fundamentals: 'cards, photo beats, list, post card, word behind', swatch: ['#efefee', '#cbe65e', '#de7e59'], order: 1 },
-  { id: 'creator-mix', label: 'Creator Mix', line: 'Twenty-two effects from two real reels: glowing words, colour fields, a picture window, a film strip.', ref: 'engine/templates/creator-mix.json', fundamentals: '22 effects, kinetic words, colour fields', swatch: ['#4b1fa8', '#e5333d', '#f1ece2'], order: 2 },
+  { id: 'card-studio', label: 'Card Studio', line: 'Your take in a clean studio card, a storyboard beside it, serif hero words.', ref: 'engine/templates/card-studio.json', fundamentals: 'cards, photo beats, list, post card, word behind', swatch: ['#efefee', '#cbe65e', '#de7e59'], order: 1 },
+  { id: 'creator-mix', label: 'Creator Mix', line: 'Colour-world backgrounds, whip and shatter cuts, number posters, photo strips, and a Before/After with Edited by Meta.', ref: 'engine/templates/creator-mix.json', fundamentals: '22 effects, kinetic words, colour fields', swatch: ['#4b1fa8', '#e5333d', '#f1ece2'], order: 2 },
 ];
 export function styles(): Style[] { return ENGINES; }
 

@@ -237,6 +237,288 @@
   "8": "photo card fan behind speaker",
   "9": "falling polaroids, red string",
   "10": "TV wall behind speaker",
-  "12": "torn paper collage, typewriter"
+  "12": "torn paper collage, typewriter",
+  "23": "bokeh glow word",
+  "24": "highlighter phrase",
+  "25": "number poster, red duotone",
+  "26": "vertical photo strips with sun"
+ },
+ "library": {
+  "1": {
+   "tags": [
+    "photo",
+    "word"
+   ],
+   "photo": 1
+  },
+  "2": {
+   "tags": [
+    "word",
+    "hero"
+   ]
+  },
+  "3": {
+   "tags": [
+    "question",
+    "word"
+   ]
+  },
+  "4": {
+   "tags": [
+    "cutout",
+    "calm"
+   ]
+  },
+  "5": {
+   "tags": [
+    "cutout",
+    "photo",
+    "hero"
+   ],
+   "photo": 1,
+   "cutout": 1
+  },
+  "6": {
+   "tags": [
+    "phrase"
+   ]
+  },
+  "7": {
+   "tags": [
+    "hero",
+    "word"
+   ]
+  },
+  "8": {
+   "tags": [
+    "photo",
+    "cutout",
+    "list"
+   ],
+   "photo": 1,
+   "cutout": 1
+  },
+  "9": {
+   "tags": [
+    "photo",
+    "story"
+   ],
+   "photo": 1
+  },
+  "10": {
+   "tags": [
+    "photo",
+    "list",
+    "cutout"
+   ],
+   "photo": 1,
+   "cutout": 1
+  },
+  "11": {
+   "tags": [
+    "photo",
+    "word"
+   ],
+   "photo": 1
+  },
+  "12": {
+   "tags": [
+    "cutout",
+    "story",
+    "phrase"
+   ],
+   "cutout": 1
+  },
+  "13": {
+   "tags": [
+    "calm",
+    "face"
+   ]
+  },
+  "14": {
+   "tags": [
+    "chapter"
+   ]
+  },
+  "15": {
+   "tags": [
+    "list"
+   ]
+  },
+  "16": {
+   "tags": [
+    "number"
+   ]
+  },
+  "17": {
+   "tags": [
+    "hero",
+    "word"
+   ]
+  },
+  "18": {
+   "tags": [
+    "story",
+    "phrase"
+   ]
+  },
+  "19": {
+   "tags": [
+    "photo",
+    "story"
+   ],
+   "photo": 1
+  },
+  "20": {
+   "tags": [
+    "energy"
+   ]
+  },
+  "21": {
+   "tags": [
+    "face",
+    "energy"
+   ]
+  },
+  "23": {
+   "tags": [
+    "hero",
+    "word",
+    "calm"
+   ]
+  },
+  "24": {
+   "tags": [
+    "phrase",
+    "word"
+   ]
+  },
+  "25": {
+   "tags": [
+    "number",
+    "photo",
+    "hero"
+   ],
+   "photo": 1
+  },
+  "26": {
+   "tags": [
+    "photo",
+    "list",
+    "cutout"
+   ],
+   "photo": 1,
+   "cutout": 1
+  }
+ },
+ "themes": {
+  "ember": {
+   "accent": "#e5333d",
+   "accent2": "#ff8a80",
+   "dark": "#14060a",
+   "worlds": [
+    [
+     "#e5333d",
+     "#3b0a14"
+    ],
+    [
+     "#f1ece2",
+     "#e5333d"
+    ],
+    [
+     "#14060a",
+     "#e5333d"
+    ]
+   ]
+  },
+  "ice": {
+   "accent": "#22e6ff",
+   "accent2": "#b388ff",
+   "dark": "#06102a",
+   "worlds": [
+    [
+     "#0a2a6e",
+     "#22e6ff"
+    ],
+    [
+     "#4b1fa8",
+     "#0a0f2e"
+    ],
+    [
+     "#0f7a96",
+     "#06102a"
+    ]
+   ]
+  },
+  "gold": {
+   "accent": "#ffb703",
+   "accent2": "#ff6b35",
+   "dark": "#160d02",
+   "worlds": [
+    [
+     "#ffb703",
+     "#7a2e00"
+    ],
+    [
+     "#2b1a05",
+     "#ffb703"
+    ],
+    [
+     "#ff6b35",
+     "#2b0a02"
+    ]
+   ]
+  },
+  "violet": {
+   "accent": "#a855f7",
+   "accent2": "#ff3fb4",
+   "dark": "#0e0620",
+   "worlds": [
+    [
+     "#4b1fa8",
+     "#ff3fb4"
+    ],
+    [
+     "#12062e",
+     "#a855f7"
+    ],
+    [
+     "#ff3fb4",
+     "#2a0a4a"
+    ]
+   ]
+  },
+  "mint": {
+   "accent": "#2ee6a6",
+   "accent2": "#22e6ff",
+   "dark": "#031612",
+   "worlds": [
+    [
+     "#0f7a5a",
+     "#031612"
+    ],
+    [
+     "#2ee6a6",
+     "#0a3d4a"
+    ],
+    [
+     "#06241e",
+     "#2ee6a6"
+    ]
+   ]
+  }
+ },
+ "themeHue": {
+  "ember": 0,
+  "gold": 45,
+  "mint": 160,
+  "ice": 190,
+  "violet": 280
+ },
+ "reuse": {
+  "min": 8,
+  "target_seconds_per_effect": 3.0,
+  "max": 16,
+  "note": "8 to 10 effects on a normal clip, more when the clip is long; any effect may repeat when relevant, never twice in a row"
  }
 }

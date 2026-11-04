@@ -70,7 +70,7 @@ export const how = {
   steps: [
     { n: '01', title: 'Drop', text: 'You drop a raw take from your phone. Landscape, square or vertical: Edit Easy frames it for 9:16 around your face.', tag: 'take.received' },
     { n: '02', title: 'Hear', text: 'Muse Voice Transcribe hears every word. Edit Easy times them and cuts the pauses, so a rambling take reads tight.', tag: 'words.timed' },
-    { n: '03', title: 'Pick', text: 'Your take goes to one of two engines, Studio Card or Creator Mix, taken in turn, so two uploads in a row never wear the same look.', tag: 'engine.chosen' },
+    { n: '03', title: 'Pick', text: 'Your take goes to one of two engines, Card Studio or Creator Mix, taken in turn, so two uploads in a row never wear the same look.', tag: 'engine.chosen' },
     { n: '04', title: 'Plan', text: 'One more Muse Spark call gives every beat a layout and a hero word. The rules check each one before it is used.', tag: 'beats.planned' },
     { n: '05', title: 'Build', text: 'Photos for the nouns you can show, you cut out for the word that goes behind you, icons for the apps you name.', tag: 'looks.built' },
     { n: '06', title: 'Draw', text: 'Code draws every frame of the edit: no generated pixels, so your face and voice stay yours.', tag: 'frames.drawn' },
@@ -83,9 +83,9 @@ export const how = {
 /** Was the memory chapter; now the engine shelf: two render engines, each built from a real editor's template. */
 export const memory = {
   heading: ['Two engines,', 'then your words.'],
-  body: 'Each upload is cut by one of two engines, taken in turn: Studio Card frames you in a clean card, and Creator Mix lays twenty-two effects over your take. Once it renders you change it by asking, and a small dictionary of edits turns your words into the change without another model call.',
+  body: 'Each upload is cut by one of two engines, taken in turn: Card Studio frames you in a clean card, and Creator Mix picks eight to sixteen of its twenty-six effects for your words. Once it renders you change it by asking, and a small dictionary of edits turns your words into the change without another model call.',
   inputLabel: 'The two engines',
-  chips: ['Studio Card', 'Creator Mix'],
+  chips: ['Card Studio', 'Creator Mix'],
   why: 'Why this engine?',
 };
 
@@ -93,8 +93,8 @@ export const memory = {
 export const styles = {
   lead: 'One director,',
   options: [
-    { id: 'card', word: 'studio cards', title: 'Studio Card', text: 'Your take framed in a clean studio card with a storyboard beside it, and one lime serif word on every line.', specs: ['Card frame, storyboard', 'Splits with photos', 'Nine layouts'] },
-    { id: 'mix', word: 'creator mixes', title: 'Creator Mix', text: 'Twenty-two effects from two real reels, from a glowing word to a film strip, set from the hook to the close.', specs: ['Colour fields, chapter cards', 'Curved captions, giant type', 'Effects picked by rules'] },
+    { id: 'card', word: 'studio cards', title: 'Card Studio', text: 'Your take framed in a clean studio card with a storyboard beside it, and one lime serif word on every line.', specs: ['Card frame, storyboard', 'Splits with photos', 'Nine layouts'] },
+    { id: 'mix', word: 'creator mixes', title: 'Creator Mix', text: 'Colour worlds behind you, whip and shatter cuts, number posters, and a Before/After with Edited by Meta.', specs: ['8 to 16 effects picked by your words', 'One colour theme per video', 'Before/After built in'] },
     { id: 'words', word: 'your words', title: 'Edit by asking', text: 'Say “bigger captions, zoom out” and the cut changes, matched by a dictionary of edits with no model call.', specs: ['Caption size, case and place', 'Zoom in or out', 'Fix a misheard word'] },
     { id: 'more', word: 'small fixes', title: 'Add and take away', text: 'Ask for a photo at twelve seconds, quieter music or a warmer grade, and only picture and sound are redrawn.', specs: ['Photos in or out', 'Music and effects', 'Your @handle and call to action'] },
   ],
@@ -107,7 +107,7 @@ export const paper = {
   columns: [
     { h: 'Meta models', items: ['Muse Voice Transcribe: words and turns', 'Muse Spark 1.3: every beat, json_schema', 'Prompt edits: no model call', 'No key, no edit: Meta is load-bearing'] },
     { h: 'Engine', items: ['Rule director with 9 layouts', 'Coverage and pacing checks', 'Canvas renderer, ffmpeg in and out', 'Effects, bed, -14 LUFS mix'] },
-    { h: 'Engines', items: ['Studio Card: nine layouts', 'Creator Mix: 22 effects', 'Taken in turn per upload', 'Edits redraw picture and sound only'] },
+    { h: 'Engines', items: ['Card Studio: nine layouts', 'Creator Mix: 26 effects', 'Taken in turn per upload', 'Edits redraw picture and sound only'] },
   ],
   cypher: `POST /v1/chat/completions
 { "model": "muse-spark-1.3",

@@ -23,7 +23,7 @@ type Status = {
   choice?: { by: string; style: string; why: string };
   plan?: { segments: number; layouts: string[]; planner?: string; captions: number; photos: number };
   meta?: { calls?: { call: string; model: string; cache: boolean; seconds: number | null; tokens: number | null; standin: boolean }[] };
-  outputs?: { edit: string; beforeAfter: string | null; raw: string };
+  outputs?: { edit: string; beforeAfter: string | null; raw: string; template?: string; show?: string; download?: string | null; downloadName?: string };
 };
 type Spec = { engine?: string; captionPreset?: string | null; captionsHidden?: boolean; edits?: number; duration: number; segments: { type: string; t0: number; t1: number; label: string | null }[]; captions: { t0: number; t1: number; text: string; hero: string | null; words?: { w: string; t: number; e?: number; hero: boolean }[] }[]; sfx: { t: number; k: string }[] };
 type Health = { meta: 'live' | 'test' | 'claude' | 'missing'; ffmpeg: boolean; queue: number };
@@ -113,6 +113,7 @@ export function Studio() {
   const [conn, setConn] = useState<'ok' | 'retrying'>('ok');
   const [drag, setDrag] = useState(false);
   const [view, setView] = useState<'edit' | 'split'>('edit');
+  const [touched, setTouched] = useState(false);   // the user picked a view themselves; until then the engine's show video plays (Creator Mix: its Before/After)
   const [msgs, setMsgs] = useState<Msg[]>([{ who: 'moovi', text: 'Drop your video, or pick a sample on the left. I edit it, then you tell me what to change in plain words: "zoom out", "funkier captions", "add a b-roll of a city", or fix a word: "change governate to governorate".' }]);
   const [tab, setTab] = useState<'chat' | 'captions'>('chat');
   const [selected, setSelected] = useState<number | null>(null);
@@ -237,12 +238,15 @@ export function Studio() {
 
   const phase = !jobId ? 'pick' : !st ? 'loading' : st.state;
   const file$ = (n: string, dl = false) => `/api/jobs/${jobId}/file/${n}${dl ? '?dl=1' : ''}`;
-  // while a prompt edit re-renders, the last cut keeps playing; ?v= changes when a new cut lands so the player reloads it
+  // show = what plays (Card Studio: the full frame; Creator Mix: the Before/After) until the user picks a view; the
+  // download is file$(<any>, true), which the server answers with the Zoom file only (Vignesh, docs/TEMPLATES.md).
+  // While a prompt edit re-renders, the last cut keeps playing; ?v= changes when a new cut lands so the player reloads it.
   const cut = phase === 'done' || (!!st?.outputs?.edit && phase !== 'error');
   const v = encodeURIComponent(st?.finished ?? '');
-  const src = cut ? `${view === 'edit' ? file$('edit.mp4') : file$('before-after.mp4')}?v=${v}` : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
+  const shown = st?.outputs?.show && !touched ? st.outputs.show : view === 'edit' ? 'edit.mp4' : 'before-after.mp4';
+  const src = cut ? `${file$(shown)}?v=${v}` : jobId ? file$(st?.raw ?? 'input.mp4') : preview;
   const D = spec?.duration ?? st?.duration ?? 0;
-  const label = st?.styleLabel ?? (jobId ? 'Choosing the engine' : 'Studio Card or Creator Mix');
+  const label = st?.styleLabel ?? (jobId ? 'Choosing the engine' : 'Card Studio or Creator Mix');
   const capSpec = useMemo(() => spec ? { duration: spec.duration, captions: spec.captions } : null, [spec]);
   const capDraft = useCaptionDraft(capSpec);
   const busy = editing || phase === 'running' || phase === 'queued';
@@ -294,9 +298,9 @@ export function Studio() {
       <section className="ed__stage">
         <div className="ed__tabs">
           <span className="ed__lab">Preview</span>
-          {phase === 'done' && st?.outputs?.beforeAfter && <span className="ed__seg"><button aria-pressed={view === 'edit'} onClick={() => setView('edit')}>Edit</button><button aria-pressed={view === 'split'} onClick={() => setView('split')}>Before / after</button></span>}
+          {phase === 'done' && st?.outputs?.beforeAfter && <span className="ed__seg"><button aria-pressed={view === 'edit'} onClick={() => { setTouched(true); setView('edit'); }}>Edit</button><button aria-pressed={view === 'split'} onClick={() => { setTouched(true); setView('split'); }}>Before / after</button></span>}
         </div>
-        <div className={`ed__screen ${view === 'split' && phase === 'done' ? 'is-wide' : ''}`}>
+        <div className="ed__screen">
           {src ? <video key={src} ref={vid} src={src} controls={cut} autoPlay={phase === 'done'} muted={phase !== 'done'} loop={phase !== 'done'} playsInline onTimeUpdate={e => setT(e.currentTarget.currentTime)} />
             : <div className="ed__empty"><HaloMark size={54} /><p>Your edit plays here.</p></div>}
           {(phase === 'running' || phase === 'queued' || phase === 'loading') && st && (

@@ -8,7 +8,7 @@ import { StyleShelf } from '@/components/sections/StyleShelf';
 
 /**
  * The crew melts back into the mascot; the camera rises; his halo swells into a ring of glowing memory nodes and the
- * whole world turns ice blue. The engine shelf (Studio Card and Creator Mix, and the way in) sits inside the ring.
+ * whole world turns ice blue. The engine shelf (Card Studio and Creator Mix, and the way in) sits inside the ring.
  */
 export function Memory() {
   const build: Build = useCallback(({ tl, stage, q }) => {

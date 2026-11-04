@@ -98,7 +98,7 @@ if (!existsSync(join(dir, 'cut.mp4'))) ff(['-i', join(dir, 'src.mp4'), '-filter_
 const toCut = t => { for (const [a, b, s] of map) if (t >= a - 1e-3 && t <= b + 1e-3) return +(s + Math.min(t, b) - a).toFixed(3); const nx = map.find(([a]) => a > t); return nx ? nx[2] : o; };
 const cutWords = words.map(w => ({ ...w, t: toCut(w.t), end: Math.max(toCut(w.t) + 0.05, toCut(w.end)) }));
 // the dialect's base grade baked into a second file, so the player draws the after with no per-frame colour filter
-const G = JSON.parse(readFileSync(join(import.meta.dirname, 'templates', (process.env.DIALECT ?? process.env.THEME ?? 'kinetic-brand') + '.json'), 'utf8')).grade ?? { contrast: 1, saturate: 1, brightness: 1, warm: 0 };
+const G = JSON.parse(readFileSync(join(import.meta.dirname, 'templates', (process.env.DIALECT ?? process.env.THEME ?? 'card-studio') + '.json'), 'utf8')).grade ?? { contrast: 1, saturate: 1, brightness: 1, warm: 0 };
 // engine/run.mjs grades per style itself (PREP_GRADE=0), so it skips this pass
 if (!existsSync(join(dir, 'graded.mp4')) && process.env.PREP_GRADE !== '0') ff(['-i', join(dir, 'cut.mp4'), '-vf', `eq=contrast=${G.contrast}:saturation=${G.saturate}:brightness=${(G.brightness - 1).toFixed(3)},colorbalance=rs=${G.warm}:bs=${-G.warm}:rm=${G.warm / 2}:bm=${-G.warm / 2}`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '17', '-g', '15', '-c:a', 'copy', '-movflags', '+faststart', join(dir, 'graded.mp4')]);
 writeFileSync(join(dir, 'cut.json'), JSON.stringify({ map, duration: +o.toFixed(3), source: D }, null, 1));

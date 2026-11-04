@@ -12,7 +12,7 @@ Box: Windows 11, 8 logical cores. The CPU was shared the whole time (the studio 
 
 | style | job | state | take s (raw -> cut) | total s | watch | direct | build | render | mix | share | beats | layouts used | photos | Meta calls |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Studio Card | stylecard1 | done | 22 -> 21.6 | 377.9 | 0.2 | 26.1 | 4.4 | 326.7 | 6.4 | 13 | 11 | face, topsquare, wide, graphic, textbehind, post, list, split, orbit | 2 | plan (stand-in), cached |
+| Card Studio | stylecard1 | done | 22 -> 21.6 | 377.9 | 0.2 | 26.1 | 4.4 | 326.7 | 6.4 | 13 | 11 | face, topsquare, wide, graphic, textbehind, post, list, split, orbit | 2 | plan (stand-in), cached |
 | Kinetic Brand | stykinetic | done | 22 -> 21.6 | 525.3 | 0.2 | 59.3 | 9.3 | 442 | 3.4 | 11 | 11 | face, graphic, textbehind, list, split | 2 | plan (stand-in), cached |
 | Creator Studio | stycreator | done | 22 -> 21.6 | 206.6 | 0.2 | 23.4 | 2.1 | 170.2 | 2.2 | 8.4 | 11 | face, textbehind, list, graphic, orbit | 1 | plan (stand-in), cached |
 | Clean UI | styclean01 | done | 22 -> 21.6 | 198.9 | 0.2 | 22.9 | 0 | 140.7 | 16.2 | 18.8 | 11 | face, topsquare, wide, post, list, graphic, orbit | 1 | plan (stand-in), cached |
@@ -35,7 +35,7 @@ watch = face-aware crop 23 s + Groq Whisper 1 s + pause cut 42 s. build = person
 
 | style | job | state | total s | watch | direct | build | render | note |
 |---|---|---|---|---|---|---|---|---|
-| Studio Card | stylecard1 | done | 1251.6 | 45.2 | 650.4 | 4.6 | 534.5 | matte 82 frames at 30 fps from graded.mp4: 577 s, counted in direct |
+| Card Studio | stylecard1 | done | 1251.6 | 45.2 | 650.4 | 4.6 | 534.5 | matte 82 frames at 30 fps from graded.mp4: 577 s, counted in direct |
 | Kinetic Brand | stykinetic | **error RENDER** | 782 | | | | | `roundRect` radius -8 on the full-frame split (r 0): ended as status error with a human sentence, no hang |
 | Clean UI | styclean01 | done | 681.1 | 46.1 | 45.5 | 261.8 | 315.7 | computed a 259 s matte for a text-behind the style does not even allow |
 | Desk Doc | stydeskdoc | done | 334.7 | 26 | 29.5 | 129.3 | 139.5 | split dropped: no on-topic photo for "themselves close up photo" |
@@ -59,7 +59,7 @@ watch = face-aware crop 23 s + Groq Whisper 1 s + pause cut 42 s. build = person
 - `engine/meta.mjs`: 120 s timeout on the chat call, 300 s on transcribe (a silent endpoint fails, never hangs).
 - `engine/prep.mjs`: a re-run skips steps whose outputs exist; no throwaway grade when run.mjs grades per style.
 - `tools/render-card.mjs`: x264 `veryfast`, CRF 21 (was `medium`, 23).
-- `player/card-studio.js` (all behind `chrome === false`, Studio Card unchanged): split radius and paper; graphic title,
+- `player/card-studio.js` (all behind `chrome === false`, Card Studio unchanged): split radius and paper; graphic title,
   orbit title, wide and post text, list items and the text-behind word in the style's display face; readable list size;
   text-behind colour field uses the style's ground (Creator Studio violet); pale topsquare panel and its hero word use the
   style's own colours (Clean UI orange, not studio lime).
@@ -72,12 +72,12 @@ watch = face-aware crop 23 s + Groq Whisper 1 s + pause cut 42 s. build = person
 - The person matte costs about 3.5 min of CPU per take even at 15 fps (GrabCut edge refine is most of it).
 - Render is 140 to 440 s for 21.6 s, mostly contention; draw is 40 to 110 ms a frame.
 - Clean UI `wide` puts the speaker in a tall thin column on the full frame; `post` leaves a large empty white band.
-- The split caption sits on the seam between photo and face in every style (by design from Studio Card, busy on Kinetic).
+- The split caption sits on the seam between photo and face in every style (by design from Card Studio, busy on Kinetic).
 
 ## Auto mode, quiet CPU, through the live studio (2026-11-05 01:07 IST)
 
 Started with the studio's own sample route (`POST /api/sample?style=auto`), nothing else running, test stand-in for the
-director. Auto kept Studio Card's look and mixed every style's layouts (`spec.card.json`: `mix: true`).
+director. Auto kept Card Studio's look and mixed every style's layouts (`spec.card.json`: `mix: true`).
 
 | job | state | total s | watch | direct | build | render | mix | share | beats | layouts used |
 |---|---|---|---|---|---|---|---|---|---|---|

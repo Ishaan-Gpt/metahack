@@ -246,7 +246,7 @@ async function apply(op, ctx) {
       return changed ? (op.scale < 1 ? 'Zoomed out on the speaker.' : 'Zoomed in on the speaker.') : 'This is already as wide as the footage goes.';
     }
     case 'broll.add': {
-      if (mix) return 'Creator Mix places its photos itself; switch to Studio Card to add a photo where you want one.';
+      if (mix) return 'Creator Mix places its photos itself; switch to Card Studio to add a photo where you want one.';
       const segs = S.segments ?? [], at = op.at;
       const fit = s => s.type === 'face' && s.t1 - s.t0 >= 1.4;
       let g = at != null ? segs.find(s => at >= s.t0 && at < s.t1 && s.type === 'face') : null;
@@ -267,7 +267,7 @@ async function apply(op, ctx) {
     case 'grade': { const g = S.gradeDelta ?? {}; for (const k of ['warm', 'bright', 'contrast', 'sat']) if (op[k]) g[k] = +((g[k] ?? 0) + op[k]).toFixed(3); S.gradeDelta = g; ctx.regrade = true; return 'Colour changed.'; }
     case 'text.handle': { S.handle = op.text; return `The handle is now ${op.text}.`; }
     case 'text.cta': { S.cta = [op.line1 ?? S.cta?.[0] ?? '', op.line2 ?? S.cta?.[1] ?? '']; return 'The call to action is updated.'; }
-    case 'engine': { if (op.name === ctx.engine) return `It is already ${op.name === 'creator-mix' ? 'Creator Mix' : 'Studio Card'}.`; ctx.job.engine = op.name; ctx.fullRerun = true; return `Re-editing it as ${op.name === 'creator-mix' ? 'Creator Mix' : 'Studio Card'}.`; }
+    case 'engine': { if (op.name === ctx.engine) return `It is already ${op.name === 'creator-mix' ? 'Creator Mix' : 'Card Studio'}.`; ctx.job.engine = op.name; ctx.fullRerun = true; return `Re-editing it as ${op.name === 'creator-mix' ? 'Creator Mix' : 'Card Studio'}.`; }
     default: return null;
   }
 }

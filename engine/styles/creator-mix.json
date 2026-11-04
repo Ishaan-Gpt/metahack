@@ -1,0 +1,15 @@
+{
+ "order": 5,
+ "label": "Creator Mix",
+ "line": "Two reels in one: a creator studio edit and a motion edit. Colour-world backgrounds, whip and shatter cuts, number posters, photo strips. Meta Muse Spark directs.",
+ "ref": "Tahrima (instagram.com/reel/DaFaIEGIFvx) + a real estate motion reel",
+ "swatch": [
+  "#e5333d",
+  "#14060a",
+  "#ffffff"
+ ],
+ "fundamentals": "full frame talking head; 8 to 16 effects picked by what is said and reused when the clip is long; one accent colour family per video; the room replaced by moving colour worlds behind the speaker; whip, radial, invert, tilt and shatter transitions; highlighter phrases, bokeh glow words, number posters, vertical photo strips; before/after with a visible 'Edited by Meta' line",
+ "engine": "creator-mix",
+ "auto": false,
+ "chrome": false
+}

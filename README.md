@@ -11,7 +11,7 @@ You talk to your phone for twenty seconds, drop the clip into the studio, and Ed
 framed around your face, the dead pauses cut, one hero word per line, cards, photo splits, lists, a big word sitting
 behind your head, a whoosh or a pop on every change, and the sound set for the feed. Meta's Muse Voice Transcribe hears
 the take, Muse Spark plans every beat, and one of two render engines draws every frame in plain code, so the face and the
-voice in the finished cut are still yours. Each upload is given the next engine in a shuffled turn, Studio Card or
+voice in the finished cut are still yours. Each upload is given the next engine in a shuffled turn, Card Studio or
 Creator Mix, so a creator's uploads do not all wear the same look. Once the edit is rendered you change it by asking
 ("bigger captions, zoom out a little, no music"), and the words are matched against a dictionary of edits rather than
 sent to a model, so a change costs close to nothing ([docs/EDIT-API.md](docs/EDIT-API.md)).
@@ -49,7 +49,7 @@ built before this hackathon.
 | Moovi's edit taste and code, copied in as source to port, not as a build: Edit mastery's player, Premium Captions, the SFX and mix engine (`import/moovi/`) | The job runner with six stages, real per-stage clocks and errors a creator can act on (`engine/run.mjs`) |
 | The MotionEasy canvas renderer by the same author, MIT (`assets/renderer/`) | Prep: the face-aware 9:16 crop, word timing and the pause cut (`engine/prep.mjs`, `engine/faces.py`) |
 | The landing page's design and the Moovi character, from Moovi's site (the copy was rewritten for this product) | Card Studio, the rule director, the nine edit types, the canvas MP4 renderer and the text-behind matte, by Vignesh B S (`engine/card-studio.mjs`, `player/card-studio.js`, `tools/render-card.mjs`, `engine/person_matte.py`, `engine/stock.mjs`) |
-| | Creator Mix, the second engine, by Vignesh B S: 22 effects from two real reels over the same director (`engine/templates/creator-mix.json`) |
+| | Creator Mix, the second engine, by Vignesh B S: 26 effects from two real reels (8 to 16 picked per video) over the same director (`engine/templates/creator-mix.json`) |
 | | Editing by prompt after the render: the edit dictionary and one edit route that redraws only picture and sound (`engine/edits.mjs`, `docs/EDIT-API.md`) |
 | | The 1:1 recreations of the reference reels and their frame-by-frame measurements (`recreate/`, `docs/recreate/`) |
 | | The studio at `/studio` and its API: upload, queue, status, retry, health, sample (`web/src/app/studio`, `web/src/app/api`, `web/src/lib/server/jobs.ts`) |
@@ -100,8 +100,8 @@ new upload is given the next engine in a shuffled turn.
 
 | Engine | id | Built from | What it does to your take |
 |---|---|---|---|
-| Studio Card | `card-studio` | Vignesh's template 1, after Edita Visuals, instagram.com/p/DerbE18txNg | Frames you in a rounded card on a light studio page, with a storyboard beside it, lime serif hero words and nine layouts |
-| Creator Mix | `creator-mix` | Vignesh's template 2, after Tahrima (instagram.com/p/DaFaIEGIFvx) and a real estate motion reel (DfFQiNCT8Lj) | 22 effects laid out from hook to close: glow words, colour fields, chapter cards, a picture window, curved captions, a film strip, giant outlined type; chosen by rules, no extra Meta call |
+| Card Studio | `card-studio` | Vignesh's template 1, after Edita Visuals, instagram.com/p/DerbE18txNg | Frames you in a rounded card on a light studio page, with a storyboard beside it, lime serif hero words and nine layouts |
+| Creator Mix | `creator-mix` | Vignesh's template 2, after Tahrima (instagram.com/p/DaFaIEGIFvx) and a real estate motion reel (DfFQiNCT8Lj) | 26 effects, 8 to 16 picked by relevance, laid out from hook to close: glow words, colour fields, chapter cards, a picture window, curved captions, a film strip, giant outlined type; chosen by rules, no extra Meta call |
 
 After the render, the studio takes plain requests: captions (size, case, position, spacing, a preset, fixing a misheard
 word), b-roll photos in or out, zoom, music and effects louder, quieter or off, the grade, your @handle and call to
@@ -113,14 +113,14 @@ The reference reels are other creators' work; we studied them and do not ship or
 ## Results
 
 One 22 s take (CC BY-SA sample, 54 words) on one 8-core Windows PC with the CPU shared, so these are upper bounds. These
-runs were made before the engines were cut to two; the Studio Card rows are the same engine that runs today, and Creator
+runs were made before the engines were cut to two; the Card Studio rows are the same engine that runs today, and Creator
 Mix has no measured row yet. Full per-stage table: [docs/RESULTS.md](docs/RESULTS.md). These runs used the TEST stand-in for the two
 director calls (no Meta key on the build box yet); Meta token counts and cost are measured on the first live run.
 
 | Engine | Result | Total s | Render s | Layouts used |
 |---|---|---|---|---|
-| Studio Card | pass | 378 | 327 | all 9 |
-| **Studio Card, quiet CPU, via the live studio** | pass | **314** | 139 | all 9 |
+| Card Studio | pass | 378 | 327 | all 9 |
+| **Card Studio, quiet CPU, via the live studio** | pass | **314** | 139 | all 9 |
 | Creator Mix | not measured yet | | | |
 
 Bad inputs end with one plain sentence, tested end to end: a fake video (`NOT_VIDEO`), a 3 s clip (`TOO_SHORT`), a silent
@@ -149,7 +149,7 @@ clip (`NO_SOUND`), no Meta key (`NO_META_KEY`).
 ## Team
 
 - **Ishaan**: Edit Easy (and Moovi before it), the job runner, editing by prompt and the studio.
-- **Vignesh B S**: both engines, Studio Card (template 1) and Creator Mix (template 2), and the Card Studio director (the Meta transcribe and plan calls, rule director, nine edit types, the MP4 renderer, text-behind).
+- **Vignesh B S**: both engines, Card Studio (template 1) and Creator Mix (template 2), and the Card Studio director (the Meta transcribe and plan calls, rule director, nine edit types, the MP4 renderer, text-behind).
 
 AI assistance is logged in [AI_USAGE.md](AI_USAGE.md).
 
@@ -189,3 +189,9 @@ node engine/matte.mjs data/clips/my-clip                         # → matte.web
 - `import/moovi/` source carried over from [Moovi](https://github.com/Ishaan-Gpt/moovi) to port (CONTEXT.md section 11)
 - `assets/` fonts, sfx, music bed, vision models, desk props (licences in `assets/CREDITS.md`)
 - `refs/` the four reference reels' why · `hackathon/` rules and plans · `docs/` themes, recreations, submission
+
+## Muse model map and what is switched off
+Every Meta Muse model (Spark, Voice Transcribe, Wonder, Image, SAM 3.1, Glimmer, Spark Open) has its own switch in `engine/muse.mjs`. Because Meta credits are low, the credit-costing ones are **OFF by default ("OFF: credit limit")** and the project runs on ordinary keys used minimally. See [docs/MUSE.md](docs/MUSE.md) for the table, what is tested and what is not.
+
+## Templates
+Exactly two: **Card Studio** and **Creator Mix**. The list lives in `engine/styles.mjs` (`TEMPLATES`); see [docs/TEMPLATES.md](docs/TEMPLATES.md).

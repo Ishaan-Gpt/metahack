@@ -1,7 +1,7 @@
 # Edit Easy for the Meta hackathon: the winning plan
 
 > Update, 5 Nov: the product is now called **Edit Easy** (it grew out of Moovi, built before the hackathon). The five
-> styles and the auto style pick below were replaced by two render engines, Studio Card and Creator Mix, given to uploads
+> styles and the auto style pick below were replaced by two render engines, Card Studio and Creator Mix, given to uploads
 > in a shuffled turn, and editing by prompt after the render through a keyword edit dictionary (docs/EDIT-API.md).
 > The rows below are the plan as it stood on 4 Nov.
 
@@ -27,7 +27,7 @@ plain code everywhere else, which is the "beyond a basic integration" the 25% Me
 
 ## 3. Our USPs (what the page, the demo and the form all say)
 1. **Edits your real take.** Not an avatar, not stock: your face, your voice.
-2. **Five pro editors' styles, measured to the frame** (Studio Card, Kinetic Brand, Creator Studio, Clean UI, Desk Doc), or **Auto**: Muse Spark watches and picks, and tells you why.
+2. **Five pro editors' styles, measured to the frame** (Card Studio, Kinetic Brand, Creator Studio, Clean UI, Desk Doc), or **Auto**: Muse Spark watches and picks, and tells you why.
 3. **One Muse plan, a deterministic editor.** Muse decides, code draws: cents per edit, the same take always gives the same cut, no generated pixels.
 4. **A before/after with every edit**, ready to post.
 5. **Honest and robust:** every failure is one sentence with the action next to it; prior work disclosed.

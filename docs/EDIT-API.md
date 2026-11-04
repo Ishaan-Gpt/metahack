@@ -51,7 +51,7 @@ keys } } }`, where overrides use the renderer's template keys: `fonts.hero` ({fa
 
 A caption card is `{ t0, t1, words: [{ w, t, e?, hero }] }`. A word starts at `t` and ends at `e` when set, else where
 the next word starts, else at the card's end. `caption.wordTime` writes `e` only when a word stops before the next one.
-The renderers read `t`: Creator Mix shows each word from its `t`, Studio Card pops the key word at its `t` and shows the
+The renderers read `t`: Creator Mix shows each word from its `t`, Card Studio pops the key word at its `t` and shows the
 card from `t0` to `t1`. They ignore `e`, so a shortened word changes the timeline and the next edit, not the picture.
 The word ops live in `engine/word-ops.mjs`; the studio uses a generated copy (`node tools/sync-caption-presets.mjs`).
 

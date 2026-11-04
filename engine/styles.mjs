@@ -10,6 +10,8 @@ const ROOT = join(import.meta.dirname, '..');
 const BASE = join(ROOT, 'engine/templates/card-studio.json');
 const DIR = join(ROOT, 'engine/styles');
 export const DEFAULT_STYLE = 'card-studio';
+/** THE templates. There are exactly two and this list is the single place that says so: Card Studio (template 1) and Creator Mix (template 2). */
+export const TEMPLATES = ['card-studio', 'creator-mix'];
 
 const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
 function merge(a, b) {
@@ -31,8 +33,8 @@ export function loadStyle(id = DEFAULT_STYLE) {
 /** the catalogue the studio shows and Muse Spark chooses from: id, label, one line, the reference it was measured from,
  *  and the fundamentals (what the style does), in the order the studio lists them */
 export function listStyles() {
-  return readdirSync(DIR).filter(f => f.endsWith('.json')).map(f => {
+  return readdirSync(DIR).filter(f => f.endsWith('.json') && TEMPLATES.includes(f.replace(/\.json$/, ''))).map(f => {
     const s = JSON.parse(readFileSync(join(DIR, f), 'utf8'));
-    return { id: f.replace(/\.json$/, ''), label: s.label, line: s.line, ref: s.ref, fundamentals: s.fundamentals, order: s.order ?? 99, swatch: s.swatch };
+    return { id: f.replace(/\.json$/, ''), label: s.label, line: s.line, ref: s.ref, fundamentals: s.fundamentals, order: s.order ?? 99, swatch: s.swatch, engine: s.engine ?? 'card-studio', auto: s.auto !== false };
   }).sort((a, b) => a.order - b.order);
 }
