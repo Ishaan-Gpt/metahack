@@ -1,0 +1,242 @@
+{
+ "name": "creator-mix",
+ "label": "Creator Mix (template 2)",
+ "about": "Template 2: a combination of the effects of two reels, a creator studio edit (@Tahrima reel DaFaIEGIFvx: glow hero words, colour fields, chapter cards, icon tiles, push-ins) and a real estate motion edit (reel DfFQiNCT8Lj: defocus punch, curved captions, picture window, film strip, mosaic, stripe glitch, slice split, giant type, progress ring), shown in a fixed order: hook, setup, proof, list, close. All plain code over the Card Studio director (same transcript, auto-cut and Muse Spark plan); the effects are chosen by rules, no extra Meta calls.",
+ "canvas": {
+  "w": 1080,
+  "h": 1920,
+  "fps": 30
+ },
+ "auto": {
+  "minFaceRatio": 0.5,
+  "whenSourceNot916": true
+ },
+ "grade": {
+  "contrast": 1.04,
+  "saturate": 1.05,
+  "brightness": 1.01,
+  "warm": 0.02
+ },
+ "palette": {
+  "navy": "#0a0f2e",
+  "ink": "#06070f",
+  "red": "#e5333d",
+  "cyan": "#22e6ff",
+  "magenta": "#ff3fb4",
+  "purple": "#4b1fa8",
+  "teal": "#0f7a96",
+  "orange": "#e8851f",
+  "white": "#ffffff",
+  "paper": "#f1ece2"
+ },
+ "fonts": {
+  "serifItalic": {
+   "family": "Instrument Serif",
+   "file": "instrument-serif-latin-400-italic.woff2",
+   "style": "italic"
+  },
+  "sans": {
+   "family": "Inter Tight",
+   "file": "inter-tight-latin-wght-normal.woff2",
+   "style": "normal"
+  },
+  "ui": {
+   "family": "Inter",
+   "file": "inter-latin-wght-normal.woff2",
+   "style": "normal"
+  },
+  "anton": {
+   "family": "Anton",
+   "file": "anton-latin-400-normal.woff2",
+   "style": "normal"
+  },
+  "script": {
+   "family": "Pacifico",
+   "file": "pacifico-latin-400-normal.woff2",
+   "style": "normal"
+  },
+  "marker": {
+   "family": "Permanent Marker",
+   "file": "permanent-marker-latin-400-normal.woff2",
+   "style": "normal"
+  }
+ },
+ "layout": {
+  "card": {
+   "x": 380,
+   "y": 422,
+   "w": 540,
+   "h": 956,
+   "r": 30,
+   "shadowBlur": 56,
+   "shadowY": 20,
+   "shadowColor": "rgba(0,0,0,0.20)"
+  },
+  "badge": {
+   "x": 388,
+   "y": 290,
+   "h": 112,
+   "textSize": 46
+  },
+  "storyboard": {
+   "x": 112,
+   "y": 655,
+   "w": 300,
+   "h": 520,
+   "r": 22,
+   "pillY": 572,
+   "pillH": 70
+  },
+  "blob": {
+   "cx": 430,
+   "cy": 760,
+   "r": 640,
+   "petals": 12
+  },
+  "handle": {
+   "xRight": 950,
+   "y": 150,
+   "size": 36
+  },
+  "cta": {
+   "y1": 1478,
+   "y2": 1552,
+   "size": 56
+  },
+  "caption": {
+   "yFrac": 0.66,
+   "smallSize": 34,
+   "heroSize": 96,
+   "lineGap": 6,
+   "maxWFrac": 0.88
+  },
+  "split": {
+   "border": 14,
+   "gap": 10,
+   "topFrac": 0.5
+  },
+  "graphic": {
+   "titleSize": 66,
+   "blockTopFrac": 0.34
+  },
+  "textBehind": {
+   "widthFrac": 0.95,
+   "maxSize": 330,
+   "capFrac": 0.21,
+   "maxStretch": 2.2,
+   "anchor": -0.05,
+   "slam": 1.14,
+   "drift": 10,
+   "blur": 34,
+   "dim": 0.5,
+   "maxFace": 9,
+   "minScale": 1,
+   "bgZoom": 1.0,
+   "headroom": 0.3,
+   "maxLower": 0.24
+  }
+ },
+ "motion": {
+  "zoomLevels": [
+   1.0,
+   1.16
+  ],
+  "pushPerSegment": 0.04,
+  "faceAnchorY": 0.36,
+  "wash": 0.45,
+  "wipe": 0.2,
+  "pop": 0.18,
+  "captionIn": 0.1,
+  "heroPop": 0.16,
+  "imageRise": 0.5,
+  "kenBurns": 0.08
+ },
+ "rules": {
+  "hookFace": 1.8,
+  "tailFace": 1.2,
+  "brollMaxFrac": 0.85,
+  "hiddenMaxFrac": 0.25,
+  "graphicMax": 2.4,
+  "graphicMin": 1.0,
+  "splitMax": 4.5,
+  "splitMin": 1.6,
+  "bigtextMax": 3.0,
+  "bigtextMin": 1.2,
+  "faceBetween": 1.2,
+  "minSentence": 1.2,
+  "stockScoreMin": 4,
+  "chunkMaxWords": 3,
+  "chunkMaxChars": 16,
+  "chunkGap": 0.28
+ },
+ "sfx": {
+  "wash": "sfx/fs.whoosh.swosh-whoosh-air-cut.wav",
+  "wipe": "sfx/fs.whoosh.swosh-whoosh-air-cut.wav",
+  "rise": "sfx/fs.ui.pop-4.wav",
+  "click": "sfx/kenney.click.wav",
+  "split": "sfx/fs.impact.soft-hit.wav",
+  "gainDb": -15
+ },
+ "music": {
+  "file": "music/bed.mp3",
+  "gainDb": -27
+ },
+ "loudness": {
+  "lufs": -14,
+  "tp": -1.5
+ },
+ "defaults": {
+  "badge": "Meta AI",
+  "handle": "@yourhandle",
+  "cta1": "Follow & comment \"{KW}\"",
+  "cta2": "for the full guide"
+ },
+ "order": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22
+ ],
+ "effectNames": {
+  "2": "glow hero word",
+  "3": "defocus punch",
+  "6": "curved arc caption",
+  "7": "colour field card",
+  "11": "picture window",
+  "13": "face push-in, text opposite",
+  "14": "chapter card",
+  "15": "icon tiles",
+  "16": "progress ring",
+  "17": "giant outlined type",
+  "18": "film strip frame",
+  "19": "B&W mosaic, red tint",
+  "20": "stripe glitch + flash",
+  "21": "face slice split",
+  "22": "end card",
+  "1": "poster collage card",
+  "4": "white void cutout",
+  "5": "cutout on colour field, giant slanted word",
+  "8": "photo card fan behind speaker",
+  "9": "falling polaroids, red string",
+  "10": "TV wall behind speaker",
+  "12": "torn paper collage, typewriter"
+ }
+}
