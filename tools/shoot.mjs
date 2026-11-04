@@ -17,7 +17,7 @@ p.on('pageerror', e => console.log('PAGE ERROR', String(e).slice(0, 300)));
 const t0 = Date.now();
 await p.goto(kv.url); await p.waitForFunction(() => window.__ready === true, null, { timeout: 180000 });
 await p.evaluate(() => { const g = document.getElementById('gate'); if (g) g.style.display = 'none'; });
-const tmp = resolve('data/grabs/_shots'); rmSync(tmp, { recursive: true, force: true }); mkdirSync(tmp, { recursive: true });
+const tmp = resolve(kv.tmp || ('data/grabs/_shots-' + (kv.out.replace(/[^\w]/g, '_')))); rmSync(tmp, { recursive: true, force: true }); mkdirSync(tmp, { recursive: true });
 const times = kv.times.split(',').map(Number), w = +(kv.w || 270);
 for (const [i, t] of times.entries()) {
   await p.evaluate(t => window.__seek(t), t); await p.waitForTimeout(120);
