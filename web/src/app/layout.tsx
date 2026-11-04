@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: 'Moovi · raw take in, a pro editor’s cut out',
   description: 'Drop a raw talking-head take. Meta’s Muse Spark directs, Moovi draws every frame: the edit a hired short-form editor would make, in minutes.',
   metadataBase: new URL(process.env.SITE_URL ?? 'http://localhost:3000'),
-  openGraph: { title: 'Moovi · raw take in, a pro editor’s cut out', description: 'Directed by Meta’s Muse Spark. Five pro editors’ styles, measured frame by frame.', type: 'website' },
+  openGraph: { title: 'Moovi · raw take in, a pro editor’s cut out', description: 'Directed by Meta’s Muse Spark. Two templates, measured frame by frame.', type: 'website' },
 };
 
 export const viewport: Viewport = { themeColor: '#F7FAFD', width: 'device-width', initialScale: 1 };

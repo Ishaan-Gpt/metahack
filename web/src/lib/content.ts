@@ -82,20 +82,18 @@ export const how = {
 
 /** Was the memory chapter; now the style library: five real editors' reels, measured frame by frame. */
 export const memory = {
-  heading: ['Five pro editors,', 'measured to the frame.'],
-  body: 'Each style is one real editor’s before-and-after reel, rebuilt by measuring it frame by frame: where the words sit, how big, which colour, how fast things change. Pick one, or let Muse Spark pick for your take.',
-  inputLabel: 'Pick a style',
-  chips: ['Studio Card', 'Kinetic Brand', 'Creator Studio', 'Clean UI', 'Desk Doc'],
+  heading: ['Two templates,', 'measured to the frame.'],
+  body: 'Each template is rebuilt from real editors’ before-and-after reels by measuring them frame by frame: where the words sit, how big, which colour, how fast things change. Pick Card Studio or Creator Mix.',
+  inputLabel: 'Pick a template',
+  chips: ['Card Studio', 'Creator Mix'],
   why: 'Why this style?',
 };
 
 export const styles = {
   lead: 'One director,',
   options: [
-    { id: 'explainer', word: 'studio cards', title: 'Studio Card', text: 'Your take framed in a clean studio card, a storyboard beside it, one lime serif word per line.', specs: ['Card frame, storyboard', 'Splits with photos', 'Post card with a tap'] },
-    { id: 'launch', word: 'brand ads', title: 'Kinetic Brand', text: 'One static take turned into a brand ad: huge words behind you, white, gold and one red.', specs: ['Full frame, deep blacks', 'Words behind you', 'Hits and risers'] },
-    { id: 'kinetic', word: 'clean UI', title: 'Clean UI', text: 'Apple-clean cards act out every claim; your take shrinks into a card and comes back.', specs: ['White interface cards', 'Wide words, post taps', 'Clean clicks'] },
-    { id: 'edit', word: 'documentaries', title: 'Desk Doc', text: 'A warm documentary: photos that prove the point, numbers made big, yellow glowing words.', specs: ['Warm sunlit grade', 'Photo splits, lists', 'A soft bed'] },
+    { id: 'explainer', word: 'studio cards', title: 'Card Studio', text: 'Your take framed in a clean studio card, a storyboard beside it, one lime serif word per line.', specs: ['Card frame, storyboard', 'Splits with photos', 'Post card with a tap'] },
+    { id: 'mix', word: 'creator mix', title: 'Creator Mix', text: 'Colour worlds behind you, whip and shatter cuts, number posters, and a Before/After with Edited by Meta.', specs: ['8 to 16 effects picked by your words', 'One colour theme per video', 'Before/After built in'] },
   ],
 };
 
@@ -106,7 +104,7 @@ export const paper = {
   columns: [
     { h: 'Meta models', items: ['Muse Voice Transcribe: words and turns', 'Muse Spark 1.3: the style, in one call', 'Muse Spark 1.3: every beat, json_schema', 'No key, no edit: Meta is load-bearing'] },
     { h: 'Engine', items: ['Rule director with 9 layouts', 'Coverage and pacing checks', 'Canvas renderer, ffmpeg in and out', 'Effects, bed, -14 LUFS mix'] },
-    { h: 'Styles', items: ['5 real editors’ reels, measured', 'Fonts matched by x-height', 'Colours sampled from frames', 'Timing read per frame at 30 fps'] },
+    { h: 'Styles', items: ['2 templates from real reels, measured', 'Fonts matched by x-height', 'Colours sampled from frames', 'Timing read per frame at 30 fps'] },
   ],
   cypher: `POST /v1/chat/completions
 { "model": "muse-spark-1.3",

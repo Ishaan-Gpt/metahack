@@ -184,3 +184,6 @@ node engine/matte.mjs data/clips/my-clip                         # → matte.web
 
 ## Muse model map and what is switched off
 Every Meta Muse model (Spark, Voice Transcribe, Wonder, Image, SAM 3.1, Glimmer, Spark Open) has its own switch in `engine/muse.mjs`. Because Meta credits are low, the credit-costing ones are **OFF by default ("OFF: credit limit")** and the project runs on ordinary keys used minimally. See [docs/MUSE.md](docs/MUSE.md) for the table, what is tested and what is not.
+
+## Templates
+Exactly two: **Card Studio** and **Creator Mix**. The list lives in `engine/styles.mjs` (`TEMPLATES`); see [docs/TEMPLATES.md](docs/TEMPLATES.md).

@@ -120,17 +120,10 @@ stage('watch', 'done'); event(`${words.length} words; pauses cut, ${dur.toFixed(
 stage('direct', 'running');
 const transcript = words.map(w => w.word).join(' ');
 let styleId = job.style;
-if (styleId === 'auto') {
-  const { metaChooseStyle, chooseStyleByRules } = await import('./meta.mjs');
-  const facts = { seconds: +cut.duration.toFixed(1), words: words.length, sourceShape: v.width / v.height > 0.6 ? (v.width > v.height ? '16:9' : '4:5') : '9:16' };
-  let pick = { ok: false };
-  try { pick = await metaChooseStyle(CLIP, { transcript, catalogue: listStyles().filter(s => s.auto), facts }); } catch (e) { pick = { ok: false, why: e.message }; }
-  if (pick.ok) { styleId = pick.style; status.choice = { by: pick.standin ? 'stand-in (test)' : claude ? 'Claude Sonnet' : 'Muse Spark', style: styleId, why: pick.why, hero: pick.hero_words }; }
-  else { const r = chooseStyleByRules(transcript, facts); styleId = r.style; status.choice = { by: claude ? 'rules (Claude unavailable)' : 'rules (Muse Spark unavailable)', style: styleId, why: r.why }; log(`style pick fallback: ${pick.why}`); }
-  event(`${status.choice.by} chose ${loadStyle(styleId).label}: ${status.choice.why}`, 'decision');
-}
+// exactly two templates exist: 'card-studio' and 'creator-mix'. 'auto' (or no choice) means Card Studio, so no extra Meta call is spent on picking.
+if (styleId === 'auto') { styleId = 'card-studio'; status.choice = { by: 'default', style: styleId, why: 'Card Studio is the default template; Creator Mix runs when chosen' }; event('Template: Card Studio (default)', 'decision'); }
 const MIX = styleId === 'creator-mix';   // template 2: Creator Mix (engine/creator-mix.mjs lays its effects on the same Card Studio plan)
-const S = loadStyle(styleId); status.style = styleId; status.styleLabel = job.style === 'auto' ? `Auto: ${S.label} look, every style's layouts` : S.label; save();
+const S = loadStyle(styleId); status.style = styleId; status.styleLabel = S.label; save();
 // re-grade the cut with the style's own grade (prep baked Card Studio's)
 const G = S.grade;
 await step('ffmpeg', ['-v', 'error', '-y', '-nostdin', '-i', join(CLIP, 'cut.mp4'), '-vf', `eq=contrast=${G.contrast}:saturation=${G.saturate}:brightness=${(G.brightness - 1).toFixed(3)},colorbalance=rs=${G.warm}:bs=${-G.warm}:rm=${G.warm / 2}:bm=${-G.warm / 2}`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '17', '-g', '15', '-c:a', 'copy', '-movflags', '+faststart', join(CLIP, 'graded.mp4')]);
@@ -140,7 +133,7 @@ try {
   console.log = (...x) => { const l = x.join(' '); log(l); if (/^coverage: added/.test(l)) sub(0.6); if (/^build:|stock|matte/i.test(l) && status.stage === 'direct') { stage('direct', 'done'); stage('build', 'running'); } };
   console.warn = (...x) => log('warn: ' + x.join(' '));
   const dog = setTimeout(() => fail(new JobError('DIRECT', 'Directing took far too long (a photo or model service stopped answering). Press Try again.', 'direct watchdog')), 1500 * 1000 * +(process.env.STEP_LIMIT_SCALE ?? 1));
-  await direct(CLIP, { style: styleId, mix: job.style === 'auto', badge: job.badge || (realMeta ? 'Muse Spark' : 'Moovi'), handle: job.handle || '@moovi', cta1: job.cta1, cta2: job.cta2, kw: job.kw, noStock: job.noStock });
+  await direct(CLIP, { style: styleId, mix: false, badge: job.badge || (realMeta ? 'Muse Spark' : 'Moovi'), handle: job.handle || '@moovi', cta1: job.cta1, cta2: job.cta2, kw: job.kw, noStock: job.noStock });
   clearTimeout(dog); console.log = origLog; console.warn = origWarn;
 } catch (e) { fail(new JobError('DIRECT', 'The director could not plan this take. Try again; if it repeats, try another style.', e.stack)); }
 if (MIX) { const { buildMix } = await import('./creator-mix.mjs'); await buildMix(CLIP, { handle: job.handle || '@moovi', cta1: job.cta1, cta2: job.cta2 }); }
