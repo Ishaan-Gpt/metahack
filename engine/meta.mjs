@@ -12,10 +12,11 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadEnv } from './env.mjs';
+import { localDirector } from './muse.mjs';   // Muse Glimmer / Muse Spark Open as a local director: OFF by default (credit limit)
 
 export const KEY_ERROR = 'MODEL_API_KEY is required for the Card Studio theme (Meta Model API)';
 export const TRANSCRIBE_MODEL = 'muse-voice-transcribe-1.0';
-export const SPARK_MODEL = 'muse-spark-1.3';
+export const SPARK_MODEL = process.env.SPARK_MODEL || 'muse-spark-1.3';   // 'muse-spark-1.3-contributor' is the cheaper tier (Meta may use the calls to improve its products)
 // TEMPORARY, until the Meta key is in: DIRECTOR=claude routes the two director calls (style pick, beat plan) to Claude
 // Sonnet with the same prompts and the same strict JSON schema. Recorded as claude-sonnet-5-5 everywhere (usage log,
 // status, studio), cached separately from Muse answers, and never labelled as Meta. Transcription then uses Whisper.
@@ -25,14 +26,15 @@ export const isClaude = () => (process.env.DIRECTOR ?? '').toLowerCase() === 'cl
 // (or DIRECTOR=gemini is asked for). Same two calls, same cache, same usage log, one wait-and-retry on a 429 (free tier).
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 export const geminiBase = () => (process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
-export const isGemini = () => { loadEnv(); if (isClaude()) return false; if ((process.env.DIRECTOR ?? '').toLowerCase() === 'gemini') return true; return !(process.env.MODEL_API_KEY ?? '').trim() && !!(process.env.GEMINI_API_KEY ?? '').trim(); };
-export const directorModel = () => isClaude() ? CLAUDE_MODEL : isGemini() ? GEMINI_MODEL : SPARK_MODEL;
+export const isGemini = () => { loadEnv(); if (isClaude() || localDirector()) return false; if ((process.env.DIRECTOR ?? '').toLowerCase() === 'gemini') return true; return !(process.env.MODEL_API_KEY ?? '').trim() && !!(process.env.GEMINI_API_KEY ?? '').trim(); };
+export const directorModel = () => localDirector() ? localDirector().model : isClaude() ? CLAUDE_MODEL : isGemini() ? GEMINI_MODEL : SPARK_MODEL;
 export const metaBase = () => (process.env.META_API_BASE || 'https://api.meta.ai/v1').replace(/\/+$/, '');
 export const sha256 = b => createHash('sha256').update(b).digest('hex');
 
 /** Exit before any work when the Meta key is missing (read the way engine/env.mjs reads it: env, then .env.local). */
 export function requireMetaKey() {
   loadEnv();
+  if (localDirector()) { console.warn(`MUSE_LOCAL=${localDirector().which}: the director runs on your own server (${localDirector().base})`); return 'local'; }
   if (isClaude()) {
     if (!process.env.ANTHROPIC_API_KEY?.trim() && !process.env.ANTHROPIC_AUTH_TOKEN?.trim()) { console.error('DIRECTOR=claude needs ANTHROPIC_API_KEY in .env.local'); process.exit(2); }
     return 'claude';
@@ -328,6 +330,8 @@ export function chooseStyleByRules(transcript, facts) {
 /** One director call. Muse Spark: the body as is. Claude: same system + user text, the same JSON schema as structured
  *  output, answered back in the chat/completions shape the callers already read (choices[0].message.content, usage). */
 async function postChat(body, key) {
+  const L = localDirector();   // Muse Glimmer / Spark Open served locally through an OpenAI-compatible endpoint
+  if (L) return fetch(`${L.base}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${process.env.MUSE_LOCAL_KEY || 'local'}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, model: L.model }), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });
   if (isGemini()) return geminiChat(key, body);
   if (!isClaude()) return fetch(`${metaBase()}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });   // a silent endpoint fails in 2 min, never hangs the job
   const { default: Anthropic, APIError } = await import('@anthropic-ai/sdk');

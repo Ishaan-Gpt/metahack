@@ -181,3 +181,6 @@ node engine/matte.mjs data/clips/my-clip                         # → matte.web
 - `import/moovi/` source carried over from [Moovi](https://github.com/Ishaan-Gpt/moovi) to port (CONTEXT.md section 11)
 - `assets/` fonts, sfx, music bed, vision models, desk props (licences in `assets/CREDITS.md`)
 - `refs/` the four reference reels' why · `hackathon/` rules and plans · `docs/` themes, recreations, submission
+
+## Muse model map and what is switched off
+Every Meta Muse model (Spark, Voice Transcribe, Wonder, Image, SAM 3.1, Glimmer, Spark Open) has its own switch in `engine/muse.mjs`. Because Meta credits are low, the credit-costing ones are **OFF by default ("OFF: credit limit")** and the project runs on ordinary keys used minimally. See [docs/MUSE.md](docs/MUSE.md) for the table, what is tested and what is not.

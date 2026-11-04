@@ -90,16 +90,17 @@ event(`Got your take: ${dur.toFixed(1)} s, ${v.width}x${v.height}`);
 const claude = (process.env.DIRECTOR ?? '').toLowerCase() === 'claude';   // temporary: Claude Sonnet directs until the Meta key is in
 const realMeta = !claude && !!process.env.MODEL_API_KEY?.trim() && !process.env.META_API_BASE;
 const standin = !claude && !!process.env.META_API_BASE;
-const gem = !claude && !standin && !process.env.MODEL_API_KEY?.trim() && !!process.env.GEMINI_API_KEY?.trim();   // free Gemini API, BACKUP only (no Meta key)
+const gem = !claude && !standin && !process.env.MODEL_API_KEY?.trim() && (!!process.env.GEMINI_API_KEY?.trim() || !!(await import('./muse.mjs')).localDirector());   // free Gemini API, BACKUP only (no Meta key)
 if (claude && !process.env.ANTHROPIC_API_KEY?.trim()) fail(new JobError('NO_DIRECTOR_KEY', 'The studio is missing its director key, so nothing can plan your edit. This is on our side, not yours: we are on it.'));
 if (!claude && !realMeta && !standin && !gem) fail(new JobError('NO_META_KEY', 'The studio is missing its Meta Model API key, so Muse Spark cannot direct. This is on our side, not yours: we are on it.'));
-status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : gem ? 'gemini' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : gem ? (process.env.GEMINI_MODEL || 'gemini-2.5-flash') : 'muse-spark-1.3' }; save();
+log('Muse model map:\n' + (await import('./muse.mjs')).museTable());
+status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : (await import('./muse.mjs')).localDirector() ? 'local-open-weights' : gem ? 'gemini' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : (await import('./muse.mjs')).localDirector() ? (await import('./muse.mjs')).localDirector().model : gem ? (process.env.GEMINI_MODEL || 'gemini-2.5-flash') : 'muse-spark-1.3' }; save();
 
 // ---- 1 watch ---------------------------------------------------------------------------------------------------------
 stage('watch', 'running');
 try {
   await step(process.execPath, [join(ROOT, 'engine/prep.mjs'), input, CLIP], {
-    env: { HEAR: realMeta || gem ? 'meta' : 'groq', DIALECT: 'card-studio', PREP_GRADE: '0' },   // test runs: Whisper on Groq for the words
+    env: { HEAR: realMeta || (gem && !(await import('./muse.mjs')).localDirector()) ? 'meta' : 'groq', DIALECT: 'card-studio', PREP_GRADE: '0' },   // test runs: Whisper on Groq for the words
     onLine: l => { if (/^ingest/.test(l)) { sub(0.35); event('Framed for 9:16 around your face'); } if (/^hear/.test(l)) { sub(0.7); event(realMeta ? 'Muse Voice Transcribe heard every word' : 'Words timed'); } if (/^clean/.test(l)) { sub(0.95); } },
   });
 } catch (e) {
