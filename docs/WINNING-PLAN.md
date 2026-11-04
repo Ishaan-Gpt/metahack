@@ -32,19 +32,28 @@ plain code everywhere else, which is the "beyond a basic integration" the 25% Me
 4. **A before/after with every edit**, ready to post.
 5. **Honest and robust:** every failure is one sentence with the action next to it; prior work disclosed.
 
-## 4. Deliverables and status
+## 4. Deliverables and status (updated 5 Nov, 04:10 IST)
 | Deliverable | Where | Status |
 |---|---|---|
-| Landing page, repositioned (Edit Easy's brand, the mascot, Muse at the centre, Vyra-style story) | `web/` → `/` | Done, build passes, desktop + phone checked |
-| Studio (Vyra-style editor: footage + styles, preview, chat, timeline) | `web/` → `/studio` | Done; full edit verified in the browser |
-| Backend API (upload with progress, queue, status, files with byte ranges, retry in another style, sample, health) | `web/src/app/api`, `web/src/lib/server/jobs.ts` | Done; error paths tested |
-| Engine: 5 styles + auto pick + job runner | `engine/styles/`, `engine/run.mjs`, `engine/meta.mjs` | Done; 2 styles verified, 3 rendering now |
-| Meta layer (Transcribe, Spark style pick, Spark plan, cache, usage log) | `engine/meta.mjs` | Built; **untested against real Meta: no key yet** |
-| Claude Sonnet as temporary director | `DIRECTOR=claude` | Built; needs `ANTHROPIC_API_KEY` |
-| Public link | Cloudflare tunnel from this PC | Live (PC must stay on through judging) |
-| README, form fields, demo script, bonus kit, AI usage | `README.md`, `docs/SUBMISSION.md`, `docs/DEMO-SCRIPT.md`, `docs/BONUS-KIT.md`, `AI_USAGE.md` | Drafted; numbers wait for RESULTS.md |
-| Measured results | `docs/RESULTS.md` | Being written by the styles worker |
-| Demo video | to make | Needs your voice or a narration decision |
+| Landing page as Edit Easy (brand, mascot, Muse at the centre, two engines, edit by asking) | `web/` → `/` | **Done.** The hero's 3D jelly word still spells the old name, so it is hidden |
+| Studio: footage and samples, preview, chat, timeline | `web/` → `/studio` | **Done**, checked in the browser |
+| Prompt editing after the render: keyword dictionary, fuzzy spelling, text fixes, no model call | `engine/edits.mjs`, `/api/jobs/<id>/edit` | **Done**; real re-renders in 127 to 214 s |
+| Captions Easy in the studio: caption tab, word timeline (edit, drag, stretch, key word, split, join, zoom, undo) | `web/src/components/studio/` | **Done**; one word edit applied and re-rendered from the UI |
+| Captions Easy library: 157 looks (16 premium), 49 animations, source files | `library/captions-easy/` | **Done**, stored for reuse (not used in renders yet) |
+| Two engines, taken in turn per upload (Card Studio, Creator Mix v3 by Vignesh) | `engine/run.mjs`, `engine/styles/` | **Done**; both re-rendered with the merged runner |
+| Show vs download (Card Studio Zoom, Creator Mix Before/After + Zoom) | `engine/run.mjs`, file route | **Done** (Vignesh), runs after prompt edits too |
+| /styles: both engines, then the five reference recreations + our own edit, live beside their raw takes | `/styles` | **Done**; all six players load |
+| Backend API (upload, queue, status, byte-range files, retry, samples, health, edit) | `web/src/app/api`, `web/src/lib/server/jobs.ts` | **Done**; error paths tested |
+| Meta layer (Transcribe, Spark plan, cache, usage log; Gemini/local backup) | `engine/meta.mjs`, `engine/muse.mjs` | Built; **untested against real Meta: no key yet** |
+| Public link | Cloudflare tunnel from this PC | **Live** (the PC must stay on through judging) |
+| Always-on deploy on the EC2 box | `deploy/` | Prepared; **waits for your OK to write to that server** |
+| README, form fields, demo script, bonus kit, AI usage | `README.md`, `docs/SUBMISSION.md`, `docs/DEMO-SCRIPT.md`, `docs/BONUS-KIT.md`, `AI_USAGE.md` | Updated to Edit Easy; SUBMISSION still has 4 placeholders: tokens and cost per edit (need the key), your full name, the video URL |
+| Measured results | `docs/RESULTS.md` | Card Studio full runs and prompt-edit re-renders measured; Creator Mix's first full run not clean (see RESULTS) |
+| Demo video | `data/demo/demo.mp4` is an old 72 s draft (old name, five styles) | **Not done**: needs a new cut and your narration call |
+| Submission in the Cerebral Valley portal | | **Not done**: yours, before 06:30 IST |
+
+Roughly: the product is about 90% done, the submission package about 50% (no Meta key, no final demo video, 4 form
+placeholders, not submitted).
 
 ## 5. Bonus prizes we can reach
 The rules name **community vote** and **most viral**, plus "other notable" categories (announced about Nov 10).
@@ -52,14 +61,13 @@ The rules name **community vote** and **most viral**, plus "other notable" categ
   Instagram) and a one-paragraph vote ask: `docs/BONUS-KIT.md`. **You approve and post; nothing is posted by us.**
 - Every studio edit already makes a shareable before/after, so every user becomes a post (the viral loop).
 
-## 6. The rest of the night (IST)
+## 6. The rest of the night (IST, from 04:10)
 | When | What | Who |
 |---|---|---|
-| now - 00:15 | Remaining 3 styles rendered and fixed; timings into RESULTS.md; rebuild + restart the live server | me + styles worker |
-| as soon as it's in | **Muse key → smoke test → one live edit**; swap the docs' test wording for real numbers | you add the key, I run it |
-| 00:15 - 01:00 | Demo video: live studio recording + outputs, cut to the script, a live preview for you | me (your voice/narration call) |
-| 01:00 - 01:30 | Fill SUBMISSION.md placeholders, final checks, commit (on your word) | me, you approve |
-| 01:30 - 06:30 | **You submit** in the Cerebral Valley portal; buffer for anything that breaks | you |
+| now | Add `MODEL_API_KEY` if you have it → I run one live edit and fill tokens and cost per edit | you, then me |
+| 04:15 - 05:15 | Demo video: record the live studio (upload, cut, prompt edits, word timeline, /styles), cut to DEMO-SCRIPT, a live preview for you | me (your narration call) |
+| 05:15 - 05:40 | Fill SUBMISSION.md, final checks, commit | me, you approve |
+| 05:40 - 06:30 | **You submit** in the Cerebral Valley portal; buffer | you |
 
 ## 7. Risks and what only you can do
 1. **Meta key** (biggest): without it the 25% criterion is unproven. Add `MODEL_API_KEY` to `.env.local`.

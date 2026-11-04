@@ -82,3 +82,20 @@ director. Auto kept Card Studio's look and mixed every style's layouts (`spec.ca
 | job | state | total s | watch | direct | build | render | mix | share | beats | layouts used |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 8uco8enqlh | done | **313.5** | 31.2 | 30.9 | 100 | 139.2 | 2.5 | 8.2 | 11 | all 9 |
+
+## 5 Nov: the two engines and prompt edits
+
+The five styles became two engines (Card Studio, Creator Mix); the Card Studio rows above still hold. Same box, same
+22 s take, TEST stand-in for Meta, CPU shared with a site build.
+
+| run | job | total s | render | mix | share | note |
+|---|---|---|---|---|---|---|
+| Creator Mix, first full run | stymixcrt1 | 448.3 | | | | person cut-out failed on Windows (fixed since), so not a clean number |
+| Creator Mix, re-render after the fix | stymixcrt1 | 206.3 | 182.0 | 2.3 | 21.8 | Before/After + Creator Mix Zoom |
+| Card Studio, prompt edit ("funkier captions, zoom out, fix a word") | 8uco8enqlh | 213.8 | | | | edits.mjs matched 3 ops, no model call |
+| Card Studio, word edit from the timeline (key word) | 8uco8enqlh | 126.7 | | | | one `caption.hero` op |
+| Card Studio, re-render with the merged runner | 8uco8enqlh | 141.7 | 131.8 | 2.4 | 7.4 | full frame + Card Studio Zoom |
+
+A prompt edit skips watch, direct and build, so a change costs only the render (about 2 to 3.5 minutes here) and no
+Meta call.
+
