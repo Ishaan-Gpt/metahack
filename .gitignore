@@ -30,3 +30,4 @@ recreate/ba1/data/
 
 # build output
 .next/
+data/serve/

@@ -17,8 +17,8 @@ const job = JSON.parse(readFileSync(join(JOB, 'job.json'), 'utf8'));
 const CLIP = join(JOB, 'clip'); mkdirSync(CLIP, { recursive: true });
 const LOG = join(JOB, 'log.txt');
 const STAGES = [
-  ['watch', 'Watching your take', 'Cropping to 9:16, listening with Muse Voice Transcribe, cutting the pauses'],
-  ['direct', 'Directing', 'Muse Spark reads the take and plans every beat'],
+  ['watch', 'Watching your take', 'Cropping to 9:16, hearing every word, cutting the pauses'],
+  ['direct', 'Directing', 'The director reads the take and plans every beat'],
   ['build', 'Building the looks', 'Fetching photos for the nouns, cutting you out for text-behind'],
   ['render', 'Rendering', 'Drawing every frame'],
   ['mix', 'Mixing the sound', 'Voice, effects on every change, a quiet bed, -14 LUFS'],

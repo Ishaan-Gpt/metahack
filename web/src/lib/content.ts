@@ -20,27 +20,16 @@ export const hero = {
   job: 'I edit your takes.',
 };
 
-/** The box Moovi holds up in the hero: drop a take, pick a style or let Muse Spark pick, go to the studio. */
+/** The box Moovi holds up in the hero: give your video, say what you want if you like, and the studio edits it. */
 export const brief = {
-  label: 'Your raw take',
-  placeholder: 'Drop a talking-head video (5 to 75 seconds)',
-  upload: 'Add your take',
+  label: 'Your video',
+  placeholder: 'Drop your video here, or click the arrow to choose it',
+  note: 'Anything Moovi should know? (optional) e.g. no music, put @me on it',
+  upload: 'Add your video',
   uploadVideo: 'Choose the video to edit',
   suggest: 'Try a sample take',
-  send: 'Edit my take',
-  pickLabel: 'How should it look?',
-  presets: [
-    { id: 'auto', title: 'Auto', line: 'Muse Spark watches and picks', need: 'Needs your video',
-      placeholder: 'Anything Moovi should know (optional)',
-      samples: ['Keep my voice, cut the pauses, make the numbers big.', 'Make it feel like a launch, not a lecture.'] },
-    { id: 'style', title: 'A style', line: 'One of five pro editors', need: 'Needs your video',
-      placeholder: 'Pick the style in the studio',
-      samples: ['Studio Card, with my handle on top.', 'Clean UI, the take shrinks into cards.'] },
-    { id: 'split', title: 'Before/after', line: 'Raw beside the edit', need: 'Needs your video',
-      placeholder: 'Anything Moovi should know (optional)',
-      samples: ['Show my raw take next to the edit for my post.'] },
-  ],
-  missing: { preset: 'Pick how it should look first.', edit: 'Moovi needs your video.', launch: 'Moovi needs your video.', showreel: 'Moovi needs your video.' },
+  send: 'Edit my video',
+  missing: { edit: 'Moovi needs your video first.' },
 } as const;
 
 export const problem = {

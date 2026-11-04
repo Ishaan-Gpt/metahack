@@ -93,11 +93,19 @@ function hasEnvKey() {
   try { const m = readFileSync(join(ROOT, '.env.local'), 'utf8').match(/^\s*MODEL_API_KEY\s*=\s*(\S+)/m); return !!m?.[1]; } catch { return false; }
 }
 
-export const SAMPLE = join(ROOT, 'data', 'samples', 'sample.mp4');
-export function startSample(style: string) {
-  if (!existsSync(SAMPLE)) return null;
+/** the sample library: raw Wikimedia Commons takes anyone can edit without uploading (data/samples/samples.json) */
+export type Sample = { id: string; name: string; line: string; seconds: number; shape: string; credit: string; licence: string; source: string };
+const SAMPLES = join(ROOT, 'data', 'samples');
+export function samples(): Sample[] {
+  try { return (JSON.parse(readFileSync(join(SAMPLES, 'samples.json'), 'utf8')) as Sample[]).filter(s => existsSync(join(SAMPLES, `${s.id}.mp4`))); } catch { return []; }
+}
+export const sampleFile = (id: string, ext: 'mp4' | 'jpg') => /^[a-z0-9-]{2,40}$/.test(id) ? join(SAMPLES, `${id}.${ext}`) : null;
+export function startSample(style: string, sampleId?: string) {
+  const list = samples(), pick = list.find(s => s.id === sampleId) ?? list[0];
+  const src = pick && sampleFile(pick.id, 'mp4');
+  if (!src || !existsSync(src)) return null;
   const id = newId(); mkdirSync(jobDir(id), { recursive: true });
-  copyFileSync(SAMPLE, join(jobDir(id), 'input.mp4'));
+  copyFileSync(src, join(jobDir(id), 'input.mp4'));
   writeJob(id, 'input.mp4', { style, sample: true });
   enqueue(id);
   return id;

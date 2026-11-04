@@ -42,7 +42,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return j as T;
 }
 
-function takeHandoff(): Promise<{ file: File; style: string } | null> {
+function takeHandoff(): Promise<{ file: File; style: string; note?: string } | null> {
   return new Promise(ok => {
     if (typeof indexedDB === 'undefined') return ok(null);
     const req = indexedDB.open('moovi-handoff', 1);
@@ -103,11 +103,15 @@ function intent(text: string, styles: Style[]): { style?: string; music?: boolea
   return { style: st?.id ?? (auto ? 'auto' : undefined), music, handle, reply: `On it: ${parts.join(', ')}. Same take, so the words are already heard.` };
 }
 
+type Sample = { id: string; name: string; line: string; seconds: number; shape: string; credit: string; licence: string };
+
 export function Studio() {
   const params = useSearchParams(), router = useRouter();
   const [styles, setStyles] = useState<Style[]>([]);
+  const [samples, setSamples] = useState<Sample[]>([]);
   const [health, setHealth] = useState<Health | null>(null);
-  const [style, setStyle] = useState<string>(params.get('style') && params.get('style') !== 'pick' ? params.get('style')! : 'auto');
+  // no style picker: every edit starts in Auto (the director picks the look); prompts change it afterwards
+  const [style, setStyle] = useState<string>('auto');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [upPct, setUpPct] = useState<number | null>(null);
@@ -117,7 +121,7 @@ export function Studio() {
   const [conn, setConn] = useState<'ok' | 'retrying'>('ok');
   const [drag, setDrag] = useState(false);
   const [view, setView] = useState<'edit' | 'split'>('edit');
-  const [msgs, setMsgs] = useState<Msg[]>([{ who: 'moovi', text: 'Drop a raw take on the left. Pick a style, or leave it on Auto and Muse Spark picks one for what you say.' }]);
+  const [msgs, setMsgs] = useState<Msg[]>([{ who: 'moovi', text: 'Drop your video, or pick a sample on the left. I edit it, then you tell me what to change: "make it Clean UI", "no music", "put @you on it".' }]);
   const [draft, setDraft] = useState('');
   const [t, setT] = useState(0);
   const vid = useRef<HTMLVideoElement>(null);
@@ -126,12 +130,18 @@ export function Studio() {
 
   useEffect(() => {
     api<{ styles: Style[] }>('/api/styles').then(r => setStyles(r.styles)).catch(() => setStyles([]));
+    api<{ samples: Sample[] }>('/api/samples').then(r => setSamples(r.samples)).catch(() => setSamples([]));
     api<Health>('/api/health').then(setHealth).catch(() => setHealth(null));
   }, []);
   useEffect(() => {
     if (jobId) return;
-    takeHandoff().then(h => { if (h) { setStyle(h.style === 'pick' ? 'auto' : h.style || 'auto'); void pick(h.file); } });
-    if (params.get('sample') === '1') void startSample();
+    // a take handed over from the landing; its note is the first prompt (a named style is used for the first cut)
+    takeHandoff().then(h => {
+      if (!h) return;
+      void pick(h.file);
+      if (h.note) { say({ who: 'you', text: h.note }); const i = intent(h.note, styles); if (i?.style) { setStyle(i.style); say({ who: 'moovi', text: i.reply }); } }
+    });
+    if (params.get('sample')) void startSample(params.get('sample') === '1' ? undefined : params.get('sample')!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -175,11 +185,13 @@ export function Studio() {
   async function start() {
     if (!file) { say({ who: 'moovi', text: 'Drop a take first, or try the sample.', kind: 'error' }); return; }
     setUpPct(0);
-    try { const { id } = await upload(file, style, setUpPct); setUpPct(null); go(id); say({ who: 'moovi', text: style === 'auto' ? 'Watching your take. Muse Spark will pick the style.' : `Editing in ${styles.find(s => s.id === style)?.label}.` }); }
+    try { const { id } = await upload(file, style, setUpPct); setUpPct(null); go(id); say({ who: 'moovi', text: 'Watching your take. I pick the look; tell me what to change when it is done.' }); }
     catch (e) { setUpPct(null); say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
   }
-  async function startSample() {
-    try { const { id } = await api<{ id: string }>(`/api/sample?style=${encodeURIComponent(style)}`, { method: 'POST' }); go(id); say({ who: 'moovi', text: 'Editing the sample take (Iliana, Wikitongues, CC BY-SA).' }); }
+  async function startSample(sid?: string) {
+    const smp = samples.find(x => x.id === sid);
+    setFile(null); setPreview(null);
+    try { const { id } = await api<{ id: string }>(`/api/sample?style=auto${sid ? `&id=${encodeURIComponent(sid)}` : ''}`, { method: 'POST' }); go(id); say({ who: 'moovi', text: smp ? `Editing ${smp.name}'s take (${smp.credit}, ${smp.licence}).` : 'Editing a sample take.' }); }
     catch (e) { say({ who: 'moovi', text: (e as JobErr).human, kind: 'error' }); }
   }
   async function reedit(o: { style?: string; music?: boolean; handle?: string }) {
@@ -229,22 +241,19 @@ export function Studio() {
           {file ? <span className="ed__clip"><video src={preview ?? undefined} muted /><span>{file.name}<i>{st?.state === 'done' ? 'edited' : jobId ? 'analysing' : 'ready'}</i></span></span>
             : <span className="ed__drop-in"><IconUpload width={22} height={22} />Drop raw footage<em>{MIN_S}–{MAX_S} s, talking to camera</em></span>}
         </label>
-        {!file && !jobId && <button className="ed__textbtn" onClick={startSample}>Use the sample take</button>}
-
-        <span className="ed__lab">Style</span>
-        <div className="ed__styles" role="radiogroup" aria-label="Style">
-          <button role="radio" aria-checked={style === 'auto'} className={style === 'auto' ? 'is-on' : ''} onClick={() => setStyle('auto')}><HaloMark size={16} /><b>Auto</b><em>Muse Spark picks</em></button>
-          {styles.map(s => (
-            <button key={s.id} role="radio" aria-checked={style === s.id} className={style === s.id ? 'is-on' : ''} onClick={() => setStyle(s.id)} title={s.line}>
-              <span className="ed__sw">{s.swatch.map(c => <i key={c} style={{ background: c }} />)}</span><b>{s.label}</b>
+        <button className="ed__go" onClick={start} disabled={!file || upPct !== null || phase === 'running' || phase === 'queued'}>
+          {upPct !== null ? `Uploading ${Math.round(upPct * 100)}%` : phase === 'running' || phase === 'queued' ? 'Editing…' : <>Edit my video <IconArrow width={18} height={18} /></>}
+        </button>
+        <span className="ed__lab">Or try a sample</span>
+        <div className="ed__samples" role="list" aria-label="Sample takes">
+          {samples.map(x => (
+            <button key={x.id} role="listitem" className="ed__sample" onClick={() => startSample(x.id)} disabled={phase === 'running' || phase === 'queued'} title={`${x.credit}, ${x.licence}`}>
+              <img src={`/api/samples/${x.id}/poster`} alt="" />
+              <span><b>{x.name}</b><em>{x.line} · {x.seconds} s</em></span>
             </button>
           ))}
+          {!samples.length && <p className="ed__ph">Loading sample takes…</p>}
         </div>
-        {phase === 'done'
-          ? <button className="ed__go" onClick={() => reedit({ style })} disabled={style === st?.style}>Re-edit in {styles.find(s => s.id === style)?.label ?? 'Auto'}</button>
-          : <button className="ed__go" onClick={start} disabled={!file || upPct !== null || phase === 'running' || phase === 'queued'}>
-              {upPct !== null ? `Uploading ${Math.round(upPct * 100)}%` : phase === 'running' || phase === 'queued' ? 'Editing…' : <>Edit <IconArrow width={18} height={18} /></>}
-            </button>}
       </aside>
 
       <section className="ed__stage">
