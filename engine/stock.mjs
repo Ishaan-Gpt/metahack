@@ -45,7 +45,7 @@ async function openverse(q) {
   const on = r => { const hay = ((r.title ?? '') + ' ' + (r.tags ?? []).map(t => t.name).join(' ')).toLowerCase(); return words.filter(w => w.length > 2 && hay.includes(w.replace(/s$/, ''))).length; };
   const rank = r => on(r) * 2 + ((r.width ?? 0) >= 900 ? 1 : 0) - ((r.title ?? '').split('#').length > 3 ? 5 : 0);
   // relevance by plain matching: every query word should be in the title or tags (on-topic), hashtag-spam titles dropped
-  return (j.results ?? []).filter(r => r.url && !/\b(meme|memes|rage|advice animal|quickmeme|y u no|demotivational|troll)\b/i.test((r.title ?? '') + ' ' + (r.tags ?? []).map(x => x.name).join(' ')) && (r.width ?? 999) >= 500 && (r.title ?? '').split('#').length <= 3 && on(r) >= Math.min(2, words.filter(w => w.length > 2).length)).sort((a, b) => rank(b) - rank(a)).map(r => ({
+  return (j.results ?? []).filter(r => r.url && !/\b(meme|memes|rage|advice animal|quickmeme|y u no|demotivational|troll|screenshot|insight|draft|wikipedia|infographic|diagram|logo|icon|banner|poster)\b/i.test((r.title ?? '') + ' ' + (r.tags ?? []).map(x => x.name).join(' ')) && (r.width ?? 999) >= 500 && (r.title ?? '').split('#').length <= 3 && on(r) >= Math.min(2, words.filter(w => w.length > 2).length)).sort((a, b) => rank(b) - rank(a)).map(r => ({
     url: r.url, w: r.width, h: r.height, page: r.foreign_landing_url, creator: r.creator,
     license: `${(r.license ?? '').toUpperCase()} ${r.license_version ?? ''}`.trim(), source: `openverse/${r.provider ?? r.source ?? ''}`,
     attribution: r.attribution, title: (r.title ?? '').slice(0, 80) }));
@@ -63,7 +63,7 @@ async function commons(q) {
   const u = `https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(q + ' filetype:bitmap')}&gsrlimit=12&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1280`;
   const j = await getJson(u, 20000);
   const strip = h => String(h ?? '').replace(/<[^>]+>/g, '').trim().slice(0, 60);
-  return Object.values(j.query?.pages ?? {}).sort((a, b) => a.index - b.index).map(p => p.imageinfo?.[0]).filter(i => i && i.width >= 600 && !/\.svg/i.test(i.url))
+  return Object.values(j.query?.pages ?? {}).sort((a, b) => a.index - b.index).map(p => p.imageinfo?.[0] && { ...p.imageinfo[0], descriptionurl: (p.imageinfo[0].descriptionurl ?? '') + ' ' + (p.title ?? '') }).filter(i => i && i.width >= 600 && !/\.svg/i.test(i.url) && !/(wikipedia|wikimedia|logo|icon|banner|screenshot|diagram|flag of|map of|poster|edit count|user box|userbox|button|template)/i.test(i.url + ' ' + (i.descriptionurl ?? '')))
     .map(i => ({ url: i.thumburl || i.url, w: i.width, h: i.height, page: i.descriptionurl, creator: strip(i.extmetadata?.Artist?.value), license: strip(i.extmetadata?.LicenseShortName?.value) || 'see page', source: 'wikimedia commons', title: strip(i.extmetadata?.ObjectName?.value) }));
 }
 

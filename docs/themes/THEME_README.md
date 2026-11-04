@@ -95,6 +95,7 @@ Speed on a 16 core box: draw 12 to 13 ms a frame; an 18.6 s clip renders in abou
 - `engine/hear_local.py` local word timings (stand-in only); `engine/faces.py` face boxes; `engine/prep.mjs`; `engine/edit.mjs` (`--theme`)
 
 ## Known gaps
+- Stock pictures without a `PIXABAY_API_KEY` come from Openverse and Wikimedia Commons, which often return weak matches for a concrete search (the model's queries help, a Pixabay key helps more). Any picture that is a screenshot, meme, logo or draft is skipped by plain filters.
 - The real Meta endpoints were not reachable from the build box (no key), so call 1 and call 2 are verified against the stand-in and Meta's published request shapes only. First run with the real key: check `data/<clip>/meta-usage.json` and the printed summary.
 - Video B-roll playback (photos only; Pixabay videos are fetched and cached but not drawn). Platform icons are simple drawn glyphs, not the real logos.
 - Meta returns turn level times, so word times inside a turn are placed by code (voiced-frame weighted); captions can be a few tenths of a second off on long turns.

@@ -503,6 +503,16 @@ export async function direct(dir, opts = {}) {
         if (g.type === 'face' && len < 0.9 && prev && next && g.t0 >= R.hookFace - 0.05 && g.t1 <= D - R.tailFace + 0.05) { const m = +(g.t0 + len / 2).toFixed(3); prev.t1 = m; next.t0 = m; segs.splice(i, 1); i--; }
       }
     }
+    // a layout squeezed under the minimum hold borrows the missing time from a neighbour that can spare it (never the face-only hook or tail)
+    for (let i = 1; i < segs.length - 1; i++) {
+      const g = segs[i], len = g.t1 - g.t0, need = MINHOLD - len;
+      if (need <= 0.05 || g.type === 'face') continue;
+      const cand = [[i - 1, 'prev'], [i + 1, 'next']].filter(([k]) => k > 0 && k < segs.length - 1 && segs[k].type !== 'face' || (k > 0 && k < segs.length - 1 && segs[k].type === 'face'))
+        .map(([k, side]) => ({ k, side, spare: (segs[k].t1 - segs[k].t0) - MINHOLD })).filter(x => x.spare >= need).sort((x, y) => y.spare - x.spare)[0];
+      if (!cand) continue;
+      if (cand.side === 'prev') { segs[cand.k].t1 = +(segs[cand.k].t1 - need).toFixed(3); g.t0 = segs[cand.k].t1; }
+      else { segs[cand.k].t0 = +(segs[cand.k].t0 + need).toFixed(3); g.t1 = segs[cand.k].t0; }
+    }
     for (const g of segs) if (g.type === 'face') g.face = faceAt(g.t0, g.t1);
     // the alternating zoom levels over the final tiling, sliver merge, split without a second shot fits
     let zj = 0; for (const g of segs) if (g.type === 'face') { const z = M.zoomLevels[zj++ % M.zoomLevels.length]; g.zoom = [z, z + M.pushPerSegment]; }

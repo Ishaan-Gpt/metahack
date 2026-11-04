@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 clip, mp4, out = sys.argv[1:4]
 spec = json.load(open(os.path.join(clip, 'spec.card.json')))
 NAMES = [('face', '1 face card + jump zoom'), ('graphic', '2 graphic card, wash + wipe'), ('orbit', '3 zoom-out, orbiting icons'),
-         ('topsquare', '4 face-top square, pale lower half'), ('split', '5 split, picture changes'), ('list', '6 bullet list'),
+         ('topsquare', '4 face-top square, pale base'), ('split', '5 split, picture changes'), ('list', '6 bullet list'),
          ('post', '7 app/post card, cursor tap'), ('wide', '8 wide card, big serif words')]
 font = ImageFont.load_default()
 try: font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 19)
