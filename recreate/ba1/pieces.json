@@ -1,0 +1,13 @@
+{
+  "source": "data/clips/ba1c/kc.webm",
+  "crop": { "x": 1030, "y": 0, "w": 1800, "h": 2160, "note": "4K source; subject face centre at x 1930, y 615 (Haar w 440)" },
+  "pieces": [
+    { "a": 19.745, "b": 23.38,  "beat": "B1 hook",       "text": "What we're seeing over time is more and more hot years" },
+    { "a": 113.22, "b": 114.98, "beat": "B2 negative",   "text": "These numbers look modest on paper" },
+    { "a": 202.38, "b": 207.85, "beat": "B3 number",     "text": "More than 70% of the Earth's surface is ocean, and we're also seeing record warming over oceans" },
+    { "a": 211.50, "b": 214.40, "beat": "B4a mechanism", "text": "So they absorb heat and carbon dioxide" },
+    { "a": 217.10, "b": 218.35, "beat": "B4b mechanism", "text": "it's not in the atmosphere" },
+    { "a": 515.40, "b": 517.70, "beat": "B5a payoff B&W", "text": "Well, we know what's driving the warming on our planet" },
+    { "a": 520.84, "b": 523.33, "beat": "B5b payoff colour", "text": "We also know how to limit warming" }
+  ]
+}
