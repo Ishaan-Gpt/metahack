@@ -62,6 +62,7 @@ function starburst(ctx, x, y, r, n, color, inner = 0.18) {
 /** Static layers, built once: under = background, starburst, storyboard card, card shadow; over = badge, handle, CTA. */
 export function buildLayers(spec, T, res, mk) {
   const { w: W, h: H } = T.canvas, P = T.palette, L = T.layout, C = L.card;
+  res.mk = mk;
   const under = mk(W, H), u = under.getContext('2d');
   const g = u.createLinearGradient(0, 0, 0, H); g.addColorStop(0, P.bgTop); g.addColorStop(1, P.bgBottom);
   u.fillStyle = g; u.fillRect(0, 0, W, H);
@@ -122,10 +123,80 @@ function segAt(spec, t) {
   return i;
 }
 
+
+/** person cut-out: the video frame with the matte (RGBA, alpha = person) applied, built once per frame into res.cut */
+function personCut(res, m) {
+  if (!res.cut || res.cut.width !== res.vw || res.cut.height !== res.vh) res.cut = res.mk(res.vw, res.vh);
+  const c = res.cut.getContext('2d');
+  c.globalCompositeOperation = 'source-over'; c.clearRect(0, 0, res.vw, res.vh);
+  c.drawImage(res.video, 0, 0, res.vw, res.vh);
+  c.globalCompositeOperation = 'destination-in'; c.drawImage(m, 0, 0, res.vw, res.vh);
+  c.globalCompositeOperation = 'source-over';
+  return res.cut;
+}
+/** TEXT BEHIND: three layers back to front. (a) a backdrop: darkened blurred copy of the video (blur), the theme's pale
+ *  card (pale) or a dark warm gradient (warm); (b) one huge word, centred behind the head and shoulders, slamming in with
+ *  a slight scale and a slow parallax drift; (c) the person on top, cut out with the matte, so the word is hidden where
+ *  the person overlaps it. The face keeps the exact source framing of a face card. */
+function drawTextBehind(ctx, t, seg, T, res, C, m) {
+  const P = T.palette, TB = T.layout.textBehind, f = seg.face ?? [0.5, 0.36, 0.3, 0.17];
+  const k = clamp((t - seg.t0) / Math.max(0.01, seg.t1 - seg.t0), 0, 1), z = lerp(seg.zoom[0], seg.zoom[1], ease.inOut(k));
+  const zz = faceZoom(f, res.vw, res.vh, C.w, C.h, z), a = C.w / C.h, ch = Math.min(res.vh, res.vw / a) / zz, cw = ch * a;
+  const sx = clamp(f[0] * res.vw - cw / 2, 0, res.vw - cw), sy = clamp(f[1] * res.vh - T.motion.faceAnchorY * ch, 0, res.vh - ch);
+  const Y = sv => C.y + (sv - sy) / ch * C.h;                      // source y -> canvas y
+  const faceTop = Y((f[1] - f[3] / 2) * res.vh), faceH = f[3] * res.vh / ch * C.h;
+  const bg = seg.bg ?? 'blur';
+  // (a) backdrop
+  if (bg === 'pale') {
+    const g = ctx.createLinearGradient(0, C.y, 0, C.y + C.h); g.addColorStop(0, '#f8f8f6'); g.addColorStop(1, '#e9ece0');
+    ctx.fillStyle = g; ctx.fillRect(C.x, C.y, C.w, C.h);
+    const rg = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.4, 10, C.x + C.w / 2, C.y + C.h * 0.4, C.w * 0.85); rg.addColorStop(0, 'rgba(246,220,200,0.85)'); rg.addColorStop(1, 'rgba(246,220,200,0)');
+    ctx.fillStyle = rg; ctx.fillRect(C.x, C.y, C.w, C.h);
+  } else if (bg === 'warm') {
+    const g = ctx.createLinearGradient(C.x, C.y, C.x + C.w, C.y + C.h); g.addColorStop(0, '#2a2422'); g.addColorStop(1, '#6a4636');
+    ctx.fillStyle = g; ctx.fillRect(C.x, C.y, C.w, C.h);
+    const rg = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.38, 10, C.x + C.w / 2, C.y + C.h * 0.38, C.w * 0.8); rg.addColorStop(0, 'rgba(203,230,94,0.28)'); rg.addColorStop(1, 'rgba(203,230,94,0)');
+    ctx.fillStyle = rg; ctx.fillRect(C.x, C.y, C.w, C.h);
+  } else {
+    ctx.save(); ctx.filter = `blur(${TB.blur}px) brightness(${TB.dim}) saturate(1.15)`;
+    const bz = zz * 1.3, bch = Math.min(res.vh, res.vw / a) / bz, bcw = bch * a;
+    const bsx = clamp(f[0] * res.vw - bcw / 2, 0, res.vw - bcw), bsy = clamp(f[1] * res.vh - 0.5 * bch, 0, res.vh - bch);
+    ctx.drawImage(res.video, bsx, bsy, bcw, bch, C.x - 40, C.y - 40, C.w + 80, C.h + 80); ctx.restore();
+    const vg = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.45, C.w * 0.2, C.x + C.w / 2, C.y + C.h * 0.45, C.h * 0.62); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.38)');
+    ctx.fillStyle = vg; ctx.fillRect(C.x, C.y, C.w, C.h);
+  }
+  // (b) the word: fitted to the card width, stretched tall like poster type, behind the head
+  const word = String(seg.word ?? '').toUpperCase(), tin = ease.out((t - seg.t0 + 0.02) / 0.4), al = clamp((t - seg.t0 + 0.02) / 0.14, 0, 1);
+  ctx.save();
+  ctx.font = font(T, 'sans', 100, 900); const w100 = Math.max(1, ctx.measureText(word).width);
+  const fs = Math.min(100 * (C.w * TB.widthFrac) / w100, TB.maxSize), capH = 0.72 * fs;
+  const stretch = clamp(TB.capFrac * C.h / capH, 1, TB.maxStretch);
+  ctx.font = font(T, 'sans', fs, 900);
+  const capVis = capH * stretch, cy = Math.max(faceTop + faceH * TB.anchor, C.y + 24 + capVis / 2), drift = lerp(-TB.drift, TB.drift, ease.inOut(k)), sc = lerp(TB.slam, 1, tin);
+  ctx.translate(C.x + C.w / 2 + drift, cy); ctx.scale(sc, sc * stretch); ctx.globalAlpha = al;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = bg === 'pale' ? P.ink : bg === 'warm' ? P.lime : '#ffffff';
+  ctx.fillText(word, 0, 0);
+  ctx.restore();
+  // (c) the person on top; a soft contact shadow keeps the word from looking pasted
+  const cut = personCut(res, m);
+  ctx.save();
+  if (bg !== 'blur') { ctx.shadowColor = 'rgba(0,0,0,0.30)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 6; }
+  ctx.drawImage(cut, sx, sy, cw, ch, C.x, C.y, C.w, C.h);
+  ctx.restore();
+  // chin and mouth lines for anything below that needs them (stickers keep off the face)
+  res.faceBottom = C.y + ((f[1] + f[3] * CHIN) * res.vh - sy) / ch * C.h; res.mouthY = C.y + ((f[1] + f[3] * MOUTH) * res.vh - sy) / ch * C.h; res.faceT = seg.t0;
+}
+
 /** the interior of the card for one segment, already clipped to the card rect */
 function drawInterior(ctx, t, seg, spec, T, res, C) {
   const P = T.palette, M = T.motion, L = T.layout;
   const k = clamp((t - seg.t0) / Math.max(0.01, seg.t1 - seg.t0), 0, 1);
+  if (seg.type === 'textbehind') {
+    const m = res.matteAt?.(t);
+    if (m && seg.word) { drawTextBehind(ctx, t, seg, T, res, C, m); return; }
+    seg = { ...seg, type: 'face' };      // no matte for this frame: plain face card, never a broken frame
+  }
   if (seg.type === 'face' || seg.type === 'list') {
     const z = lerp(seg.zoom[0], seg.zoom[1], ease.inOut(k));
     drawFace(ctx, res, seg, T, C.x, C.y, C.w, C.h, z);
@@ -302,7 +373,7 @@ function drawList(ctx, t, seg, T, C) {
 }
 
 function drawCaption(ctx, t, spec, T, C, seg, res) {
-  if (['graphic', 'post', 'wide', 'orbit'].includes(seg.type)) return;
+  if (['graphic', 'post', 'wide', 'orbit'].includes(seg.type) || (seg.type === 'textbehind' && res.matteAt?.(t) && seg.word)) return;
   if ((seg.enter === 'wipe' && t - seg.t0 < T.motion.wipe) || (seg.enter === 'wash' && t - seg.t0 < T.motion.wash)) return; // no caption over a half-revealed card
   const cap = spec.captions.find(c => t >= c.t0 && t < c.t1); if (!cap) return;
   const L = T.layout.caption, P = T.palette, M = T.motion;

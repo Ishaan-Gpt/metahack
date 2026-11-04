@@ -144,14 +144,16 @@ export function planSchema({ layouts, icons, transitions }) {
       icons: { type: 'array', items: { type: 'string', enum: icons }, description: '0 to 2 icons, only when the words name or clearly imply them' },
       queries: { type: 'array', items: { type: 'string' }, description: '1 to 2 stock photo searches: concrete, visible things (3 to 6 words), e.g. "film camera on set"' },
       transition: { type: 'string', enum: transitions },
+      background: { type: 'string', enum: ['blur', 'pale', 'warm'], description: 'only for layout textbehind: the backdrop behind the big word (blur = darkened copy of the video, pale = the theme pale card, warm = dark warm gradient); leave blur otherwise' },
     } } } },
   };
 }
 const SYSTEM = L => `You plan a short vertical talking-head video in the "Card Studio" style. You get the full transcript and a numbered list of segments (start, end, text, and the layout the rule director chose). For EVERY segment return exactly one plan item:
-- layout: one of ${L.layouts.join(', ')}. face = speaker in the card (default, most segments). graphic = face hidden, a full stock photo (short, for one concrete noun). split = stock photo on top, face below (a concrete thing being explained). list = items listed over the face (only when the words list 2 to 4 things). post = big words with a button tap (posting, sharing, apps, calls to action). wide = face left with big words right (numbers, a strong claim). orbit = small face with platform icons around it (social media, reach, audience). topsquare = face square on top with the caption below (a turn: "but", "not just"). Keep the first and last segment as face. HARD RULE: use every one of the layouts at least once across the video when there are enough segments (the code checks this afterwards and fixes any you missed), give each layout to the segment whose words fit it best, never two graphic in a row, and change layout between neighbouring segments where you can.
+- layout: one of ${L.layouts.join(', ')}. face = speaker in the card (default, most segments). graphic = face hidden, a full stock photo (short, for one concrete noun). split = stock photo on top, face below (a concrete thing being explained). list = items listed over the face (only when the words list 2 to 4 things). post = big words with a button tap (posting, sharing, apps, calls to action). wide = face left with big words right (numbers, a strong claim). orbit = small face with platform icons around it (social media, reach, audience). topsquare = face square on top with the caption below (a turn: "but", "not just"). textbehind = ONE huge word behind the speaker's head and shoulders (the code cuts the person out), for a segment with one strong short keyword (a noun, number or verb of 3 to 8 letters); use it on exactly one segment of 1.5 s or more, not the first or last. Keep the first and last segment as face. HARD RULE: use every one of the layouts at least once across the video when there are enough segments (the code checks this afterwards and fixes any you missed), give each layout to the segment whose words fit it best, never two graphic in a row, and change layout between neighbouring segments where you can.
 - hero: ONE word copied exactly from the segment text, the word the frame is about.
 - icons: 0 to 2 from ${L.icons.join(', ')}, only when the words name or clearly imply them (ig instagram, yt youtube, tt tiktok, fb facebook, x twitter/x).
 - queries: 1 to 2 stock photo searches of concrete, photographable things that match the meaning (not the literal word): "film camera on set", "person editing video on laptop", never abstract words.
+- background: for textbehind only, blur, pale or warm (vary it); blur for every other layout.
 - transition: into this segment, one of ${L.transitions.join(', ')} (cut between face segments; wash into graphic; pop into split; wipe out of graphic or post).
 Answer only with the JSON object.`;
 
@@ -203,7 +205,8 @@ export async function metaPlan(dir, { transcript, segments, layouts, icons, tran
 export function validateItem(it, seg, { layouts, icons, transitions }) {
   if (!it || typeof it !== 'object') return 'missing';
   const keys = ['i', 'layout', 'hero', 'icons', 'queries', 'transition'];
-  if (Object.keys(it).some(k => !keys.includes(k)) || keys.some(k => !(k in it))) return 'keys differ from the schema';
+  if (Object.keys(it).some(k => ![...keys, 'background'].includes(k)) || keys.some(k => !(k in it))) return 'keys differ from the schema';
+  if ('background' in it && !['blur', 'pale', 'warm'].includes(it.background)) return `background "${it.background}" not allowed`;
   if (!layouts.includes(it.layout)) return `layout "${it.layout}" not in the menu`;
   if (!transitions.includes(it.transition)) return `transition "${it.transition}" not allowed`;
   if (!Array.isArray(it.icons) || it.icons.length > 2 || it.icons.some(x => !icons.includes(x))) return 'icons not from the list (0 to 2)';

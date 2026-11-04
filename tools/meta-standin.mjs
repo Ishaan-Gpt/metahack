@@ -106,12 +106,22 @@ function planFor(segments) {
     list: ws => Math.min(3, ws.filter(w => !STOP.has(w) && w.length > 2).length * 0.4),
     split: (ws, f) => f.matched ? 3 + f.dur * 0.2 : -1,
     graphic: (ws, f) => f.matched ? 2.5 + (f.dur < 2.8 ? 0.5 : 0) : -1,
+    // text-behind: one strong short keyword (3 to 8 letters) in a segment long enough to hold 1.5 s
+    textbehind: (ws, f) => f.dur >= 1.8 ? Math.max(-1, ...ws.filter(w => !STOP.has(w) && w.length >= 3 && w.length <= 8).map(w => 2 + (/\d/.test(w) ? 2 : 0) + w.length * 0.1)) : -1,
   };
   const taken = new Set([0, n - 1]);
-  for (const lay of ['wide', 'post', 'list', 'orbit', 'topsquare', 'split', 'graphic']) {
+  for (const lay of ['wide', 'post', 'list', 'orbit', 'topsquare', 'split', 'graphic', 'textbehind']) {
     let best = -1, bs = -0.5;
     fits.forEach((f, k) => { if (taken.has(k)) return; const sc = RX[lay](f.ws, f) + 0.01 * (k % 3); if (sc > bs) { bs = sc; best = k; } });
-    if (best >= 0) { out[best].layout = lay; taken.add(best); }
+    if (best >= 0) {
+      out[best].layout = lay; taken.add(best);
+      if (lay === 'textbehind') {   // the big word: the longest short content word of the segment, copied as it is written
+        const f = fits[best], cand = f.toks.filter(t => { const w = norm(t); return w && !STOP.has(w) && w.length >= 3 && w.length <= 8; });
+        const pick = cand.sort((a, b) => (/\d/.test(b) ? 1 : 0) - (/\d/.test(a) ? 1 : 0) || norm(b).length - norm(a).length)[0];
+        if (pick) out[best].hero = pick.replace(/[.?!,;:"]+$/, '');
+        out[best].background = 'blur';
+      }
+    }
   }
   out.forEach((it, k) => {
     const prev = out[k - 1];

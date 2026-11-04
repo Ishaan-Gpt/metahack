@@ -12,10 +12,11 @@ import { fetchStock } from './stock.mjs';
 import { metaPlan, requireMetaKey, resetUsage, usageSummary } from './meta.mjs';
 
 // what the model may choose from (the theme's own names; the player draws exactly these)
-export const LAYOUTS = ['face', 'graphic', 'split', 'list', 'post', 'wide', 'orbit', 'topsquare'];
+export const LAYOUTS = ['face', 'graphic', 'split', 'list', 'post', 'wide', 'orbit', 'topsquare', 'textbehind'];
 export const ICONS = ['ig', 'yt', 'tt', 'fb', 'x', 'heart', 'play', 'chat', 'bell', 'cash', 'chart', 'camera'];
 export const TRANSITIONS = ['cut', 'wash', 'wipe', 'pop'];
 const BROLL = new Set(['graphic', 'split', 'wide', 'post', 'orbit']);
+const TB_MIN = 1.5, TB_MAX = 2.5;   // text-behind holds 1.5 to 2.5 s
 
 const STOP = new Set(`a an the and or but so to of in on at for with from by is are was were be been being am i you he she it we they me
 my your our their his her its this that these those there here then than just only not no do does did done doing have has had having will
@@ -143,7 +144,7 @@ export async function direct(dir, opts = {}) {
   const words = JSON.parse(readFileSync(join(dir, 'words.json'), 'utf8'));
   const cut = JSON.parse(readFileSync(join(dir, 'cut.json'), 'utf8'));
   const D = cut.duration;
-  // short clips (< 20 s): shorter holds so all 8 edit types still fit with a change every 2-3 s
+  // short clips (< 20 s): shorter holds so all 9 edit types still fit with a change every 2-3 s
   const SHORT = D < 20, MINHOLD = SHORT ? 1.2 : 1.35, TARGET = SHORT ? 2.1 : 2.6;
   if (SHORT) Object.assign(R, { graphicMin: 1.1, splitMin: 1.3, bigtextMin: 1.2, graphicMax: 2.0, splitMax: 3.0, bigtextMax: 2.4 });
   // face track: OpenCV pass on the edit's picture (or the browser bake's faces.json when it exists)
@@ -347,6 +348,19 @@ export async function direct(dir, opts = {}) {
       return { main: { type: 'orbit', t0: a, t1: b, title: ws.filter(w => w.t < b).map(w => w.word).slice(0, 6).join(' '), orbitIcons: it.icons.length ? it.icons : null, face: faceAt(a, b) }, rest };
     }
     if (layout === 'topsquare') { const [{ b }, rest] = cut(3.5); return { main: { type: 'topsquare', t0: a, t1: b, face: faceAt(a, b) }, rest }; }
+    if (layout === 'textbehind') {
+      // ONE huge word behind the person (the matte is cut by engine/person_matte.py after the tiling is final)
+      if (dur < TB_MIN) return { why: 'too short for text-behind' };
+      const word = String(ws[hj]?.word ?? it.hero).replace(/[^\p{L}\p{N}%$']/gu, '');
+      if (word.length < 2 || word.length > 10 || STOP.has(clean(word))) return { why: 'hero word is not a strong short keyword' };
+      const wt = ws[hj]?.t ?? a;
+      const a2 = g.type === 'x' ? a : Math.min(Math.max(a, wt - 0.35), g.t1 - TB_MIN);   // appear as the word is spoken
+      const b2 = Math.min(g.t1, a2 + TB_MAX);
+      if (b2 - a2 < TB_MIN - 1e-6) return { why: 'no room for 1.5 s around the word' };
+      const rest = g.t1 - b2 > 0.05 ? asFace(g, b2, g.t1) : null;
+      const pre = a2 - a > 0.05 ? asFace(g, a, a2) : null;
+      return { pre, main: { type: 'textbehind', t0: +a2.toFixed(3), t1: +b2.toFixed(3), word, wordT: +wt.toFixed(3), bg: it.background ?? 'blur', zoom: [1, 1.04], face: faceAt(a2, b2) }, rest };
+    }
     if (layout === 'list') {
       const items = listItems(ws);
       if (items.length < 2) return { why: 'no list in these words' };
@@ -368,7 +382,13 @@ export async function direct(dir, opts = {}) {
     let brollT2 = 0, hiddenT2 = 0;
     const weight = g => g.type === 'graphic' ? g.t1 - g.t0 : BROLL.has(g.type) ? (g.t1 - g.t0) * 0.5 : 0;
     // code checks on any B-roll layout: not in the hook or the tail, budgets, and never two B-roll back to back over 3 s
+    const maxTB = D < 28 ? 1 : D < 50 ? 2 : 3;
     const allowed = (g) => {
+      if (g.type === 'textbehind') {
+        if (g.t0 < R.hookFace - 0.05 || g.t1 > D - R.tailFace + 0.05) return 'inside the face-only hook or tail';
+        if (out.filter(x => x.type === 'textbehind').length >= maxTB) return `only ${maxTB} text-behind for a ${D.toFixed(0)} s clip`;
+        return null;
+      }
       if (!BROLL.has(g.type)) return null;
       if (g.t0 < R.hookFace - 0.05 || g.t1 > D - R.tailFace + 0.05) return 'inside the face-only hook or tail';
       if (brollT2 + weight(g) > brollMax2 + 1e-6) return 'b-roll budget';
@@ -389,6 +409,7 @@ export async function direct(dir, opts = {}) {
         r = { main: keep }; by = `rules (${it.layout} refused: ${why})`;
       }
       const m = r.main;
+      if (r.pre && by === 'spark') { planOf.set(r.pre, it); out.push({ ...r.pre, enter: 'cut' }); }
       if (by === 'spark') {
         m.enter = i === 0 ? 'none' : m.type === 'graphic' ? (it.transition === 'wipe' ? 'wipe' : 'wash') : it.transition;
         if (it.icons.length && ['face', 'split', 'topsquare', 'list'].includes(m.type)) { m.icons = it.icons.slice(0, 2); m.iconT = hw ? hw.t : m.t0 + 0.3; }
@@ -413,11 +434,11 @@ export async function direct(dir, opts = {}) {
     // a split whose second shot no longer fits after the merge keeps its first shot only
     for (const g of segs) if (g.type === 'split') g.shots = g.shots.filter((s, n) => n === 0 || s.t < g.t1 - 0.9);
   }
-  // ---- HARD RULE: every video uses all 8 reference edit types. Coverage pass in plain code, AFTER the Spark plan: any
+  // ---- HARD RULE: every video uses all 9 edit types (the 8 reference ones plus text-behind). Coverage pass in plain code, AFTER the Spark plan: any
   // missing layout goes to the best-fitting stretch of the transcript (carved from a face segment, or from a duplicate
   // layout when no face room is left). Face-only hook and tail are never touched. ----
-  const ALL8 = ['face', 'graphic', 'orbit', 'topsquare', 'split', 'list', 'post', 'wide'];
-  const coverageLog = [];
+  const ALL9 = ['face', 'graphic', 'orbit', 'topsquare', 'split', 'list', 'post', 'wide', 'textbehind'];
+  const coverageLog = []; let matteInfo = null;
   {
     const fit = (m, ws) => {
       const c = ws.map(w => clean(w.word));
@@ -425,12 +446,40 @@ export async function direct(dir, opts = {}) {
       if (m === 'post') return c.some(x => POST.test(x)) ? 4 : 0;
       if (m === 'orbit') return (c.some(x => ORBIT.test(x)) ? 4 : 0) + (c.some(x => /^(instagram|youtube|tiktok|facebook|twitter|social)$/.test(x)) ? 2 : 0);
       if (m === 'topsquare') return c.some(x => TURN.test(x)) ? 3 : 0;
+      if (m === 'textbehind') return Math.max(0, ...ws.map(w => { const x = clean(w.word); return x.length >= 3 && x.length <= 8 && !STOP.has(x) ? 2 + (/\d/.test(x) ? 2 : 0) + Math.max(0, heroScore(w)) * 0.3 : 0; }));
       if (m === 'list') return (listItems(ws).length >= 2 ? 4 : 0) + Math.min(2, c.filter(x => x && !STOP.has(x)).length * 0.3);
       return Math.max(0, ...ws.map((w, j) => stockScore(w, j, ws)));
     };
-    const FIRST = ['wide', 'post', 'list', 'orbit', 'topsquare', 'split', 'graphic'];
-    const maxLen = m => m === 'graphic' ? R.graphicMax : m === 'split' ? Math.min(R.splitMax, 3.2) : m === 'topsquare' ? 3.0 : Math.min(R.bigtextMax, 3.0);
-    const minLen = m => m === 'graphic' ? R.graphicMin : m === 'split' ? R.splitMin : MINHOLD;
+    const FIRST = ['wide', 'post', 'list', 'orbit', 'topsquare', 'split', 'graphic', 'textbehind'];
+    const maxLen = m => m === 'textbehind' ? TB_MAX : m === 'graphic' ? R.graphicMax : m === 'split' ? Math.min(R.splitMax, 3.2) : m === 'topsquare' ? 3.0 : Math.min(R.bigtextMax, 3.0);
+    const minLen = m => m === 'textbehind' ? TB_MIN : m === 'graphic' ? R.graphicMin : m === 'split' ? R.splitMin : MINHOLD;
+    const capLong = (maxL, cutAfter) => {
+      for (let i = 0; i < segs.length; i++) {
+        const g = segs[i], len = g.t1 - g.t0;
+        if (g.type === 'face' || len <= maxL) continue;
+        const cutT = +(g.t0 + cutAfter).toFixed(3);
+        if (g.type === 'list' && (g.items ?? []).filter(x => x.t < cutT - 0.3).length < 2) continue;
+        const rest = { type: 'face', t0: cutT, t1: g.t1, zoom: [1, 1.04], face: faceAt(cutT, g.t1), enter: 'cut' };
+        g.t1 = cutT;
+        if (g.words) g.words = g.words.filter(w => w.t < cutT);
+        if (g.items) g.items = g.items.filter(x => x.t < cutT - 0.3);
+        if (g.shots) g.shots = g.shots.filter((x, n) => n === 0 || x.t < cutT - 0.9);
+        segs.splice(i + 1, 0, rest);
+      }
+    };
+    const mergeFaces = () => { for (let i = 1; i < segs.length; i++) if (segs[i].type === 'face' && segs[i - 1].type === 'face') { segs[i - 1].t1 = segs[i].t1; segs.splice(i, 1); i--; } };
+    const splitFaces = () => {   // a face run longer than ~1.5 x TARGET is cut at word starts into pieces of about TARGET s (jump zooms)
+      for (let i = 0; i < segs.length; i++) {
+        const g = segs[i], len = g.t1 - g.t0;
+        if (g.type !== 'face' || len <= TARGET * 1.5) continue;
+        const n = Math.max(2, Math.round(len / TARGET)), starts = words.map(w => w.t).filter(t => t > g.t0 + MINHOLD * 0.8 && t < g.t1 - MINHOLD * 0.8), cuts = [g.t0];
+        for (let k = 1; k < n; k++) { const ideal = g.t0 + (len * k) / n; const c = starts.filter(t => t - cuts.at(-1) >= MINHOLD && g.t1 - t >= MINHOLD).sort((x, y) => Math.abs(x - ideal) - Math.abs(y - ideal))[0]; if (c != null) cuts.push(c); }
+        cuts.push(g.t1);
+        const pcs = []; for (let k = 0; k + 1 < cuts.length; k++) pcs.push({ ...g, t0: +cuts[k].toFixed(3), t1: +cuts[k + 1].toFixed(3), face: faceAt(cuts[k], cuts[k + 1]), enter: k ? 'cut' : g.enter });
+        segs.splice(i, 1, ...pcs); i += pcs.length - 1;
+      }
+    };
+    if (SHORT) { capLong(2.0, 1.8); mergeFaces(); }   // short clips: room for all 9 types (a long layout hands its tail back to the face)
     for (let guard = 0; guard < 12; guard++) {
       const have = {}; for (const g of segs) have[g.type] = (have[g.type] ?? 0) + 1;
       const miss = FIRST.filter(m => !have[m]);
@@ -442,7 +491,7 @@ export async function direct(dir, opts = {}) {
         const lo = Math.max(g.t0, R.hookFace), hi = Math.min(g.t1, D - R.tailFace);
         if (hi - lo < minLen(m) - 1e-6) continue;
         // window inside [lo, hi]: start at the best-fitting word, length up to maxLen
-        const len = Math.min(maxLen(m), TARGET, hi - lo), cand = [];
+        const len = Math.min(maxLen(m), m === 'textbehind' && SHORT ? 1.7 : TARGET, hi - lo), cand = [];
         for (const a0 of [lo, ...words.map(w => w.t - 0.1).filter(t => t > lo && t < hi - minLen(m))]) {
           const a = Math.max(lo, a0), b = Math.min(hi, a + len);
           if (b - a < minLen(m) - 1e-6) continue;
@@ -454,7 +503,7 @@ export async function direct(dir, opts = {}) {
       if (!best) { coverageLog.push({ missing: miss, why: 'no stretch long enough for any missing layout' }); break; }
       const g = segs[best.i], donorPlan = planOf.get(g);
       const ws = wordsIn(best.a, best.b);
-      const hw = [...ws].sort((x, y) => heroScore(y) - heroScore(x))[0] ?? ws[0];
+      const hw = [...ws].sort((x, y) => best.m === 'textbehind' ? fit('textbehind', [y]) - fit('textbehind', [x]) : heroScore(y) - heroScore(x))[0] ?? ws[0];
       const kwq = [...ws].map((w, j) => ({ j, w, s: stockScore(w, j, ws) })).sort((x, y) => y.s - x.s)[0];
       const it = { hero: hw?.word ?? '', queries: donorPlan?.queries?.length ? donorPlan.queries : [kwq && kwq.s > 0 ? phraseAround(ws, kwq.j) : (hw?.word ?? 'people')], icons: donorPlan?.icons ?? [], transition: 'cut' };
       let r = build(best.m, { t0: best.a, t1: best.b, type: 'x' }, it);
@@ -480,19 +529,9 @@ export async function direct(dir, opts = {}) {
       coverageLog.push({ layout: best.m, at: [+main.t0.toFixed(2), +main.t1.toFixed(2)], from: g.type, fit: +best.sc.toFixed(1) });
       console.log(`coverage: added ${best.m} at ${main.t0.toFixed(2)}-${main.t1.toFixed(2)} (carved from ${g.type})`);
     }
-    // cadence cap: a non-face layout never holds longer than ~3.2 s; the rest of its time goes back to the face (jump zoom)
-    for (let i = 0; i < segs.length; i++) {
-      const g = segs[i], len = g.t1 - g.t0;
-      if (g.type === 'face' || len <= 3.05 || g.t1 > D - R.tailFace + 1e-3 && false) continue;
-      const cutT = +(g.t0 + 2.7).toFixed(3);
-      if (g.type === 'list' && (g.items ?? []).filter(x => x.t < cutT - 0.3).length < 2) continue;
-      const rest = { type: 'face', t0: cutT, t1: g.t1, zoom: [1, 1.04], face: faceAt(cutT, g.t1), enter: 'cut' };
-      g.t1 = cutT;
-      if (g.words) g.words = g.words.filter(w => w.t < cutT);
-      if (g.items) g.items = g.items.filter(x => x.t < cutT - 0.3);
-      if (g.shots) g.shots = g.shots.filter((x, n) => n === 0 || x.t < cutT - 0.9);
-      segs.splice(i + 1, 0, rest);
-    }
+    // cadence cap: a non-face layout never holds longer than ~3.2 s (about 2 s on short clips); the rest of its time goes back to the face (jump zoom)
+    capLong(3.05, 2.7);
+    splitFaces();
     // final tidy: close gaps, merge adjacent short face pieces, give a thin face sliver to its neighbours (never a flash)
     for (let pass = 0; pass < 3; pass++) {
       for (let i = 1; i < segs.length; i++) segs[i].t0 = segs[i - 1].t1;
@@ -516,7 +555,29 @@ export async function direct(dir, opts = {}) {
     for (const g of segs) if (g.type === 'face') g.face = faceAt(g.t0, g.t1);
     // the alternating zoom levels over the final tiling, sliver merge, split without a second shot fits
     let zj = 0; for (const g of segs) if (g.type === 'face') { const z = M.zoomLevels[zj++ % M.zoomLevels.length]; g.zoom = [z, z + M.pushPerSegment]; }
-    const have = new Set(segs.map(g => g.type)); const still = ALL8.filter(m => !have.has(m));
+    // ---- text-behind needs a person matte: engine/person_matte.py cuts it for the frames of these segments only (cached per
+    // clip). If that fails for any reason the segments fall back to the plain face layout and the fallback is logged;
+    // a matte failure never stops the render. ----
+    const tbs = segs.filter(g => g.type === 'textbehind');
+    if (tbs.length) {
+      const fps = T.canvas.fps, vid = join(dir, 'graded.mp4');
+      const ranges = tbs.map(g => `${Math.max(0, g.t0 - 0.1).toFixed(3)}-${Math.min(D, g.t1 + 0.7).toFixed(3)}`).join(',');
+      try {
+        if (process.env.CARD_FORCE_MATTE_FAIL) throw new Error('forced failure (test)');
+        const out = execFileSync(process.env.PYTHON ?? 'python3', [join(ROOT, 'engine/person_matte.py'), vid, '--out', join(dir, 'matte'), '--ranges', ranges, '--fps', String(fps)], { encoding: 'utf8', timeout: 900000, stdio: ['ignore', 'pipe', 'inherit'] });
+        const info = JSON.parse(out.trim().split('\n').filter(l => l.startsWith('{')).at(-1));
+        const idx = JSON.parse(readFileSync(join(info.matte_dir, 'index.json'), 'utf8'));
+        if (!idx.frames.length || !idx.frames.every(n => existsSync(join(info.matte_dir, `m${String(n).padStart(5, '0')}.png`)))) throw new Error('matte frames missing');
+        matteInfo = { dir: relative(dir, info.matte_dir), fps, model: info.model, frames: idx.frames.length, seconds: info.seconds, computed: info.computed };
+        console.log(`matte: ${info.model}, ${info.frames} frames (${info.computed} computed) in ${info.seconds} s`);
+      } catch (e) {
+        const why = String(e.message).split('\n')[0].slice(0, 160);
+        for (const g of tbs) { g.type = 'face'; g.zoom = [1, 1.04]; delete g.word; delete g.wordT; delete g.bg; g.face = faceAt(g.t0, g.t1); coverageLog.push({ layout: 'textbehind', at: [g.t0, g.t1], fallback: 'face', why }); }
+        console.warn(`coverage: text-behind matte failed (${why}), fell back to face`);
+        let zj2 = 0; for (const g of segs) if (g.type === 'face') { const z = M.zoomLevels[zj2++ % M.zoomLevels.length]; g.zoom = [z, z + M.pushPerSegment]; }
+      }
+    }
+    const have = new Set(segs.map(g => g.type)); const still = ALL9.filter(m => !have.has(m));
     if (still.length) console.warn(`coverage: STILL MISSING ${still.join(', ')} (clip too short or too little speech for them)`);
   }
   // stock images (cached), plus credits
@@ -554,6 +615,7 @@ export async function direct(dir, opts = {}) {
     if (g.type === 'post') sfx.push({ t: Math.max(g.t0, g.t1 - 0.3), k: 'click' });
     if (g.type === 'orbit') { sfx.push({ t: g.t0, k: 'wash' }); [0.25, 0.4, 0.55].forEach(o => sfx.push({ t: g.t0 + o, k: 'rise' })); }
     if (g.type === 'wide' || (segs[segs.indexOf(g) - 1]?.type === 'wide')) sfx.push({ t: g.t0, k: 'wipe' });
+    if (g.type === 'textbehind') { sfx.push({ t: Math.max(0, g.t0 - 0.05), k: 'wipe' }); sfx.push({ t: +Math.max(g.t0 + 0.12, (g.wordT ?? g.t0) - 0.02).toFixed(3), k: 'rise' }); }   // whoosh as the word slams in, pop on the word
   }
   // an SFX on EVERY change (whoosh / pop / click): a boundary with none yet gets a pop (cut) or a soft hit (pop)
   segs.forEach((g, i) => {
@@ -567,7 +629,7 @@ export async function direct(dir, opts = {}) {
     badge: opts.badge ?? D_.badge, handle: opts.handle ?? D_.handle,
     cta: [(opts.cta1 ?? D_.cta1).replace('{KW}', kw), opts.cta2 ?? D_.cta2], ctaWord: kw,
     director: { model: sp.skipped ? null : 'muse-spark-1.3', plan: sp.skipped ? 'skipped (--no-model, test only)' : sp.valid.size ? `${sp.valid.size} of ${segList.length} segments planned by Muse Spark, ${sp.invalid.length} by rules` : 'rules (plan unusable)', planCache: sp.cache_hit, decisions: planLog, faceRatio: +faceRatio.toFixed(2), coverage: coverageLog, types: [...new Set(segs.map(g => g.type))] },
-    segments: segs, captions: caps, sfx, images, credits,
+    segments: segs, captions: caps, sfx, images, credits, matte: matteInfo,
     storyboard: Object.values(images).slice(0, 3),
   };
   writeFileSync(join(dir, 'spec.card.json'), JSON.stringify(spec, null, 1));

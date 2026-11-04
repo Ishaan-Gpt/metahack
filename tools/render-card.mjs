@@ -25,6 +25,16 @@ for (const p of new Set([...Object.values(spec.images ?? {}), ...(spec.storyboar
 const src = createCanvas(vw, vh), sctx = src.getContext('2d');
 const res = { video: src, vw, vh, images };
 res.layers = buildLayers(spec, T, res, (w, h) => createCanvas(w, h));
+// text-behind: the person matte frames (RGBA PNG, alpha = person) cut by engine/person_matte.py; loaded one frame ahead of the draw
+const matteSet = new Set(), matteCache = new Map();
+if (spec.matte) { try { for (const n of JSON.parse(readFileSync(join(dir, spec.matte.dir, 'index.json'), 'utf8')).frames) matteSet.add(n); } catch (e) { console.warn('matte index unreadable, text-behind falls back to face:', e.message); } }
+const mIdx = t => Math.round(t * (spec.matte?.fps ?? FPS));
+async function prepMatte(t) {
+  const n = mIdx(t); if (!matteSet.has(n) || matteCache.has(n)) return;
+  try { matteCache.set(n, await loadImage(join(dir, spec.matte.dir, `m${String(n).padStart(5, '0')}.png`))); } catch (e) { matteCache.set(n, null); }
+  if (matteCache.size > 8) matteCache.delete(matteCache.keys().next().value);
+}
+res.matteAt = t => matteCache.get(mIdx(t)) ?? null;
 const out = createCanvas(W, H), ctx = out.getContext('2d');
 const setFrame = buf => sctx.putImageData(new ImageData(new Uint8ClampedArray(buf.buffer, buf.byteOffset, vw * vh * 4), vw, vh), 0, 0);
 
@@ -34,6 +44,7 @@ if (a.includes('--frames')) {
   for (const [i, t] of times.entries()) {
     const raw = execFileSync('ffmpeg', ['-v', 'error', '-nostdin', '-ss', String(t), '-i', video, '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-'], { maxBuffer: 1 << 28 });
     if (raw.length >= vw * vh * 4) setFrame(raw);
+    await prepMatte(t);
     drawFrame(ctx, t, spec, T, res);
     writeFileSync(join(od, `f${String(i).padStart(3, '0')}.png`), out.toBuffer('image/png'));
   }
@@ -52,6 +63,7 @@ for await (const chunk of dec.stdout) {
   acc = acc.length ? Buffer.concat([acc, chunk]) : chunk;
   while (acc.length >= FB) {
     const frame = acc.subarray(0, FB);
+    await prepMatte(n / FPS);
     const d0 = performance.now(); setFrame(Buffer.from(frame)); drawFrame(ctx, n / FPS, spec, T, res);
     const px = ctx.getImageData(0, 0, W, H).data; drawMs += performance.now() - d0;
     await write(Buffer.from(px.buffer, px.byteOffset, px.byteLength));

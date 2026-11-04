@@ -73,6 +73,8 @@ def refine(bgr, raw, sc=0.5, band=14):
     except Exception:
         return raw
     out = np.where((mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 1.0, 0.0).astype(np.float32)
+    c = max(1, int(round(4 * min(w, h) / 1080)))
+    out = cv2.erode(out, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * c + 1, 2 * c + 1)))   # choke about 8 px at 1080 wide: source edges are soft, the model edge is generous: no pale rim of the old background
     return cv2.resize(out, (w, h), interpolation=cv2.INTER_LINEAR)
 
 class FaceSeed:
@@ -166,7 +168,7 @@ def main():
     if not frames: raise SystemExit('no frames in --ranges')
     seed = FaceSeed()
     model, errs = load_model(a.model, seed)
-    out = os.path.join(a.out, f'{sha12(a.video)}-{model.name}')
+    out = os.path.join(a.out, f'{sha12(a.video)}-{model.name}-v2')
     os.makedirs(out, exist_ok=True)
     fn = lambda n: os.path.join(out, f'm{n:05d}.png')
     todo = [n for n in frames if not os.path.exists(fn(n))]
@@ -175,7 +177,7 @@ def main():
     need = sorted(set(todo) | {n + d for n in todo for d in (-1, 1) if n + d in set(frames)})
     for n, bgr in (read_frames(a.video, a.fps, need, W, H) if need else []):
         r0 = model(bgr).astype(np.float32); faces[n] = seed.box(bgr)
-        raw[n] = (0.4 * smooth(r0) + 0.6 * refine(bgr, r0)) if model.name != 'grabcut' else r0
+        raw[n] = (0.25 * smooth(r0) + 0.75 * refine(bgr, r0)) if model.name != 'grabcut' else r0
     k = max(1, int(round(min(W, H) / 270)))  # feather scale: 2 px at 540 wide, more on bigger sources
     for n in todo:
         cur = raw[n]
@@ -187,9 +189,9 @@ def main():
         fb = faces.get(n) or faces.get(n - 1) or faces.get(n + 1)
         if fb and model.name != 'grabcut':
             x, y, bw, bh = fb; e = np.zeros((H, W), np.float32)
-            cv2.ellipse(e, (int(x + bw / 2), int(y + bh * 0.52)), (int(bw * 0.62), int(bh * 0.78)), 0, 0, 360, 1.0, -1)
+            cv2.ellipse(e, (int(x + bw / 2), int(y + bh * 0.52)), (int(bw * 0.40), int(bh * 0.50)), 0, 0, 360, 1.0, -1)
             m = np.maximum(m, cv2.GaussianBlur(e, (0, 0), 2 * k) * 0.98)
-        m = cv2.GaussianBlur(m, (0, 0), 1.0 * k)          # 2 to 3 px feather
+        m = cv2.GaussianBlur(m, (0, 0), 0.6 * k)          # 2 to 3 px feather
         al = (m.clip(0, 1) * 255 + 0.5).astype(np.uint8)
         rgba = np.dstack([np.full((H, W), 255, np.uint8)] * 3 + [al])
         cv2.imwrite(fn(n) + '.tmp.png', rgba, [cv2.IMWRITE_PNG_COMPRESSION, 6]); os.replace(fn(n) + '.tmp.png', fn(n))
