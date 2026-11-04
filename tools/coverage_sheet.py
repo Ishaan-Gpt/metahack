@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Coverage sheet: one labeled frame per Card Studio edit type (all 8), taken from a finished MP4 at the time
+"""Coverage sheet: one labeled frame per Card Studio edit type (all 9), taken from a finished MP4 at the time
 spec.card.json says that type is on screen. usage: python3 tools/coverage_sheet.py data/clips/<clip> out.mp4 sheet.jpg"""
 import json, subprocess, sys, os, tempfile
 from PIL import Image, ImageDraw, ImageFont
@@ -7,16 +7,16 @@ clip, mp4, out = sys.argv[1:4]
 spec = json.load(open(os.path.join(clip, 'spec.card.json')))
 NAMES = [('face', '1 face card + jump zoom'), ('graphic', '2 graphic card, wash + wipe'), ('orbit', '3 zoom-out, orbiting icons'),
          ('topsquare', '4 face-top square, pale base'), ('split', '5 split, picture changes'), ('list', '6 bullet list'),
-         ('post', '7 app/post card, cursor tap'), ('wide', '8 wide card, big serif words')]
+         ('post', '7 app/post card, cursor tap'), ('wide', '8 wide card, big serif words'), ('textbehind', '9 text behind the person')]
 font = ImageFont.load_default()
 try: font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 19)
 except Exception: pass
 W, H = 360, 640
-sheet = Image.new('RGB', (W * 4, (H + 70) * 2), 'white'); d = ImageDraw.Draw(sheet)
+sheet = Image.new('RGB', (W * 3, (H + 70) * 3), 'white'); d = ImageDraw.Draw(sheet)
 for n, (t, label) in enumerate(NAMES):
     segs = [g for g in spec['segments'] if g['type'] == t]
     if t == 'face': segs = [g for g in segs if g['t0'] > 0.5] or segs
-    x, y = (n % 4) * W, (n // 4) * (H + 70)
+    x, y = (n % 3) * W, (n // 3) * (H + 70)
     if not segs:
         d.text((x + 10, y + 10), label + ' MISSING', fill='red', font=font); continue
     g = segs[0]; ts = round(g['t0'] + (g['t1'] - g['t0']) * 0.6, 2)

@@ -168,7 +168,7 @@ def main():
     if not frames: raise SystemExit('no frames in --ranges')
     seed = FaceSeed()
     model, errs = load_model(a.model, seed)
-    out = os.path.join(a.out, f'{sha12(a.video)}-{model.name}-v2')
+    out = os.path.join(a.out, f'{sha12(a.video)}-{model.name}-v4')
     os.makedirs(out, exist_ok=True)
     fn = lambda n: os.path.join(out, f'm{n:05d}.png')
     todo = [n for n in frames if not os.path.exists(fn(n))]
@@ -177,13 +177,13 @@ def main():
     need = sorted(set(todo) | {n + d for n in todo for d in (-1, 1) if n + d in set(frames)})
     for n, bgr in (read_frames(a.video, a.fps, need, W, H) if need else []):
         r0 = model(bgr).astype(np.float32); faces[n] = seed.box(bgr)
-        raw[n] = (0.25 * smooth(r0) + 0.75 * refine(bgr, r0)) if model.name != 'grabcut' else r0
+        raw[n] = refine(bgr, r0) if model.name != 'grabcut' else r0
     k = max(1, int(round(min(W, H) / 270)))  # feather scale: 2 px at 540 wide, more on bigger sources
     for n in todo:
         cur = raw[n]
         prv = raw[n - 1] if n - 1 in raw else cur
         nxt = raw[n + 1] if n + 1 in raw else cur
-        m = 0.2 * prv + 0.6 * cur + 0.2 * nxt
+        m = 0.12 * prv + 0.76 * cur + 0.12 * nxt
         big = np.abs(cur - 0.5 * (prv + nxt)) > 0.5      # fast motion: trust the current frame (no ghost)
         m = np.where(big, cur, m)
         fb = faces.get(n) or faces.get(n - 1) or faces.get(n + 1)

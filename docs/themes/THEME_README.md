@@ -17,7 +17,7 @@ Without it the theme does not run. `node engine/card-studio.mjs ...` exits befor
 | # | call | model | sends | returns | typical size |
 |---|------|-------|-------|---------|--------------|
 | 1 | transcription | Muse Voice Transcribe (`POST {base}/asr/transcribe`, multipart: request JSON + 16 kHz mono WAV) | the clip's audio | transcript and speech turns with times (Meta gives turn level times; `engine/meta.mjs` places each word inside its turn by plain code) | request is about 32 KB per second of speech (a 35 s clip is about 1.1 MB), no tokens |
-| 2 | plan | Muse Spark (`POST {base}/chat/completions`, strict `json_schema`) | the whole transcript plus the director's segment list (start, end, text) | per segment: layout (one of `face graphic split list post wide orbit topsquare`), hero caption word, 0 to 2 icon names (from the fixed list `ig yt tt fb x heart play chat bell cash chart camera`), 1 to 2 concrete stock searches ("film camera on set"), transition | about 1,000 input and 300 output tokens for a 10 segment video; `max_tokens` is capped at about 160 per segment plus headroom; temperature 0, minimal reasoning, one attempt |
+| 2 | plan | Muse Spark (`POST {base}/chat/completions`, strict `json_schema`) | the whole transcript plus the director's segment list (start, end, text) | per segment: layout (one of `face graphic split list post wide orbit topsquare textbehind`), plus an optional `background` (`blur pale warm`, only read for `textbehind`), hero caption word, 0 to 2 icon names (from the fixed list `ig yt tt fb x heart play chat bell cash chart camera`), 1 to 2 concrete stock searches ("film camera on set"), transition | about 1,000 input and 300 output tokens for a 10 segment video; `max_tokens` is capped at about 160 per segment plus headroom; temperature 0, minimal reasoning, one attempt |
 
 Rules for both calls: one attempt each, no retries, no critique or multi turn. If the plan comes back with a segment that fails
 the schema check (unknown layout, a hero word that is not in the segment, ...), only that segment goes back to the rule director
@@ -34,17 +34,56 @@ segment list plus schema (call 2). Re-running the same video makes zero Meta cal
 one line summary is printed, for example `meta: 2 calls, 0 cache hits: transcribe, plan called (1018 in / 306 out tokens)`.
 Stock pictures are cached per search word under `data/stock/`.
 
-## All 8 reference edit types in every video (hard rule)
-After the Spark plan, a coverage pass in code makes sure every video uses all 8 edit types: face card with jump zoom, graphic
-card (wash in, wipe out), zoom out to a small card with orbiting icons, face in a top square over a pale lower half, split with
-picture changes, bullet list, app/post card with a cursor tap, wide card with big serif words as spoken. A missing type goes to
-the best fitting stretch of the transcript (numbers to the wide card, "post/share/app" to the post card, social words to orbit,
-a turn like "but" to the top square, a concrete noun to split or graphic, a list to the bullet list), carved from a face segment
-or from a duplicate layout. The first 1.8 s and last 1.2 s are always the face. The cadence is a change every 2 to 3 s: long
-face segments are cut at word boundaries and each piece gets the next zoom level (a jump zoom). Clips under 20 s use shorter
-holds (about 1.2 s minimum). Every change has a whoosh, pop or click. Captions start below the chin of the current face box, never over the mouth. The log line
+## All 9 edit types in every video (hard rule)
+After the Spark plan, a coverage pass in code makes sure every video uses all 9 edit types: the 8 reference ones (face card with
+jump zoom, graphic card with wash in and wipe out, zoom out to a small card with orbiting icons, face in a top square over a
+pale lower half, split with picture changes, bullet list, app/post card with a cursor tap, wide card with big serif words as
+spoken) and the 9th, `textbehind` (below). A missing type goes to the best fitting stretch of the transcript (numbers to the
+wide card, "post/share/app" to the post card, social words to orbit, a turn like "but" to the top square, a concrete noun to
+split or graphic, a list to the bullet list, one strong short keyword to text-behind), carved from a face segment or from a
+duplicate layout. The first 1.8 s and last 1.2 s are always the face. The cadence is a change every 2 to 3 s: long face
+segments are cut at word boundaries and each piece gets the next zoom level (a jump zoom). Clips under 20 s use shorter holds
+(about 1.2 s minimum) and long layouts hand their tail back to the face to make room. Every change has a whoosh, pop or click
+(text-behind: a whoosh as the word slams in and a pop on the spoken word). Captions start below the chin of the current face
+box, never over the mouth.
+
+## 9th type: text-behind (the person cut out in front of a huge word)
+Three layers, back to front: (a) a backdrop, `blur` (a darkened, heavily blurred copy of the same video, a soft gradient of the real wall and light; the default),
+`pale` (the theme's pale card with a peach glow) or `warm` (dark warm gradient), picked by the Spark plan's `background`;
+(b) ONE huge word (the hero word of the segment, bold sans, fitted to the card width and stretched tall like poster type,
+slamming in with a small scale and a slow sideways drift for parallax), sized from the head top so about half of each letter
+stays above the head and the hair hides the lower part; (c) the person on top, cut out with a per frame alpha matte. The face keeps exactly the
+framing of a face card (same crop, same place as in the source). The segment holds 1.5 to 2.5 s, never in the first 1.8 s or
+last 1.2 s, starts about 0.35 s before the word is spoken, and has no caption (the word is the caption). The plan may use it on
+1 segment of a clip under 28 s (2 under 50 s, then 3); the coverage pass adds one when the plan has none. No extra Meta call.
+
+`engine/person_matte.py` makes the matte, all local, no credits, no network at render time:
+- Model: U2-Net human segmentation (`u2net_human_seg.onnx`, 176 MB, Apache-2.0 weights from the U-2-Net project, the same file
+  `rembg` ships) run with `onnxruntime` on CPU. Fallbacks in this order: mediapipe selfie segmentation (only if the package with
+  its legacy solutions is installed; not used on the build box), `u2netp` (4.7 MB, Apache-2.0, rougher), OpenCV GrabCut seeded
+  from the YuNet face box (no download at all). `--model` forces one.
+- Edges: the model output is sharpened with a smoothstep, snapped to the real picture edge with a half size GrabCut whose trimap
+  comes from the model matte, choked about 8 px (a soft source gives the model a generous edge), unioned with a small face
+  ellipse so the head top never has a hole, blended over 3 frames (small, with a motion guard so there are no ghosts) and
+  feathered 2 to 3 px. The frames are 30 fps to match the renderer; only the frames of the text-behind segments (plus 0.1 s
+  before and 0.7 s after, for the transition) are processed.
+- Speed (16 cores, 1080x1920 source): about 0.7 s a frame, 83 frames for one segment in about 55 s. A whole 37 s clip
+  (1,100 frames) would take about 13 min, which is why only the segments are matted. Memory is small.
+- Weights go to `$MATTE_WEIGHTS_DIR` (default `~/.cache/card-studio-matte`), downloaded once on first use from the
+  U-2-Net release on GitHub; they are never committed.
+- Cache: `data/<clip>/matte/<sha of graded.mp4 first 12>-<model>-v4/m00123.png` (RGBA, alpha = person) plus `index.json`. A
+  re-run computes only frames that are missing, so a repeat costs nothing.
+- Fallback (never a crash): if the matte step fails (no weights and no network, a missing library, ...) the coverage pass turns
+  the text-behind segments into plain face segments, logs `coverage: text-behind matte failed (...), fell back to face` and
+  records it in `spec.card.json` under `director.coverage`; at render time a frame with no matte also draws the face card.
+  `CARD_FORCE_MATTE_FAIL=1` forces the failure for a test.
+- Standalone: `python3 engine/person_matte.py graded.mp4 --out data/clips/c/matte --ranges 5.0-7.4,12-14`.
+Known weak points: a soft or low resolution source makes a soft edge (a faint light rim can remain on cheek and jaw where the
+wall and the skin have the same colour); a hand held far from the body at head height is still kept (the model sees it), but a
+fast hand can blur; text-behind shows the matte at the card size only (player preview in the browser plays the face card, the
+MP4 renderer draws the effect).
 `coverage: added ...` and `director.coverage` in `spec.card.json` list anything the pass had to add; a clip with too little
-speech to fit all 8 prints `STILL MISSING ...`. `python3 tools/coverage_sheet.py data/clips/<clip> out.mp4 sheet.jpg` makes a labeled frame per type.
+speech to fit all 9 prints `STILL MISSING ...`. `python3 tools/coverage_sheet.py data/clips/<clip> out.mp4 sheet.jpg` makes a labeled frame per type.
 
 ## One command (raw face video in, MP4 out)
 ```bash
@@ -70,14 +109,14 @@ For real use delete `META_API_BASE` and put your real key in `.env.local`.
 ## Setup
 ```bash
 npm install                       # adds @napi-rs/canvas (the MP4 renderer draws with it; no browser needed)
-pip install faster-whisper opencv-python-headless   # only the stand-in and the face boxes need these
+pip install faster-whisper opencv-python-headless onnxruntime   # stand-in, face boxes, and the text-behind matte
 ```
 Step by step (the same result): `node engine/prep.mjs raw.mp4 data/clips/c` with `THEME=card-studio` for the Meta transcript, then
 `node engine/card-studio.mjs data/clips/c --out out.mp4`. Live preview: `node serve.mjs 4700`, then
 `http://127.0.0.1:4700/player/card-studio.html?clip=data/clips/c`. Other themes (kinetic-brand) still use Groq or local whisper
 and are unchanged.
 
-Speed on a 16 core box: draw 12 to 13 ms a frame; an 18.6 s clip renders in about 40 s, plus the Meta calls.
+Speed on a 16 core box: draw 12 to 13 ms a frame; an 18.6 s clip renders in about 40 s, plus the Meta calls, plus about a minute for the text-behind matte the first time.
 
 ## Env keys
 - `MODEL_API_KEY` (Meta Model API): required for this theme.
@@ -87,6 +126,7 @@ Speed on a 16 core box: draw 12 to 13 ms a frame; an 18.6 s clip renders in abou
 ## Files
 - `engine/meta.mjs` the two Meta calls, schema, validation, cache, usage log
 - `engine/card-studio.mjs` rule director + plan merge + coverage pass -> `spec.card.json`
+- `engine/person_matte.py` person alpha matte for text-behind (local model, cached per clip)
 - `engine/templates/card-studio.json` theme values (layout, palette, fonts, motion, rules, SFX)
 - `player/card-studio.js` drawing module (browser preview and MP4 renderer), `player/card-studio.html` preview
 - `tools/render-card.mjs` MP4 export (ffmpeg decode -> canvas -> ffmpeg encode, SFX, music bed, two pass loudnorm)

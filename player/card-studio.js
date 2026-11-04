@@ -134,6 +134,26 @@ function personCut(res, m) {
   c.globalCompositeOperation = 'source-over';
   return res.cut;
 }
+
+/** the backdrop source for the blur style: the video with the person painted out in the wall's own colour (average of the
+ *  pixels the matte says are not the person), so the blur is a clean soft wall, with no ghost head and no halo */
+function wallPlate(res, m) {
+  const { vw, vh, mk } = res;
+  if (!res.plate || res.plate.width !== vw) { res.plate = mk(vw, vh); res.sil = mk(vw, vh); res.tinyV = mk(24, 42); res.tinyM = mk(24, 42); }
+  const tv = res.tinyV.getContext('2d'), tm = res.tinyM.getContext('2d');
+  tv.drawImage(res.video, 0, 0, 24, 42); tm.clearRect(0, 0, 24, 42); tm.drawImage(m, 0, 0, vw, vh, 0, 0, 24, 42);
+  const dv = tv.getImageData(0, 0, 24, 42).data, dm = tm.getImageData(0, 0, 24, 42).data;
+  let r = 0, g = 0, b = 0, n = 0;
+  for (let i = 0; i < 24 * 42; i++) if (dm[i * 4 + 3] < 6) { r += dv[i * 4]; g += dv[i * 4 + 1]; b += dv[i * 4 + 2]; n++; }
+  if (!n) for (let i = 0; i < 24 * 42; i++) { r += dv[i * 4]; g += dv[i * 4 + 1]; b += dv[i * 4 + 2]; n++; }
+  const p = res.plate.getContext('2d'), s = res.sil.getContext('2d'), grow = Math.round(vw / 80);
+  p.globalCompositeOperation = 'source-over'; p.drawImage(res.video, 0, 0, vw, vh);
+  s.globalCompositeOperation = 'source-over'; s.clearRect(0, 0, vw, vh);
+  for (const [dx, dy] of [[0, 0], [grow, 0], [-grow, 0], [0, grow], [0, -grow], [grow, grow], [-grow, grow], [grow, -grow], [-grow, -grow]]) s.drawImage(m, dx, dy, vw, vh);
+  s.globalCompositeOperation = 'source-in'; s.fillStyle = `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`; s.fillRect(0, 0, vw, vh);
+  p.drawImage(res.sil, 0, 0);
+  return res.plate;
+}
 /** TEXT BEHIND: three layers back to front. (a) a backdrop: darkened blurred copy of the video (blur), the theme's pale
  *  card (pale) or a dark warm gradient (warm); (b) one huge word, centred behind the head and shoulders, slamming in with
  *  a slight scale and a slow parallax drift; (c) the person on top, cut out with the matte, so the word is hidden where
@@ -143,8 +163,14 @@ function drawTextBehind(ctx, t, seg, T, res, C, m) {
   const k = clamp((t - seg.t0) / Math.max(0.01, seg.t1 - seg.t0), 0, 1), z = lerp(seg.zoom[0], seg.zoom[1], ease.inOut(k));
   const zz = faceZoom(f, res.vw, res.vh, C.w, C.h, z), a = C.w / C.h, ch = Math.min(res.vh, res.vw / a) / zz, cw = ch * a;
   const sx = clamp(f[0] * res.vw - cw / 2, 0, res.vw - cw), sy = clamp(f[1] * res.vh - T.motion.faceAnchorY * ch, 0, res.vh - ch);
-  const Y = sv => C.y + (sv - sy) / ch * C.h;                      // source y -> canvas y
-  const faceTop = Y((f[1] - f[3] / 2) * res.vh), faceH = f[3] * res.vh / ch * C.h;
+  // a very large face (close-up) hides the whole word: the cut-out is scaled down about the face's x and the card's bottom
+  // edge (shoulders stay on the bottom, face stays on its vertical line) until the head is at most TB.maxFace of the card
+  const fh0 = f[3] * res.vh / ch, sc0 = clamp(TB.maxFace / Math.max(0.01, fh0), TB.minScale, 1);
+  const fxs = f[0] * res.vw, sw = cw / sc0, sh = ch / sc0, x0 = fxs - (fxs - sx) / sc0, y0 = sy + ch - sh;
+  const faceTop = C.y + ((f[1] - f[3] / 2) * res.vh - y0) / sh * C.h, faceH = f[3] * res.vh / sh * C.h;
+  // tight framing leaves no room above the head for a word: the person is lowered (the body just runs off the card's bottom
+  // edge) until the head top has TB.headroom of the card above it; a roomy source is left exactly where it is
+  const headRel0 = faceTop - 0.45 * faceH - C.y, dy = clamp(TB.headroom * C.h - headRel0, 0, TB.maxLower * C.h);
   const bg = seg.bg ?? 'blur';
   // (a) backdrop
   if (bg === 'pale') {
@@ -159,9 +185,12 @@ function drawTextBehind(ctx, t, seg, T, res, C, m) {
     ctx.fillStyle = rg; ctx.fillRect(C.x, C.y, C.w, C.h);
   } else {
     ctx.save(); ctx.filter = `blur(${TB.blur}px) brightness(${TB.dim}) saturate(1.15)`;
-    const bz = zz * 1.3, bch = Math.min(res.vh, res.vw / a) / bz, bcw = bch * a;
+    const bz = zz * TB.bgZoom, bch = Math.min(res.vh, res.vw / a) / bz, bcw = bch * a;
     const bsx = clamp(f[0] * res.vw - bcw / 2, 0, res.vw - bcw), bsy = clamp(f[1] * res.vh - 0.5 * bch, 0, res.vh - bch);
-    ctx.drawImage(res.video, bsx, bsy, bcw, bch, C.x - 40, C.y - 40, C.w + 80, C.h + 80); ctx.restore();
+    const plateImg = wallPlate(res, m);
+    ctx.drawImage(plateImg, bsx, bsy, bcw, bch, C.x - 40, C.y - 40 + dy, C.w + 80, C.h + 80);
+    if (dy > 0) ctx.drawImage(plateImg, bsx, bsy, bcw, Math.max(1, bch * 0.02), C.x - 40, C.y - 40, C.w + 80, dy + 2);   // the strip the shift uncovers: the top rows stretched
+    ctx.restore();
     const vg = ctx.createRadialGradient(C.x + C.w / 2, C.y + C.h * 0.45, C.w * 0.2, C.x + C.w / 2, C.y + C.h * 0.45, C.h * 0.62); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.38)');
     ctx.fillStyle = vg; ctx.fillRect(C.x, C.y, C.w, C.h);
   }
@@ -169,23 +198,29 @@ function drawTextBehind(ctx, t, seg, T, res, C, m) {
   const word = String(seg.word ?? '').toUpperCase(), tin = ease.out((t - seg.t0 + 0.02) / 0.4), al = clamp((t - seg.t0 + 0.02) / 0.14, 0, 1);
   ctx.save();
   ctx.font = font(T, 'sans', 100, 900); const w100 = Math.max(1, ctx.measureText(word).width);
-  const fs = Math.min(100 * (C.w * TB.widthFrac) / w100, TB.maxSize), capH = 0.72 * fs;
-  const stretch = clamp(TB.capFrac * C.h / capH, 1, TB.maxStretch);
+  // size: fitted to the card width, then stretched tall; the head top (hair is about half a face box above the box) decides how
+  // tall it may be, so that at least ~60% of the letters stay above the head: the word is always readable
+  const headTop = faceTop - 0.45 * faceH + dy, capMax = Math.max(90, (headTop - 24 - C.y) / 0.65);
+  let fs = Math.min(100 * (C.w * TB.widthFrac) / w100, TB.maxSize), stretch = 1;
+  const capTarget = Math.min(TB.capFrac * C.h, capMax);
+  if (capTarget < 0.727 * fs) fs = capTarget / 0.727; else stretch = clamp(capTarget / (0.727 * fs), 1, TB.maxStretch);
+  const capVis = 0.727 * fs * stretch;
   ctx.font = font(T, 'sans', fs, 900);
-  const capVis = capH * stretch, cy = Math.max(faceTop + faceH * TB.anchor, C.y + 24 + capVis / 2), drift = lerp(-TB.drift, TB.drift, ease.inOut(k)), sc = lerp(TB.slam, 1, tin);
+  const cy = Math.max(headTop - 0.15 * capVis, C.y + 24 + capVis / 2), drift = lerp(-TB.drift, TB.drift, ease.inOut(k)), sc = lerp(TB.slam, 1, tin);
   ctx.translate(C.x + C.w / 2 + drift, cy); ctx.scale(sc, sc * stretch); ctx.globalAlpha = al;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = bg === 'pale' ? P.ink : bg === 'warm' ? P.lime : '#ffffff';
-  ctx.fillText(word, 0, 0);
+  ctx.fillText(word, 0, 0.5 * 0.727 * fs);   // cap height centred on the anchor
   ctx.restore();
   // (c) the person on top; a soft contact shadow keeps the word from looking pasted
   const cut = personCut(res, m);
   ctx.save();
   if (bg !== 'blur') { ctx.shadowColor = 'rgba(0,0,0,0.30)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 6; }
-  ctx.drawImage(cut, sx, sy, cw, ch, C.x, C.y, C.w, C.h);
+  { const ix0 = Math.max(0, x0), iy0 = Math.max(0, y0), ix1 = Math.min(res.vw, x0 + sw), iy1 = Math.min(res.vh, y0 + sh);
+    if (ix1 > ix0 && iy1 > iy0) ctx.drawImage(cut, ix0, iy0, ix1 - ix0, iy1 - iy0, C.x + (ix0 - x0) / sw * C.w, C.y + dy + (iy0 - y0) / sh * C.h, (ix1 - ix0) / sw * C.w, (iy1 - iy0) / sh * C.h); }
   ctx.restore();
   // chin and mouth lines for anything below that needs them (stickers keep off the face)
-  res.faceBottom = C.y + ((f[1] + f[3] * CHIN) * res.vh - sy) / ch * C.h; res.mouthY = C.y + ((f[1] + f[3] * MOUTH) * res.vh - sy) / ch * C.h; res.faceT = seg.t0;
+  res.faceBottom = C.y + dy + ((f[1] + f[3] * CHIN) * res.vh - y0) / sh * C.h; res.mouthY = C.y + dy + ((f[1] + f[3] * MOUTH) * res.vh - y0) / sh * C.h; res.faceT = seg.t0;
 }
 
 /** the interior of the card for one segment, already clipped to the card rect */

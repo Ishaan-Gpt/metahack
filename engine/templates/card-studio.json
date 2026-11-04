@@ -110,13 +110,18 @@
   "textBehind": {
    "widthFrac": 0.95,
    "maxSize": 330,
-   "capFrac": 0.26,
+   "capFrac": 0.21,
    "maxStretch": 2.2,
    "anchor": -0.05,
    "slam": 1.14,
    "drift": 10,
-   "blur": 16,
-   "dim": 0.55
+   "blur": 34,
+   "dim": 0.5,
+   "maxFace": 9,
+   "minScale": 1,
+   "bgZoom": 1.0,
+   "headroom": 0.3,
+   "maxLower": 0.24
   }
  },
  "motion": {
