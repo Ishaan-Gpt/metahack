@@ -4,6 +4,10 @@ services:
     build: { context: /opt/metahack, dockerfile: deploy/Dockerfile }
     image: metahack:latest
     restart: unless-stopped
+    # leave Moovi its share of this 2-core, 2 GB box
+    mem_limit: 900m
+    memswap_limit: 1800m
+    cpus: 1.5
     env_file: /opt/metahack/.env.local
     volumes: [ "/opt/metahack-data/jobs:/app/data/jobs", "/opt/metahack-data/stock:/app/data/stock", "/opt/metahack-data/cache:/root/.cache" ]
     networks: [ moovi_default ]
