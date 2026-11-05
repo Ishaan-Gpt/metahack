@@ -11,7 +11,7 @@ if (process.argv.includes('--claude')) env.DIRECTOR = 'claude';   // temporary: 
 // otherwise a deployed studio with a real Meta key would still talk to the stand-in (META_API_BASE set makes engine/run.mjs treat the run as a test).
 const realKey = !!(process.env.MODEL_API_KEY ?? '').trim() && process.env.MODEL_API_KEY !== 'standin', gemKey = !!(process.env.GEMINI_API_KEY ?? '').trim();
 if (process.argv.includes('--standin') && !realKey && !gemKey && !process.env.META_API_BASE) {
-  env.META_API_BASE ??= 'http://127.0.0.1:8799/v1'; env.MODEL_API_KEY ??= 'standin';
+  env.META_API_BASE ||= 'http://127.0.0.1:8799/v1'; env.MODEL_API_KEY ||= 'standin';   // ||=: an empty line in .env.local (Docker env_file) counts as no key
   try { await fetch('http://127.0.0.1:8799/v1/health'); } catch { spawn(process.execPath, [join(web, '..', 'tools/meta-standin.mjs'), '8799'], { stdio: 'inherit', env }); }
 }
 const next = join(web, 'node_modules/next/dist/bin/next');
