@@ -61,6 +61,10 @@ export async function museCritique(transcript, planSummary) {
 /** Open-weight local director (Glimmer / Spark Open): any OpenAI-compatible server you run (llama.cpp, vLLM). MUSE_LOCAL=glimmer|sparkopen,
  *  MUSE_LOCAL_BASE=http://127.0.0.1:8080/v1, MUSE_LOCAL_MODEL=<served model name>. Returns null when off. */
 export const localDirector = () => {
+  // test fallback while there is no real Meta key: an OpenAI-compatible director; shown everywhere as the test director
+  const mk = (process.env.MODEL_API_KEY ?? '').trim(), standin = /127\.0\.0\.1|localhost/.test(process.env.META_API_BASE ?? '');
+  if (!process.env.MUSE_LOCAL && (process.env.DIRECTOR ?? '').toLowerCase() !== 'claude' && (process.env.GROQ_API_KEY ?? '').trim() && (!mk || mk === 'standin' || standin))
+    return { which: 'groq', base: 'https://api.groq.com/openai/v1', model: process.env.GROQ_DIRECTOR_MODEL || 'openai/gpt-oss-120b', key: process.env.GROQ_API_KEY.trim(), label: 'test' };
   const w = (process.env.MUSE_LOCAL ?? '').toLowerCase();
   if (!['glimmer', 'sparkopen'].includes(w)) return null;
   return { which: w, base: (process.env.MUSE_LOCAL_BASE ?? 'http://127.0.0.1:8080/v1').replace(/\/+$/, ''), model: process.env.MUSE_LOCAL_MODEL ?? (w === 'glimmer' ? 'muse-glimmer' : 'muse-spark-open') };

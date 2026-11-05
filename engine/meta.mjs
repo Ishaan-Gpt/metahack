@@ -27,14 +27,14 @@ export const isClaude = () => (process.env.DIRECTOR ?? '').toLowerCase() === 'cl
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 export const geminiBase = () => (process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
 export const isGemini = () => { loadEnv(); if (isClaude() || localDirector()) return false; if ((process.env.DIRECTOR ?? '').toLowerCase() === 'gemini') return true; return !(process.env.MODEL_API_KEY ?? '').trim() && !!(process.env.GEMINI_API_KEY ?? '').trim(); };
-export const directorModel = () => localDirector() ? localDirector().model : isClaude() ? CLAUDE_MODEL : isGemini() ? GEMINI_MODEL : SPARK_MODEL;
+export const directorModel = () => localDirector() ? (localDirector().label ?? localDirector().model) : isClaude() ? CLAUDE_MODEL : isGemini() ? GEMINI_MODEL : SPARK_MODEL;
 export const metaBase = () => (process.env.META_API_BASE || 'https://api.meta.ai/v1').replace(/\/+$/, '');
 export const sha256 = b => createHash('sha256').update(b).digest('hex');
 
 /** Exit before any work when the Meta key is missing (read the way engine/env.mjs reads it: env, then .env.local). */
 export function requireMetaKey() {
   loadEnv();
-  if (localDirector()) { console.warn(`MUSE_LOCAL=${localDirector().which}: the director runs on your own server (${localDirector().base})`); return 'local'; }
+  if (localDirector()) { console.warn(localDirector().label === 'test' ? 'no Meta key: test director' : `MUSE_LOCAL=${localDirector().which}: the director runs on your own server (${localDirector().base})`); return 'local'; }
   if (isClaude()) {
     if (!process.env.ANTHROPIC_API_KEY?.trim() && !process.env.ANTHROPIC_AUTH_TOKEN?.trim()) { console.error('DIRECTOR=claude needs ANTHROPIC_API_KEY in .env.local'); process.exit(2); }
     return 'claude';
@@ -282,7 +282,7 @@ export function validateItem(it, seg, { layouts, icons, transitions }) {
  *  output, answered back in the chat/completions shape the callers already read (choices[0].message.content, usage). */
 async function postChat(body, key) {
   const L = localDirector();   // Muse Glimmer / Spark Open served locally through an OpenAI-compatible endpoint
-  if (L) return fetch(`${L.base}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${process.env.MUSE_LOCAL_KEY || 'local'}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, model: L.model }), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });
+  if (L) return fetch(`${L.base}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${L.key || process.env.MUSE_LOCAL_KEY || 'local'}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, model: L.model, ...(L.which === 'groq' ? { reasoning_effort: 'low', response_format: { ...body.response_format, json_schema: { ...body.response_format?.json_schema, strict: false } } } : {}) }), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });
   if (isGemini()) return geminiChat(key, body);
   if (!isClaude()) return fetch(`${metaBase()}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(+(process.env.META_TIMEOUT_MS ?? 120000)) });   // a silent endpoint fails in 2 min, never hangs the job
   const { default: Anthropic, APIError } = await import('@anthropic-ai/sdk');

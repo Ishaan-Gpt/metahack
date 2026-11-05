@@ -168,7 +168,7 @@ if (NEEDS_MODEL && !claude && !realMeta && !standin && !gem) fail(new JobError('
 if (NEEDS_MODEL) {
   log('Muse model map: ' + (await import('./muse.mjs')).museTable());
   const local = (await import('./muse.mjs')).localDirector();
-  status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : local ? 'local-open-weights' : gem ? 'gemini' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : local ? local.model : gem ? (process.env.GEMINI_MODEL || 'gemini-2.5-flash') : 'muse-spark-1.3' }; save();
+  status.meta = { live: realMeta, provider: claude ? 'claude' : realMeta ? 'meta' : local ? (local.label === 'test' ? 'standin' : 'local-open-weights') : gem ? 'gemini' : 'standin', transcriber: realMeta ? 'muse-voice-transcribe-1.0' : 'whisper-large-v3-turbo (Groq)', director: claude ? 'claude-sonnet-5-5' : local ? (local.label ?? local.model) : gem ? (process.env.GEMINI_MODEL || 'gemini-2.5-flash') : 'muse-spark-1.3' }; save();
 }
 
 // ---- the final render (the studio's Render button, or a re-render from before preview-first) --------------------------

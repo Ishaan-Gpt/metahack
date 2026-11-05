@@ -4,6 +4,7 @@
 // usage: node engine/card-studio.mjs <raw.mp4 | clip dir> [--out out.mp4] [--badge "Meta AI"] [--handle "@me"] [--cta1 ..] [--cta2 ..] [--kw WORD] [--no-stock] [--no-music]
 // Decides, per sentence: face card (with a jump zoom at sentence boundaries), keyword graphic card (face hidden),
 // split (stock image on top, face below), bullet list over the face, or a big-text post card for numbers.
+import { localDirector } from './muse.mjs';
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -643,7 +644,7 @@ export async function direct(dir, opts = {}) {
     version: 1, theme: 'card-studio', style: T.name, mix: !!opts.mix, duration: D, fps: T.canvas.fps, video: 'graded.mp4', src: 'src.mp4',
     badge: opts.badge ?? D_.badge, handle: opts.handle ?? D_.handle,
     cta: [(opts.cta1 ?? D_.cta1).replace('{KW}', kw), opts.cta2 ?? D_.cta2], ctaWord: kw,
-    director: { model: sp.skipped ? null : directorModel(), plan: sp.skipped ? 'skipped (--no-model, test only)' : sp.valid.size ? `${sp.valid.size} of ${segList.length} segments planned by ${process.env.META_API_BASE ? 'the test stand-in' : (process.env.DIRECTOR ?? '').toLowerCase() === 'claude' ? 'Claude Sonnet' : 'Muse Spark'}, ${sp.invalid.length} by rules` : 'rules (plan unusable)', planCache: sp.cache_hit, decisions: planLog, faceRatio: +faceRatio.toFixed(2), coverage: coverageLog, types: [...new Set(segs.map(g => g.type))] },
+    director: { model: sp.skipped ? null : directorModel(), plan: sp.skipped ? 'skipped (--no-model, test only)' : sp.valid.size ? `${sp.valid.size} of ${segList.length} segments planned by ${localDirector()?.label === 'test' || process.env.META_API_BASE ? 'the test stand-in' : (process.env.DIRECTOR ?? '').toLowerCase() === 'claude' ? 'Claude Sonnet' : 'Muse Spark'}, ${sp.invalid.length} by rules` : 'rules (plan unusable)', planCache: sp.cache_hit, decisions: planLog, faceRatio: +faceRatio.toFixed(2), coverage: coverageLog, types: [...new Set(segs.map(g => g.type))] },
     segments: segs, captions: caps, sfx, images, credits, matte: matteInfo,
     storyboard: Object.values(images).slice(0, 3),
   };
